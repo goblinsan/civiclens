@@ -114,17 +114,13 @@ export function createBillsRepository(pool: DbPool) {
   ): Promise<PaginatedResult<BillWithTags>> {
     const { page = 1, limit = 20 } = options;
     const offset = (page - 1) * limit;
-    const tsQuery = query
-      .trim()
-      .split(/\s+/)
-      .map((w) => w + ':*')
-      .join(' & ');
-
+    // plainto_tsquery treats the input as plain text, safely handling special
+    // characters that would break to_tsquery (e.g. &, |, !, parentheses).
     const countResult = await pool.query<{ count: string }>(
       `SELECT COUNT(*) AS count FROM bills b
        WHERE to_tsvector('english', b.title || ' ' || COALESCE(b.summary, ''))
-             @@ to_tsquery('english', $1)`,
-      [tsQuery],
+             @@ plainto_tsquery('english', $1)`,
+      [query],
     );
     const total = parseInt(countResult.rows[0]?.count ?? '0', 10);
 
@@ -142,11 +138,11 @@ export function createBillsRepository(pool: DbPool) {
        LEFT JOIN bill_tags bt ON bt.bill_id = b.id
        LEFT JOIN policy_tags pt ON pt.id = bt.policy_tag_id
        WHERE to_tsvector('english', b.title || ' ' || COALESCE(b.summary, ''))
-             @@ to_tsquery('english', $1)
+             @@ plainto_tsquery('english', $1)
        GROUP BY b.id, p.first_name, p.last_name
        ORDER BY b.introduced_at DESC
        LIMIT $2 OFFSET $3`,
-      [tsQuery, limit, offset],
+      [query, limit, offset],
     );
 
     return { data: dataResult.rows, total, page, limit };

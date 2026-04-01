@@ -83,7 +83,7 @@ describe('createBillsRepository', () => {
     it('returns results for a search query', async () => {
       const pool = makePoolMock({
         'COUNT(*)': [{ count: '1' }],
-        'to_tsquery': [fakeBill],
+        'plainto_tsquery': [fakeBill],
       });
       const repo = createBillsRepository(pool);
       const result = await repo.searchBills('care', { page: 1, limit: 10 });
