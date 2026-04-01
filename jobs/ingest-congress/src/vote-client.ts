@@ -11,6 +11,7 @@
 import { XMLParser } from 'fast-xml-parser';
 import type { Logger } from './logger.js';
 import type { CongressVoteEvent, CongressVoteMember } from './normalize.js';
+import { normalizeVoteValue } from './normalize.js';
 
 const SENATE_BASE = 'https://www.senate.gov/legislative/LIS';
 const HOUSE_BASE = 'https://clerk.house.gov/evs';
@@ -288,10 +289,10 @@ async function fetchHouseVoteDetail(
   }
 
   const resultText = meta?.['vote-result'] ?? '';
-  const yeaCount = members.filter((m) => normalizePositionForCount(m.votePosition) === 'yea').length;
-  const nayCount = members.filter((m) => normalizePositionForCount(m.votePosition) === 'nay').length;
-  const abstainCount = members.filter((m) => normalizePositionForCount(m.votePosition) === 'abstain').length;
-  const notVotingCount = members.filter((m) => normalizePositionForCount(m.votePosition) === 'not-voting').length;
+  const yeaCount = members.filter((m) => normalizeVoteValue(m.votePosition) === 'yea').length;
+  const nayCount = members.filter((m) => normalizeVoteValue(m.votePosition) === 'nay').length;
+  const abstainCount = members.filter((m) => normalizeVoteValue(m.votePosition) === 'abstain').length;
+  const notVotingCount = members.filter((m) => normalizeVoteValue(m.votePosition) === 'not-voting').length;
 
   return {
     sourceId: `house-${congress}-${year}-${rollCallNumber}`,
@@ -309,14 +310,6 @@ async function fetchHouseVoteDetail(
     billIdentifier,
     members,
   };
-}
-
-function normalizePositionForCount(raw: string): 'yea' | 'nay' | 'abstain' | 'not-voting' {
-  const v = raw.trim().toLowerCase();
-  if (v === 'yea' || v === 'yes' || v === 'aye') return 'yea';
-  if (v === 'nay' || v === 'no') return 'nay';
-  if (v === 'present') return 'abstain';
-  return 'not-voting';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

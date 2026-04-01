@@ -184,6 +184,22 @@ export async function findBillId(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Look up the internal UUID for a vote by its source_id.
+ * Returns null if not found.
+ */
+export async function findVoteId(
+  pool: DbPool,
+  sourceId: string,
+): Promise<string | null> {
+  const result = await pool.query<{ id: string }>(
+    `SELECT id FROM votes WHERE source_id = $1`,
+    [sourceId],
+  );
+  return result.rows[0]?.id ?? null;
+}
+
+
+/**
  * Upsert a roll-call vote event.
  * Uses source_id as the deduplication key (partial unique index).
  * Returns the internal UUID of the vote.

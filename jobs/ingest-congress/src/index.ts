@@ -34,6 +34,7 @@ import {
   saveRawPayload,
   findPoliticianId,
   findBillId,
+  findVoteId,
 } from './db.js';
 import type { DbPool } from '@civiclens/db';
 import type { Logger } from './logger.js';
@@ -227,7 +228,8 @@ async function ingestSenateVotes(
         billId = await findBillId(pool, vote.billCongress, vote.billType, vote.billNumber);
       }
 
-      const changed = await saveRawPayload(pool, 'senate.gov', event.sourceId, event);
+      const existingVoteId = await findVoteId(pool, event.sourceId);
+      await saveRawPayload(pool, 'senate.gov', event.sourceId, event);
       const voteId = await upsertVote(pool, vote, billId);
 
       // Upsert individual vote records
@@ -247,8 +249,8 @@ async function ingestSenateVotes(
         }
       }
 
-      if (changed) stats.inserted++;
-      else stats.skipped++;
+      if (existingVoteId) stats.updated++;
+      else stats.inserted++;
 
       logger.debug('senate vote upserted', {
         sourceId: event.sourceId,
@@ -293,7 +295,8 @@ async function ingestHouseVotes(
         billId = await findBillId(pool, vote.billCongress, vote.billType, vote.billNumber);
       }
 
-      const changed = await saveRawPayload(pool, 'house.gov', event.sourceId, event);
+      const existingVoteId = await findVoteId(pool, event.sourceId);
+      await saveRawPayload(pool, 'house.gov', event.sourceId, event);
       const voteId = await upsertVote(pool, vote, billId);
 
       let recordsInserted = 0;
@@ -312,8 +315,8 @@ async function ingestHouseVotes(
         }
       }
 
-      if (changed) stats.inserted++;
-      else stats.skipped++;
+      if (existingVoteId) stats.updated++;
+      else stats.inserted++;
 
       logger.debug('house vote upserted', {
         sourceId: event.sourceId,
