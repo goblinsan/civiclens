@@ -13,7 +13,10 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\" --ignore-path .prettierignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\" --ignore-path .prettierignore",
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "db:migrate": "pnpm --filter @civiclens/scripts migrate",
+    "db:seed": "pnpm --filter @civiclens/scripts seed",
+    "db:reset": "pnpm --filter @civiclens/scripts db:reset"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",

@@ -1,0 +1,21 @@
+{
+  "name": "@civiclens/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate": "tsx migrate.ts",
+    "db:reset": "tsx db-reset.ts",
+    "seed": "tsx ../db/seeds/seed.ts"
+  },
+  "dependencies": {
+    "@civiclens/db": "workspace:*",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@types/pg": "^8.11.0",
+    "tsx": "^4.7.3",
+    "typescript": "^5.4.5"
+  }
+}
