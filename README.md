@@ -93,7 +93,7 @@ cd apps/api && pnpm dev   # http://localhost:3001
 cd apps/web && pnpm dev   # http://localhost:3000
 ```
 
-The web dev server proxies `/api/*` → `http://localhost:3001`.
+The web dev server proxies `/api/*` → `http://localhost:3001` with path rewriting (the `/api` prefix is stripped), so a request to `http://localhost:3000/api/health` is forwarded to `http://localhost:3001/health`.
 
 ## API Endpoints
 
