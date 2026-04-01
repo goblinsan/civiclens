@@ -7,7 +7,7 @@ const pkg: { version?: string } = require('../../package.json');
 
 export async function healthRoutes(app: FastifyInstance) {
   app.get('/', async (_request, reply) => {
-    return reply.status(200).send({
+    return reply.code(200).send({
       status: 'ok',
       service: 'civiclens-api',
       version: pkg.version ?? '0.0.0',
