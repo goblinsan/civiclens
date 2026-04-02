@@ -7,6 +7,7 @@ import Politicians from './pages/Politicians';
 import PoliticianDetail from './pages/PoliticianDetail';
 import Questionnaire from './pages/Questionnaire';
 import Matches from './pages/Matches';
+import ScoringMethodology from './pages/ScoringMethodology';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="politicians/:id" element={<PoliticianDetail />} />
         <Route path="questionnaire" element={<Questionnaire />} />
         <Route path="matches" element={<Matches />} />
+        <Route path="methodology" element={<ScoringMethodology />} />
       </Route>
     </Routes>
   );

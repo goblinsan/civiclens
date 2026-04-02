@@ -13,3 +13,9 @@ export type {
   VoteWithRecords,
   VoteRecordWithPolitician,
 } from './votes.js';
+
+export { createQuestionnaireRepository } from './questionnaire.js';
+export type {
+  QuestionnaireRepository,
+  MatchResultWithPolitician,
+} from './questionnaire.js';

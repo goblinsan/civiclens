@@ -2,8 +2,8 @@
 
 const BASE = '/api';
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url);
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, init);
   if (!res.ok) {
     const body = await res.json().catch(() => ({})) as { error?: { message?: string } };
     throw new Error(body.error?.message ?? `HTTP ${res.status}`);
@@ -140,4 +140,59 @@ export function getPoliticianVotes(
   params: { page?: number; limit?: number } = {},
 ): Promise<Paginated<PoliticianVoteRecord>> {
   return fetchJson(`${BASE}/politicians/${id}/votes${buildQuery(params)}`);
+}
+
+// ─── Questionnaire ────────────────────────────────────────────────────────────
+
+export interface PolicyQuestion {
+  id: string;
+  slug: string;
+  label: string;
+}
+
+export type Stance =
+  | 'strongly-support'
+  | 'support'
+  | 'neutral'
+  | 'oppose'
+  | 'strongly-oppose';
+
+export interface MatchResult {
+  id: string;
+  profile_id: string;
+  politician_id: string;
+  /** NUMERIC from pg – kept as string to avoid precision loss. */
+  score: string;
+  /** Per-tag alignment scores (0–100) plus `_total_votes` count. */
+  breakdown: Record<string, number>;
+  computed_at: string;
+  first_name: string;
+  last_name: string;
+  party: string;
+  state: string;
+  chamber: 'senate' | 'house';
+  image_url: string | null;
+  bioguide_id: string;
+  total_votes: number;
+}
+
+export function getQuestions(): Promise<PolicyQuestion[]> {
+  return fetchJson(`${BASE}/questionnaire/questions`);
+}
+
+export function submitQuestionnaire(body: {
+  sessionId: string;
+  responses: Array<{ tag: string; stance: Stance }>;
+}): Promise<{ sessionId: string; profileId: string }> {
+  return fetchJson(`${BASE}/questionnaire/submit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
+export function getMatches(sessionId: string): Promise<MatchResult[]> {
+  return fetchJson(
+    `${BASE}/questionnaire/matches${buildQuery({ sessionId })}`,
+  );
 }
