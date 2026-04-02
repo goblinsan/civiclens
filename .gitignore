@@ -6,3 +6,4 @@ build/
 .env.*.local
 *.tsbuildinfo
 .pnpm-store/
+package-lock.json
