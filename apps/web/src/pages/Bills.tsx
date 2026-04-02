@@ -7,7 +7,8 @@ import { BILL_STATUSES, POLICY_TAGS } from '@civiclens/shared';
 const PAGE_SIZE = 20;
 
 function statusClass(status: string): string {
-  return `status-badge status-${status}` + (BILL_STATUSES.includes(status as typeof BILL_STATUSES[number]) ? '' : ' status-default');
+  const known = ['introduced','committee','floor','passed-house','passed-senate','enrolled','signed','vetoed'];
+  return `status-badge status-${known.includes(status) ? status : 'default'}`;
 }
 
 function formatDate(iso: string): string {

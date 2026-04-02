@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPolitician, getPoliticianVotes } from '../api';
 import type { PoliticianSummary, PoliticianVoteRecord, Paginated } from '../api';
-import { POLICY_TAGS } from '@civiclens/shared';
 
 const PAGE_SIZE = 20;
 
@@ -44,17 +43,19 @@ export default function PoliticianDetail() {
   }, [id]);
 
   // Load all vote records (paginated, accumulate for client-side filtering)
+  // Reset accumulated votes when politician changes
+  useEffect(() => {
+    setAllVotes([]);
+    setPage(1);
+  }, [id]);
+
   useEffect(() => {
     if (!id) return;
     setVotesLoading(true);
     getPoliticianVotes(id, { page, limit: PAGE_SIZE })
       .then(data => {
         setVoteResult(data);
-        if (page === 1) {
-          setAllVotes(data.data);
-        } else {
-          setAllVotes(prev => [...prev, ...data.data]);
-        }
+        setAllVotes(prev => (page === 1 ? data.data : [...prev, ...data.data]));
       })
       .catch(() => {/* ignore vote errors — show empty state */})
       .finally(() => setVotesLoading(false));
@@ -76,8 +77,13 @@ export default function PoliticianDetail() {
   // Apply client-side filters to loaded votes
   const filteredVotes = allVotes.filter(r => {
     if (voteFilter && r.value !== voteFilter) return false;
-    if (dateFrom && r.vote_date < dateFrom) return false;
-    if (dateTo && r.vote_date > dateTo + 'T23:59:59') return false;
+    const voteTime = new Date(r.vote_date).getTime();
+    if (dateFrom && voteTime < new Date(dateFrom).getTime()) return false;
+    if (dateTo) {
+      const toEnd = new Date(dateTo);
+      toEnd.setHours(23, 59, 59, 999);
+      if (voteTime > toEnd.getTime()) return false;
+    }
     return true;
   });
 

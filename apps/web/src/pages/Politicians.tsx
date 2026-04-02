@@ -63,20 +63,12 @@ export default function Politicians() {
       const data = await listPoliticians({
         page: p,
         limit: PAGE_SIZE,
+        q: nameQuery.trim() || undefined,
         chamber: chamber || undefined,
         party: party || undefined,
         state: state || undefined,
       });
-      // Client-side name filter (API doesn't support it yet)
-      if (nameQuery.trim()) {
-        const q = nameQuery.trim().toLowerCase();
-        const filtered = data.data.filter(pol =>
-          `${pol.first_name} ${pol.last_name}`.toLowerCase().includes(q),
-        );
-        setResult({ ...data, data: filtered });
-      } else {
-        setResult(data);
-      }
+      setResult(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load politicians');
     } finally {

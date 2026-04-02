@@ -10,6 +10,7 @@ const listQuerySchema = z.object({
   chamber: z.enum(['senate', 'house']).optional(),
   party: z.string().optional(),
   state: z.string().optional(),
+  q: z.string().optional(),
 });
 
 export async function politicianRoutes(
@@ -26,13 +27,14 @@ export async function politicianRoutes(
         .code(400)
         .send({ error: { message: 'Invalid query parameters', statusCode: 400 } });
     }
-    const { page, limit, chamber, party, state } = parsed.data;
+    const { page, limit, chamber, party, state, q } = parsed.data;
     const result = await repo.listPoliticians({
       page,
       limit,
       ...(chamber !== undefined && { chamber }),
       ...(party !== undefined && { party }),
       ...(state !== undefined && { state }),
+      ...(q !== undefined && { q }),
     });
     return reply.send(result);
   });
