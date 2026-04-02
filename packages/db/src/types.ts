@@ -75,6 +75,7 @@ export interface VoteRow {
   nay_count: number;
   abstain_count: number;
   not_voting_count: number;
+  source_id: string | null;
   created_at: Date;
 }
 
