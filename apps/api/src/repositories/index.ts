@@ -19,3 +19,10 @@ export type {
   QuestionnaireRepository,
   MatchResultWithPolitician,
 } from './questionnaire.js';
+
+export { createSentimentsRepository } from './sentiments.js';
+export type {
+  SentimentsRepository,
+  SentimentCounts,
+  SubmitSentimentResult,
+} from './sentiments.js';

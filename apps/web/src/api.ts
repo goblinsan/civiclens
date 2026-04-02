@@ -92,6 +92,15 @@ export interface Paginated<T> {
   limit: number;
 }
 
+export type SentimentValue = 'support' | 'oppose' | 'neutral';
+
+export interface SentimentCounts {
+  support: number;
+  oppose: number;
+  neutral: number;
+  total: number;
+}
+
 // ─── Bills ────────────────────────────────────────────────────────────────────
 
 export function listBills(params: {
@@ -111,6 +120,26 @@ export function getBill(id: string): Promise<BillSummary> {
 
 export function getBillVotes(id: string): Promise<Vote[]> {
   return fetchJson(`${BASE}/bills/${id}/votes`);
+}
+
+// ─── Sentiments ───────────────────────────────────────────────────────────────
+
+export function getBillSentiments(billId: string): Promise<SentimentCounts> {
+  return fetchJson(`${BASE}/bills/${billId}/sentiments`);
+}
+
+export function submitSentiment(body: {
+  billId: string;
+  sessionId: string;
+  sentiment: SentimentValue;
+  turnstileToken?: string;
+}): Promise<{ id: string; sentiment: SentimentValue }> {
+  const { billId, ...rest } = body;
+  return fetchJson(`${BASE}/bills/${billId}/sentiments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(rest),
+  });
 }
 
 // ─── Votes ────────────────────────────────────────────────────────────────────
