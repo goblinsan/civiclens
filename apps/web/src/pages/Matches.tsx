@@ -250,9 +250,7 @@ export default function Matches() {
       <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
         ⚠️ Scores are based solely on available voting records for tagged bills.
         Low-confidence results mean few relevant votes were found.{' '}
-        <a href="/docs/scoring-methodology.md" target="_blank" rel="noopener noreferrer">
-          Read the methodology →
-        </a>
+        <Link to="/methodology">Read the methodology →</Link>
       </p>
 
       {!hasBreakdown && (
