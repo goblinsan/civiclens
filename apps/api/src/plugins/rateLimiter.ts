@@ -18,12 +18,33 @@ const BURST_LIMIT = 5;
 /** Short burst window in milliseconds (1 minute). */
 const BURST_WINDOW_MS = 60 * 1000;
 
+/** How often to evict fully-expired entries from the store (5 minutes). */
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+
 interface WindowEntry {
   /** Unix-ms timestamps of each request within the current window. */
   timestamps: number[];
 }
 
 const store = new Map<string, WindowEntry>();
+
+/** Remove entries whose timestamps are all outside the long window. */
+function cleanupStore() {
+  const now = Date.now();
+  for (const [key, entry] of store) {
+    const active = entry.timestamps.filter((t) => now - t < WINDOW_MS);
+    if (active.length === 0) {
+      store.delete(key);
+    } else {
+      entry.timestamps = active;
+    }
+  }
+}
+
+// Schedule periodic cleanup so the store doesn't grow unbounded.
+const cleanupTimer = setInterval(cleanupStore, CLEANUP_INTERVAL_MS);
+// Allow Node.js to exit even if the timer is still active.
+if (cleanupTimer.unref) cleanupTimer.unref();
 
 /**
  * Check whether `key` has exceeded the rate limit.

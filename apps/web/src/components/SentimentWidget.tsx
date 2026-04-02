@@ -188,19 +188,7 @@ export default function SentimentWidget({ billId }: SentimentWidgetProps) {
       .catch(() => { /* non-critical – counts are optional */ });
   }, [billId]);
 
-  // Auto-submit once we have a Turnstile token (if captcha is required).
-  useEffect(() => {
-    if (
-      widgetState === 'pending' &&
-      pending !== null &&
-      needsCaptcha &&
-      turnstileToken
-    ) {
-      void doSubmit(pending, turnstileToken);
-    }
-  }, [turnstileToken]); // intentionally runs only when token changes
-
-  async function doSubmit(sentiment: SentimentValue, token?: string) {
+  const doSubmit = useCallback(async (sentiment: SentimentValue, token?: string) => {
     setWidgetState('pending');
     const sessionId = getOrCreateSessionId();
     try {
@@ -222,7 +210,19 @@ export default function SentimentWidget({ billId }: SentimentWidgetProps) {
       setWidgetState('error');
       resetWidget();
     }
-  }
+  }, [billId, resetWidget]);
+
+  // Auto-submit once we have a Turnstile token (if captcha is required).
+  useEffect(() => {
+    if (
+      widgetState === 'pending' &&
+      pending !== null &&
+      needsCaptcha &&
+      turnstileToken
+    ) {
+      void doSubmit(pending, turnstileToken);
+    }
+  }, [doSubmit, needsCaptcha, pending, turnstileToken, widgetState]);
 
   function handleButtonClick(sentiment: SentimentValue) {
     if (widgetState === 'submitted' || widgetState === 'pending') return;
