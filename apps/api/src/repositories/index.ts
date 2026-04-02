@@ -8,4 +8,8 @@ export type {
 } from './politicians.js';
 
 export { createVotesRepository } from './votes.js';
-export type { VotesRepository, VoteWithRecords } from './votes.js';
+export type {
+  VotesRepository,
+  VoteWithRecords,
+  VoteRecordWithPolitician,
+} from './votes.js';

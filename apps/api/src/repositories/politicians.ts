@@ -6,6 +6,7 @@ export interface ListPoliticiansOptions {
   chamber?: 'senate' | 'house';
   party?: string;
   state?: string;
+  q?: string;
 }
 
 export interface PaginatedResult<T> {
@@ -20,7 +21,7 @@ export function createPoliticiansRepository(pool: DbPool) {
   async function listPoliticians(
     options: ListPoliticiansOptions = {},
   ): Promise<PaginatedResult<PoliticianRow>> {
-    const { page = 1, limit = 20, chamber, party, state } = options;
+    const { page = 1, limit = 20, chamber, party, state, q } = options;
     const offset = (page - 1) * limit;
 
     const conditions: string[] = [];
@@ -38,6 +39,13 @@ export function createPoliticiansRepository(pool: DbPool) {
     if (state) {
       conditions.push(`state = $${idx++}`);
       params.push(state);
+    }
+    if (q) {
+      conditions.push(
+        `(first_name ILIKE $${idx} OR last_name ILIKE $${idx} OR (first_name || ' ' || last_name) ILIKE $${idx})`,
+      );
+      params.push(`%${q}%`);
+      idx++;
     }
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';

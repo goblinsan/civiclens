@@ -4,6 +4,7 @@ import { healthRoutes } from './health.js';
 import { readyRoutes } from './ready.js';
 import { billRoutes } from './bills.js';
 import { politicianRoutes } from './politicians.js';
+import { voteRoutes } from './votes.js';
 
 export async function registerRoutes(app: FastifyInstance, opts: { pool: DbPool | null }) {
   await app.register(healthRoutes, { prefix: '/health' });
@@ -12,5 +13,6 @@ export async function registerRoutes(app: FastifyInstance, opts: { pool: DbPool 
   if (opts.pool) {
     await app.register(billRoutes, { prefix: '/bills', pool: opts.pool });
     await app.register(politicianRoutes, { prefix: '/politicians', pool: opts.pool });
+    await app.register(voteRoutes, { prefix: '/votes', pool: opts.pool });
   }
 }
