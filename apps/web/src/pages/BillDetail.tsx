@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getBill, getBillVotes, getVoteRecords } from '../api';
 import type { BillSummary, Vote, VoteRecord } from '../api';
 import SentimentWidget from '../components/SentimentWidget';
+import { track } from '../analytics';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -129,7 +130,11 @@ export default function BillDetail() {
     if (!id) return;
     setLoading(true);
     Promise.all([getBill(id), getBillVotes(id)])
-      .then(([b, v]) => { setBill(b); setVotes(v); })
+      .then(([b, v]) => {
+        setBill(b);
+        setVotes(v);
+        track('bill_detail_viewed', { billId: id });
+      })
       .catch(e => setError(e instanceof Error ? e.message : 'Failed to load bill'))
       .finally(() => setLoading(false));
   }, [id]);

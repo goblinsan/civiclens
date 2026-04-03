@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getQuestions, submitQuestionnaire } from '../api';
 import type { PolicyQuestion, Stance } from '../api';
+import { track } from '../analytics';
 
 const SESSION_KEY = 'civiclens_session_id';
 
@@ -53,6 +54,7 @@ export default function Questionnaire() {
         for (const q of qs) defaults[q.slug] = 'neutral';
         setStances(defaults);
         setLoading(false);
+        track('questionnaire_started');
       })
       .catch(() => {
         setError('Failed to load questions. Please try again.');
@@ -82,6 +84,7 @@ export default function Questionnaire() {
 
     try {
       await submitQuestionnaire({ sessionId, responses });
+      track('questionnaire_completed', { answeredCount });
       navigate('/matches');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Submission failed. Please try again.');

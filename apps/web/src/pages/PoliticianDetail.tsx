@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPolitician, getPoliticianVotes } from '../api';
 import type { PoliticianSummary, PoliticianVoteRecord, Paginated } from '../api';
+import { track } from '../analytics';
 
 const PAGE_SIZE = 20;
 
@@ -37,7 +38,10 @@ export default function PoliticianDetail() {
   useEffect(() => {
     if (!id) return;
     getPolitician(id)
-      .then(setPolitician)
+      .then(p => {
+        setPolitician(p);
+        track('politician_detail_viewed', { politicianId: id });
+      })
       .catch(e => setError(e instanceof Error ? e.message : 'Failed to load politician'))
       .finally(() => setLoading(false));
   }, [id]);

@@ -7,6 +7,7 @@ import { politicianRoutes } from './politicians.js';
 import { voteRoutes } from './votes.js';
 import { questionnaireRoutes } from './questionnaire.js';
 import { auditRoutes } from './audit.js';
+import { analyticsRoutes } from './analytics.js';
 
 export async function registerRoutes(app: FastifyInstance, opts: { pool: DbPool | null }) {
   await app.register(healthRoutes, { prefix: '/health' });
@@ -18,5 +19,6 @@ export async function registerRoutes(app: FastifyInstance, opts: { pool: DbPool 
     await app.register(voteRoutes, { prefix: '/votes', pool: opts.pool });
     await app.register(questionnaireRoutes, { prefix: '/questionnaire', pool: opts.pool });
     await app.register(auditRoutes, { prefix: '/audit', pool: opts.pool });
+    await app.register(analyticsRoutes, { prefix: '/analytics', pool: opts.pool });
   }
 }
