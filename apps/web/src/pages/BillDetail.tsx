@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getBill, getBillVotes, getVoteRecords } from '../api';
 import type { BillSummary, Vote, VoteRecord } from '../api';
+import SentimentWidget from '../components/SentimentWidget';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -175,6 +176,9 @@ export default function BillDetail() {
           </p>
         </div>
       )}
+
+      {/* Sentiment widget */}
+      <SentimentWidget billId={bill.id} />
 
       {/* Vote events */}
       <div className="detail-section">
