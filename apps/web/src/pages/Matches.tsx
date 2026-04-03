@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getMatches } from '../api';
 import type { MatchResult } from '../api';
+import { track } from '../analytics';
 
 const SESSION_KEY = 'civiclens_session_id';
 
@@ -193,6 +194,7 @@ export default function Matches() {
     getMatches(sessionId)
       .then((data) => {
         setMatches(data);
+        track('matches_viewed', { matchCount: data.length });
         setLoading(false);
       })
       .catch((err: unknown) => {

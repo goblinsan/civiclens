@@ -340,10 +340,10 @@ async function ingestHouseVotes(
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  const logger = createLogger(env.LOG_LEVEL);
+  const baseLogger = createLogger(env.LOG_LEVEL);
   const startMs = Date.now();
 
-  logger.info('ingest-congress starting', {
+  baseLogger.info('ingest-congress starting', {
     congress: env.CONGRESS,
     senateSession: env.SENATE_SESSION,
     houseYear: env.HOUSE_YEAR,
@@ -353,11 +353,9 @@ async function main(): Promise<void> {
   });
 
   const pool = getPool(env.DATABASE_URL);
-  const congressClient = createCongressClient(env.CONGRESS_API_KEY, logger);
-  const voteClient = createVoteClient(logger);
 
   // ── Audit: run start ───────────────────────────────────────────────────────
-  await insertIngestionEvent(pool, {
+  const jobId = await insertIngestionEvent(pool, {
     event_type: 'run_start',
     source: 'ingest-congress',
     data: {
@@ -369,6 +367,11 @@ async function main(): Promise<void> {
       maxVotes: env.MAX_VOTES,
     },
   });
+
+  // Bind jobId to all subsequent log entries for full run correlation.
+  const logger = baseLogger.child({ jobId });
+  const congressClient = createCongressClient(env.CONGRESS_API_KEY, logger);
+  const voteClient = createVoteClient(logger);
 
   let memberStats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
   let billStats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };

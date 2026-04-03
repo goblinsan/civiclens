@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import type { DbPool } from '@civiclens/db';
+import { env } from '../env.js';
 
 // How often to probe the database in the background (ms).
 const DB_PROBE_INTERVAL_MS = 10_000;
@@ -8,9 +9,15 @@ const DB_PROBE_INTERVAL_MS = 10_000;
  * Runs a lightweight DB connectivity probe on a fixed interval.
  * The result is cached so that the /ready handler never touches the database
  * directly (avoiding per-request DB access that could be abused).
+ *
+ * Skipped in the test environment to avoid interfering with pool mocks.
  */
 function startDbProbe(pool: DbPool, log: FastifyInstance['log']) {
   let dbOk = true;
+
+  if (env.NODE_ENV === 'test') {
+    return { isOk: () => dbOk };
+  }
 
   const probe = async () => {
     try {

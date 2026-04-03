@@ -35,8 +35,8 @@ async function verifyTurnstile(token: string | undefined, remoteIp?: string): Pr
   const secretKey = env.TURNSTILE_SECRET_KEY;
 
   if (!secretKey) {
-    // Dev-only bypass: allow submissions when no secret key is configured.
-    return env.NODE_ENV === 'development';
+    // Dev/test bypass: allow submissions when no secret key is configured.
+    return env.NODE_ENV === 'development' || env.NODE_ENV === 'test';
   }
 
   if (!token) return false;
