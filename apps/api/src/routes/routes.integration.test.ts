@@ -326,7 +326,7 @@ describe('POST /bills/:id/sentiments', () => {
         .mockResolvedValueOnce({ rows: [fakeSentiment], rowCount: 1 }) // SELECT existing
         .mockResolvedValue({ rows: [], rowCount: 0 }),                 // any further calls
       connect: vi.fn(),
-    } as unknown as import('@civiclens/db').DbPool;
+    } as unknown as DbPool;
     const app = await buildApp({ pool: poolMock });
     const res = await app.inject({
       method: 'POST',

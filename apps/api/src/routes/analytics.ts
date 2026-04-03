@@ -34,6 +34,8 @@ export async function analyticsRoutes(
       event_type: event,
       source: 'web-client',
       data: properties ?? {},
+    }).catch((err: unknown) => {
+      app.log.debug({ err }, 'analytics logEvent failed');
     });
 
     return reply.code(202).send();
