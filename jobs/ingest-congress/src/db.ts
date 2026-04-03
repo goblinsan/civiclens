@@ -17,6 +17,42 @@ import type { DbPool } from '@civiclens/db';
 import type { NormalizedBill, NormalizedPolitician, NormalizedVote, NormalizedVoteRecord } from './normalize.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Audit / ingestion event helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Insert an ingestion audit event row.
+ * Failures are silently ignored so that an audit write never aborts a run.
+ */
+export async function insertIngestionEvent(
+  pool: DbPool,
+  event: {
+    event_type: string;
+    source: string;
+    entity_type?: string;
+    entity_id?: string;
+    data?: Record<string, unknown>;
+  },
+): Promise<void> {
+  try {
+    await pool.query(
+      `INSERT INTO ingestion_events (event_type, source, entity_type, entity_id, data)
+       VALUES ($1, $2, $3, $4, $5::jsonb)`,
+      [
+        event.event_type,
+        event.source,
+        event.entity_type ?? null,
+        event.entity_id ?? null,
+        JSON.stringify(event.data ?? {}),
+      ],
+    );
+  } catch {
+    // Audit failures must never abort a data run; log to stderr only.
+    process.stderr.write(`[audit] Failed to write ingestion event: ${event.event_type}\n`);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Raw payload helpers
 // ─────────────────────────────────────────────────────────────────────────────
 

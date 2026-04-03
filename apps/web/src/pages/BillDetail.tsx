@@ -8,6 +8,26 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+/** Returns a human-readable relative time string, e.g. "2 days ago". */
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return 'today';
+  if (diffDays === 1) return '1 day ago';
+  if (diffDays < 30) return `${diffDays} days ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths === 1) return '1 month ago';
+  if (diffMonths < 12) return `${diffMonths} months ago`;
+  const diffYears = Math.floor(diffDays / 365);
+  return diffYears === 1 ? '1 year ago' : `${diffYears} years ago`;
+}
+
+/** Returns true if the data is considered stale (not updated in >30 days). */
+function isStale(iso: string): boolean {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  return diffMs > 30 * 24 * 60 * 60 * 1000;
+}
+
 function VoteBar({ vote }: { vote: Vote }) {
   const total = vote.yea_count + vote.nay_count + vote.abstain_count + vote.not_voting_count;
   if (total === 0) return null;
@@ -147,7 +167,17 @@ export default function BillDetail() {
         <div className="detail-meta">
           <span>Sponsored by <Link to={`/politicians/${bill.sponsor_id}`}>{bill.sponsor_first_name} {bill.sponsor_last_name}</Link></span>
           <span>Introduced {formatDate(bill.introduced_at)}</span>
-          <span>Updated {formatDate(bill.updated_at)}</span>
+          <span>Updated {formatDate(bill.updated_at)} ({timeAgo(bill.updated_at)})</span>
+          {isStale(bill.updated_at) && (
+            <span className="freshness-badge freshness-badge-stale" title="This record has not been updated in over 30 days">
+              ⚠ Data may be outdated
+            </span>
+          )}
+          {!isStale(bill.updated_at) && (
+            <span className="freshness-badge freshness-badge-current" title="This record was recently updated">
+              ✓ Recently updated
+            </span>
+          )}
         </div>
         {bill.tags.length > 0 && (
           <div className="card-tags" style={{ marginTop: '0.5rem' }}>

@@ -139,3 +139,13 @@ export interface AuditLogRow {
   source: string | null;
   performed_at: Date;
 }
+
+export interface IngestionEventRow {
+  id: string;
+  event_type: string;
+  source: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  data: Record<string, unknown>;
+  occurred_at: Date;
+}

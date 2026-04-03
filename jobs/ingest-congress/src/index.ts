@@ -35,6 +35,7 @@ import {
   findPoliticianId,
   findBillId,
   findVoteId,
+  insertIngestionEvent,
 } from './db.js';
 import type { DbPool } from '@civiclens/db';
 import type { Logger } from './logger.js';
@@ -355,6 +356,20 @@ async function main(): Promise<void> {
   const congressClient = createCongressClient(env.CONGRESS_API_KEY, logger);
   const voteClient = createVoteClient(logger);
 
+  // ── Audit: run start ───────────────────────────────────────────────────────
+  await insertIngestionEvent(pool, {
+    event_type: 'run_start',
+    source: 'ingest-congress',
+    data: {
+      congress: env.CONGRESS,
+      senateSession: env.SENATE_SESSION,
+      houseYear: env.HOUSE_YEAR,
+      syncSince: env.SYNC_SINCE ?? null,
+      maxBills: env.MAX_BILLS,
+      maxVotes: env.MAX_VOTES,
+    },
+  });
+
   let memberStats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
   let billStats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
   let senateVoteStats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
@@ -367,6 +382,12 @@ async function main(): Promise<void> {
     logger.info('members ingested', { ...memberStats });
   } catch (err) {
     logger.error('member ingestion failed', { err: String(err) });
+    await insertIngestionEvent(pool, {
+      event_type: 'fetch_failure',
+      source: 'ingest-congress',
+      entity_type: 'members',
+      data: { error: String(err) },
+    });
   }
 
   // ── 2. Ingest bills ───────────────────────────────────────────────────────
@@ -379,6 +400,12 @@ async function main(): Promise<void> {
     logger.info('bills ingested', { ...billStats });
   } catch (err) {
     logger.error('bill ingestion failed', { err: String(err) });
+    await insertIngestionEvent(pool, {
+      event_type: 'fetch_failure',
+      source: 'ingest-congress',
+      entity_type: 'bills',
+      data: { congress: env.CONGRESS, error: String(err) },
+    });
   }
 
   // ── 3. Ingest Senate votes ────────────────────────────────────────────────
@@ -400,6 +427,12 @@ async function main(): Promise<void> {
     logger.info('senate votes ingested', { ...senateVoteStats });
   } catch (err) {
     logger.error('senate vote ingestion failed', { err: String(err) });
+    await insertIngestionEvent(pool, {
+      event_type: 'fetch_failure',
+      source: 'ingest-congress',
+      entity_type: 'senate_votes',
+      data: { congress: env.CONGRESS, session: env.SENATE_SESSION, error: String(err) },
+    });
   }
 
   // ── 4. Ingest House votes ─────────────────────────────────────────────────
@@ -421,6 +454,12 @@ async function main(): Promise<void> {
     logger.info('house votes ingested', { ...houseVoteStats });
   } catch (err) {
     logger.error('house vote ingestion failed', { err: String(err) });
+    await insertIngestionEvent(pool, {
+      event_type: 'fetch_failure',
+      source: 'ingest-congress',
+      entity_type: 'house_votes',
+      data: { congress: env.CONGRESS, year: env.HOUSE_YEAR, error: String(err) },
+    });
   }
 
   const durationMs = Date.now() - startMs;
@@ -430,6 +469,19 @@ async function main(): Promise<void> {
     bills: billStats,
     senateVotes: senateVoteStats,
     houseVotes: houseVoteStats,
+  });
+
+  // ── Audit: run complete ────────────────────────────────────────────────────
+  await insertIngestionEvent(pool, {
+    event_type: 'run_complete',
+    source: 'ingest-congress',
+    data: {
+      durationMs,
+      members: memberStats,
+      bills: billStats,
+      senateVotes: senateVoteStats,
+      houseVotes: houseVoteStats,
+    },
   });
 
   await closePool();
