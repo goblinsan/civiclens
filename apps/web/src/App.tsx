@@ -8,6 +8,8 @@ import PoliticianDetail from './pages/PoliticianDetail';
 import Questionnaire from './pages/Questionnaire';
 import Matches from './pages/Matches';
 import ScoringMethodology from './pages/ScoringMethodology';
+import DataSources from './pages/DataSources';
+import Transparency from './pages/Transparency';
 
 export default function App() {
   return (
@@ -21,6 +23,8 @@ export default function App() {
         <Route path="questionnaire" element={<Questionnaire />} />
         <Route path="matches" element={<Matches />} />
         <Route path="methodology" element={<ScoringMethodology />} />
+        <Route path="data-sources" element={<DataSources />} />
+        <Route path="transparency" element={<Transparency />} />
       </Route>
     </Routes>
   );

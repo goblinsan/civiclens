@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { DbPool } from '@civiclens/db';
-import { createBillsRepository, createSentimentsRepository } from '../repositories/index.js';
-import type { BillsRepository, SentimentsRepository } from '../repositories/index.js';
+import { createBillsRepository, createSentimentsRepository, createAuditLogRepository } from '../repositories/index.js';
+import type { BillsRepository, SentimentsRepository, AuditLogRepository } from '../repositories/index.js';
 import { checkRateLimit } from '../plugins/rateLimiter.js';
 import { env } from '../env.js';
 
@@ -66,6 +66,7 @@ export async function billRoutes(
 ) {
   const repo: BillsRepository = createBillsRepository(opts.pool);
   const sentimentRepo: SentimentsRepository = createSentimentsRepository(opts.pool);
+  const auditRepo: AuditLogRepository = createAuditLogRepository(opts.pool);
 
   // GET /bills  — list / search
   app.get('/', async (request, reply) => {
@@ -141,6 +142,13 @@ export async function billRoutes(
 
     if (limited) {
       app.log.warn({ ip, billId, sessionId }, 'Sentiment rate limit exceeded');
+      void auditRepo.logEvent({
+        event_type: 'sentiment_block',
+        source: 'api',
+        entity_type: 'sentiment',
+        entity_id: billId,
+        data: { reason: 'rate_limit', ip, sessionId },
+      });
       return reply.code(429).send({
         error: { message: 'Too many requests. Please try again later.', statusCode: 429 },
       });
@@ -150,6 +158,13 @@ export async function billRoutes(
     const turnstileValid = await verifyTurnstile(turnstileToken, ip);
     if (!turnstileValid) {
       app.log.warn({ ip, billId, sessionId }, 'Turnstile verification failed for sentiment');
+      void auditRepo.logEvent({
+        event_type: 'sentiment_block',
+        source: 'api',
+        entity_type: 'sentiment',
+        entity_id: billId,
+        data: { reason: 'turnstile_failed', ip, sessionId },
+      });
       return reply.code(403).send({
         error: { message: 'Bot verification failed. Please try again.', statusCode: 403 },
       });

@@ -26,3 +26,12 @@ export type {
   SentimentCounts,
   SubmitSentimentResult,
 } from './sentiments.js';
+
+export { createAuditLogRepository } from './auditLog.js';
+export type {
+  AuditLogRepository,
+  IngestionEvent,
+  IngestionEventType,
+  LogEventInput,
+  QueryEventsOptions,
+} from './auditLog.js';
