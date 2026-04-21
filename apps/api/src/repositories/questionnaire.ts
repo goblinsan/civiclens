@@ -1,4 +1,4 @@
-import type { DbPool, MatchResultRow, PolicyTagRow, QuestionnaireProfileRow } from '@civiclens/db';
+import type { DbPool, MatchResultRow, PolicyTagRow, QuestionnaireProfileRow } from '@civreveal/db';
 
 const STANCE_WEIGHT: Record<string, number> = {
   'strongly-support': 2,

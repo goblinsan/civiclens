@@ -1,4 +1,4 @@
-/** Typed API client for the CivicLens backend. */
+/** Typed API client for the CivReveal backend. */
 
 const BASE = '/api';
 

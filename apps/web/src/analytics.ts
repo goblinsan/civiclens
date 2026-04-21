@@ -1,5 +1,5 @@
 /**
- * Lightweight analytics module for CivicLens.
+ * Lightweight analytics module for CivReveal.
  *
  * Sends fire-and-forget POST requests to the analytics API.  Errors are
  * silently swallowed so analytics can never break the user experience.

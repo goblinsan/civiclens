@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { listBills } from '../api';
 import type { BillSummary, Paginated } from '../api';
-import { BILL_STATUSES, POLICY_TAGS } from '@civiclens/shared';
+import { BILL_STATUSES, POLICY_TAGS } from '@civreveal/shared';
 
 const PAGE_SIZE = 20;
 

@@ -1,6 +1,6 @@
 # Data Ingestion — MVP Coverage & Source Boundaries
 
-This document defines which data sources the CivicLens ingestion pipeline covers
+This document defines which data sources the CivReveal ingestion pipeline covers
 at MVP, what the expected refresh cadence is, and where known gaps exist.
 
 ---

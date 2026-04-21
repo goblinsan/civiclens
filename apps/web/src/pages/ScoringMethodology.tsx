@@ -4,7 +4,7 @@ export default function ScoringMethodology() {
       <h1 className="page-heading">Scoring Methodology</h1>
 
       <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
-        CivicLens computes an <strong>alignment score</strong> (0–100) for each
+        CivReveal computes an <strong>alignment score</strong> (0–100) for each
         politician that reflects how closely their voting record matches your stated
         policy preferences. This page explains exactly how those scores are calculated.
       </p>
@@ -107,7 +107,7 @@ export default function ScoringMethodology() {
 
       <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.5rem' }}>6. Limitations</h2>
       <ul style={{ marginBottom: '1rem', paddingLeft: '1.5rem', lineHeight: '1.75' }}>
-        <li>CivicLens does <strong>not</strong> infer ideology or political affiliation from scores.</li>
+        <li>CivReveal does <strong>not</strong> infer ideology or political affiliation from scores.</li>
         <li>A high score does not mean a politician is "better" or that you should vote for them.</li>
         <li>Scores can change as more bills are tagged and more votes are recorded.</li>
         <li>Bill tagging is an editorial judgment; a single tag may not capture a bill's full complexity.</li>

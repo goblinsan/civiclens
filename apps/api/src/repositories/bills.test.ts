@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createBillsRepository } from '../repositories/bills.js';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 
 /** Minimal pool mock: query() returns empty rows by default. */
 function makePoolMock(overrides: Record<string, unknown[]> = {}) {

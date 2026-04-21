@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 import { createAuditLogRepository } from '../repositories/index.js';
 import type { AuditLogRepository } from '../repositories/index.js';
 

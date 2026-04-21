@@ -1,5 +1,5 @@
 {
-  "name": "civiclens",
+  "name": "civreveal",
   "private": true,
   "version": "0.0.0",
   "engines": {
@@ -14,9 +14,9 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\" --ignore-path .prettierignore",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "db:migrate": "pnpm --filter @civiclens/scripts migrate",
-    "db:seed": "pnpm --filter @civiclens/scripts seed",
-    "db:reset": "pnpm --filter @civiclens/scripts db:reset"
+    "db:migrate": "pnpm --filter @civreveal/scripts migrate",
+    "db:seed": "pnpm --filter @civreveal/scripts seed",
+    "db:reset": "pnpm --filter @civreveal/scripts db:reset"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",

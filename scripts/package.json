@@ -1,5 +1,5 @@
 {
-  "name": "@civiclens/scripts",
+  "name": "@civreveal/scripts",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "seed": "tsx ../db/seeds/seed.ts"
   },
   "dependencies": {
-    "@civiclens/db": "workspace:*",
+    "@civreveal/db": "workspace:*",
     "pg": "^8.20.0"
   },
   "devDependencies": {

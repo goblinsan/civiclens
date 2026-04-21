@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 export default function Home() {
   return (
     <div className="home-hero">
-      <h1>CivicLens</h1>
+      <h1>CivReveal</h1>
       <p>
         Track legislation and understand how your representatives vote.
         All data sourced from official U.S. government records.

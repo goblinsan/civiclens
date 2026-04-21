@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 import { createPoliticiansRepository } from '../repositories/index.js';
 import type { PoliticiansRepository } from '../repositories/index.js';
 

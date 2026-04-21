@@ -9,7 +9,7 @@ export async function healthRoutes(app: FastifyInstance) {
   app.get('/', async (_request, reply) => {
     return reply.code(200).send({
       status: 'ok',
-      service: 'civiclens-api',
+      service: 'civreveal-api',
       version: pkg.version ?? '0.0.0',
       timestamp: new Date().toISOString(),
     });

@@ -1,4 +1,4 @@
-import type { DbPool, SentimentSubmissionRow } from '@civiclens/db';
+import type { DbPool, SentimentSubmissionRow } from '@civreveal/db';
 
 export interface SentimentCounts {
   support: number;

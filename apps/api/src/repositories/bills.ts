@@ -1,4 +1,4 @@
-import type { DbPool, BillRow, PolicyTagRow, PoliticianRow, VoteRow } from '@civiclens/db';
+import type { DbPool, BillRow, PolicyTagRow, PoliticianRow, VoteRow } from '@civreveal/db';
 
 export interface BillWithTags extends BillRow {
   tags: string[];

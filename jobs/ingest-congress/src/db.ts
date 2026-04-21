@@ -13,7 +13,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 import type { NormalizedBill, NormalizedPolitician, NormalizedVote, NormalizedVoteRecord } from './normalize.js';
 
 // ─────────────────────────────────────────────────────────────────────────────

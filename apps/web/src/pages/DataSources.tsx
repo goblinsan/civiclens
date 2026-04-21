@@ -4,7 +4,7 @@ export default function DataSources() {
       <h1 className="page-heading">Data Sources</h1>
 
       <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
-        CivicLens pulls from official U.S. government sources only. This page
+        CivReveal pulls from official U.S. government sources only. This page
         documents every source, what it provides, how often data is refreshed,
         and known gaps or limitations.
       </p>
@@ -207,7 +207,7 @@ export default function DataSources() {
           <span className="source-label source-label-platform">Platform</span>
         </div>
         <p style={{ marginBottom: '0.75rem' }}>
-          The following content is produced by CivicLens, not sourced from an
+          The following content is produced by CivReveal, not sourced from an
           official government record.
         </p>
         <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '0.9375rem' }}>
@@ -227,7 +227,7 @@ export default function DataSources() {
                 Alignment scores
               </th>
               <td style={{ padding: '0.375rem 0' }}>
-                Computed by CivicLens from your questionnaire responses and
+                Computed by CivReveal from your questionnaire responses and
                 politician voting records. See the{' '}
                 <a href="/methodology">Scoring Methodology</a> page for full
                 details.
@@ -250,7 +250,7 @@ export default function DataSources() {
         All raw source data is stored verbatim and checksummed at ingest time so
         that every derived fact can be traced back to a source record. See the{' '}
         <a href="/transparency">Trust &amp; Transparency</a> page for more
-        information on how CivicLens handles data integrity.
+        information on how CivReveal handles data integrity.
       </p>
     </div>
   );

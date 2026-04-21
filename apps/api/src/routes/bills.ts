@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 import { createBillsRepository, createSentimentsRepository, createAuditLogRepository } from '../repositories/index.js';
 import type { BillsRepository, SentimentsRepository, AuditLogRepository } from '../repositories/index.js';
 import { checkRateLimit } from '../plugins/rateLimiter.js';

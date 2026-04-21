@@ -5,7 +5,7 @@ import { env } from '../env';
 
 // ─── Session helpers ──────────────────────────────────────────────────────────
 
-const SESSION_KEY = 'civiclens_session_id';
+const SESSION_KEY = 'civreveal_session_id';
 
 function getOrCreateSessionId(): string {
   let id = localStorage.getItem(SESSION_KEY);
@@ -18,7 +18,7 @@ function getOrCreateSessionId(): string {
 
 /** Per-bill localStorage key that stores the user's submitted sentiment. */
 function sentimentStorageKey(billId: string) {
-  return `civiclens_sentiment_${billId}`;
+  return `civreveal_sentiment_${billId}`;
 }
 
 // ─── Turnstile types ──────────────────────────────────────────────────────────

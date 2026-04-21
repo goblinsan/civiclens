@@ -1,4 +1,4 @@
-import type { DbPool, PoliticianRow, VoteRecordRow, VoteRow } from '@civiclens/db';
+import type { DbPool, PoliticianRow, VoteRecordRow, VoteRow } from '@civreveal/db';
 
 export interface ListPoliticiansOptions {
   page?: number;

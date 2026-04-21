@@ -1,5 +1,5 @@
 {
-  "name": "@civiclens/api",
+  "name": "@civreveal/api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,8 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@civiclens/db": "workspace:*",
-    "@civiclens/shared": "workspace:*",
+    "@civreveal/db": "workspace:*",
+    "@civreveal/shared": "workspace:*",
     "fastify": "^5.7.2",
     "zod": "^3.22.4"
   },

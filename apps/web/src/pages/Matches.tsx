@@ -4,7 +4,7 @@ import { getMatches } from '../api';
 import type { MatchResult } from '../api';
 import { track } from '../analytics';
 
-const SESSION_KEY = 'civiclens_session_id';
+const SESSION_KEY = 'civreveal_session_id';
 
 /** Labels for each policy tag. */
 const TAG_LABELS: Record<string, string> = {

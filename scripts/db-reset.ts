@@ -15,12 +15,12 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
-import { migrate } from '@civiclens/db';
+import { migrate } from '@civreveal/db';
 
 const { Pool } = pg;
 
 const DATABASE_URL =
-  process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/civiclens';
+  process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/civreveal';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const migrationsDir = path.resolve(__dirname, '../db/migrations');

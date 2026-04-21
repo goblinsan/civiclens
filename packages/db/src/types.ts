@@ -1,6 +1,6 @@
 /**
  * Row types mirroring the database schema.
- * These are plain data-transfer objects; Zod validation lives in @civiclens/shared.
+ * These are plain data-transfer objects; Zod validation lives in @civreveal/shared.
  */
 
 export interface JurisdictionRow {

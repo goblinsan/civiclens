@@ -4,14 +4,14 @@ export default function Transparency() {
       <h1 className="page-heading">Trust &amp; Transparency</h1>
 
       <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
-        CivicLens is a non-partisan civic information tool. This page explains
+        CivReveal is a non-partisan civic information tool. This page explains
         in plain language what the platform does and does not claim, how data is
         handled, and what you should keep in mind when interpreting what you see.
       </p>
 
-      {/* What CivicLens Is */}
+      {/* What CivReveal Is */}
       <div className="detail-section">
-        <h2 className="detail-section-title">What CivicLens Is</h2>
+        <h2 className="detail-section-title">What CivReveal Is</h2>
         <ul style={{ paddingLeft: '1.5rem', lineHeight: 1.8, marginBottom: 0 }}>
           <li>
             A read-only window into publicly available U.S. federal legislative
@@ -29,16 +29,16 @@ export default function Transparency() {
         </ul>
       </div>
 
-      {/* What CivicLens Is Not */}
+      {/* What CivReveal Is Not */}
       <div className="detail-section">
-        <h2 className="detail-section-title">What CivicLens Is Not</h2>
+        <h2 className="detail-section-title">What CivReveal Is Not</h2>
         <ul style={{ paddingLeft: '1.5rem', lineHeight: 1.8, marginBottom: 0 }}>
           <li>
-            <strong>Not an endorsement tool.</strong> CivicLens does not tell you
+            <strong>Not an endorsement tool.</strong> CivReveal does not tell you
             who to vote for or which positions are correct.
           </li>
           <li>
-            <strong>Not affiliated with any government body.</strong> CivicLens
+            <strong>Not affiliated with any government body.</strong> CivReveal
             is an independent project and is not operated by or on behalf of any
             federal, state, or local government agency.
           </li>
@@ -59,7 +59,7 @@ export default function Transparency() {
       <div className="detail-section">
         <h2 className="detail-section-title">Official Data vs. Platform Content</h2>
         <p style={{ marginBottom: '1rem' }}>
-          CivicLens clearly distinguishes between two types of content using
+          CivReveal clearly distinguishes between two types of content using
           visual badges throughout the interface:
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -70,7 +70,7 @@ export default function Transparency() {
             <span>
               Sourced verbatim from a U.S. government API or XML feed. Includes
               bill titles, summaries, vote results, and politician profiles.
-              CivicLens stores the raw source response alongside each record so
+              CivReveal stores the raw source response alongside each record so
               it can be verified.
             </span>
           </div>
@@ -79,7 +79,7 @@ export default function Transparency() {
               Platform
             </span>
             <span>
-              Generated or computed by CivicLens. Includes policy tags applied
+              Generated or computed by CivReveal. Includes policy tags applied
               to bills, alignment scores, and aggregated public sentiment counts.
               These are not official government records and represent editorial
               or algorithmic judgments.
@@ -104,7 +104,7 @@ export default function Transparency() {
           </li>
           <li>
             <strong>Update lag.</strong> There is a delay between when official
-            records change and when CivicLens reflects those changes. Each
+            records change and when CivReveal reflects those changes. Each
             record displays its last-updated timestamp so you can assess
             freshness.
           </li>
@@ -119,7 +119,7 @@ export default function Transparency() {
             few relevant votes will show a "Low" or "No data" confidence rating.
           </li>
           <li>
-            <strong>No AI-generated content.</strong> CivicLens does not
+            <strong>No AI-generated content.</strong> CivReveal does not
             currently use large language models to generate or modify any
             content. Bill summaries shown on the site are sourced directly from
             the Congressional Research Service via Congress.gov.
@@ -172,7 +172,7 @@ export default function Transparency() {
       </div>
 
       <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
-        CivicLens is open source. You can inspect the code and data pipeline at{' '}
+        CivReveal is open source. You can inspect the code and data pipeline at{' '}
         <a
           href="https://github.com/goblinsan/civiclens"
           target="_blank"
