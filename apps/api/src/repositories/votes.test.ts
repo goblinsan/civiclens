@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createVotesRepository } from '../repositories/votes.js';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 
 function makePoolMock(overrides: Record<string, unknown[]> = {}) {
   const mock = {

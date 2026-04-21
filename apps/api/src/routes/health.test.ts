@@ -11,7 +11,7 @@ describe('GET /health', () => {
     expect(response.statusCode).toBe(200);
     const body = response.json<{ status: string; service: string }>();
     expect(body.status).toBe('ok');
-    expect(body.service).toBe('civiclens-api');
+    expect(body.service).toBe('civreveal-api');
   });
 
   it('GET /ready returns 200', async () => {

@@ -8,7 +8,7 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 import { buildApp } from '../app.js';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 
 // ─── Shared mock data ─────────────────────────────────────────────────────────
 

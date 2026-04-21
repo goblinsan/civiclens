@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 import { env } from '../env.js';
 
 // How often to probe the database in the background (ms).

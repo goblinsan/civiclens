@@ -1,7 +1,7 @@
 /**
  * Seed script: inserts repeatable local dev fixture data.
  *
- * Run with:  pnpm --filter @civiclens/db seed
+ * Run with:  pnpm --filter @civreveal/db seed
  *         or via the top-level script:  pnpm db:seed
  *
  * The script is idempotent – it uses INSERT … ON CONFLICT DO NOTHING so it
@@ -12,7 +12,7 @@ import pg from 'pg';
 const { Pool } = pg;
 
 const DATABASE_URL =
-  process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/civiclens';
+  process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/civreveal';
 
 const pool = new Pool({ connectionString: DATABASE_URL });
 

@@ -1,4 +1,4 @@
-# CivicLens
+# CivReveal
 
 A civic-engagement platform for tracking U.S. legislation and understanding how elected representatives vote — helping citizens discover which politicians best reflect their values.
 
@@ -108,7 +108,7 @@ The web dev server proxies `/api/*` → `http://localhost:3001` with path rewrit
 // GET /health
 {
   "status": "ok",
-  "service": "civiclens-api",
+  "service": "civreveal-api",
   "version": "0.0.0",
   "timestamp": "2024-05-01T12:00:00.000Z"
 }
@@ -129,8 +129,8 @@ Browser ──► Vite (port 3000)
          PostgreSQL
 ```
 
-- **`@civiclens/shared`** — imported by both `api` and `web` via workspace protocol; contains Zod schemas and TypeScript types for Bills, Politicians, Votes, Questionnaire responses, and Match results.
-- **`@civiclens/ingest-congress`** — standalone Node.js job that pulls data from [api.congress.gov](https://api.congress.gov) and upserts into the database.
+- **`@civreveal/shared`** — imported by both `api` and `web` via workspace protocol; contains Zod schemas and TypeScript types for Bills, Politicians, Votes, Questionnaire responses, and Match results.
+- **`@civreveal/ingest-congress`** — standalone Node.js job that pulls data from [api.congress.gov](https://api.congress.gov) and upserts into the database.
 
 ## Contributing
 

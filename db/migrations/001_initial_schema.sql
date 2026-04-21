@@ -1,5 +1,5 @@
 -- Migration: 001_initial_schema
--- Description: MVP normalized schema for CivicLens
+-- Description: MVP normalized schema for CivReveal
 
 -- Enable pgcrypto for gen_random_uuid() on PostgreSQL < 13
 -- (PostgreSQL 13+ uses gen_random_uuid() built-in; keep the extension for compatibility)

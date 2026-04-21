@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import type { DbPool } from '@civiclens/db';
-import { POLICY_TAGS } from '@civiclens/shared';
+import type { DbPool } from '@civreveal/db';
+import { POLICY_TAGS } from '@civreveal/shared';
 import { createQuestionnaireRepository } from '../repositories/index.js';
 import type { QuestionnaireRepository } from '../repositories/index.js';
 

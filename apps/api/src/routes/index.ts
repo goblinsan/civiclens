@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 import { healthRoutes } from './health.js';
 import { readyRoutes } from './ready.js';
 import { billRoutes } from './bills.js';

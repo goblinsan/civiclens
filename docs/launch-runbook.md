@@ -1,6 +1,6 @@
-# CivicLens MVP Launch Runbook
+# CivReveal MVP Launch Runbook
 
-> **Audience:** Engineering team deploying the CivicLens MVP to production.
+> **Audience:** Engineering team deploying the CivReveal MVP to production.
 > **Outcome:** The team can deploy the MVP with a documented, repeatable process.
 
 ---
@@ -85,7 +85,7 @@ Expected output includes all migration versions (e.g. `001`, `002`, …).
 
 ```bash
 # Build
-pnpm --filter @civiclens/api build
+pnpm --filter @civreveal/api build
 
 # Start (from apps/api)
 NODE_ENV=production node dist/index.js
@@ -94,20 +94,20 @@ NODE_ENV=production node dist/index.js
 Or using the workspace root:
 
 ```bash
-pnpm --filter @civiclens/api start
+pnpm --filter @civreveal/api start
 ```
 
 ### Development
 
 ```bash
-pnpm --filter @civiclens/api dev
+pnpm --filter @civreveal/api dev
 ```
 
 ### Verifying the API is healthy
 
 ```bash
 curl http://localhost:3001/health
-# Expected: {"status":"ok","service":"civiclens-api","version":"..."}
+# Expected: {"status":"ok","service":"civreveal-api","version":"..."}
 
 curl http://localhost:3001/ready
 # Expected: {"status":"ready"} (or "degraded" if DB is unreachable)
@@ -122,7 +122,7 @@ or manually to seed initial data.
 
 ```bash
 # From the monorepo root
-pnpm --filter @civiclens/ingest-congress start
+pnpm --filter @civreveal/ingest-congress start
 ```
 
 Or directly:

@@ -1,5 +1,5 @@
 /**
- * index.ts — CivicLens Congress ingestion pipeline
+ * index.ts — CivReveal Congress ingestion pipeline
  *
  * Pulls official government data from api.congress.gov, Senate.gov, and the
  * House Clerk XML feeds, normalises it, and upserts it into the database.
@@ -17,7 +17,7 @@
  */
 
 import { z } from 'zod';
-import { getPool, closePool } from '@civiclens/db';
+import { getPool, closePool } from '@civreveal/db';
 import { createLogger } from './logger.js';
 import { createCongressClient } from './congress-client.js';
 import { createVoteClient } from './vote-client.js';
@@ -37,7 +37,7 @@ import {
   findVoteId,
   insertIngestionEvent,
 } from './db.js';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 import type { Logger } from './logger.js';
 import type { CongressClient } from './congress-client.js';
 import type { VoteClient } from './vote-client.js';

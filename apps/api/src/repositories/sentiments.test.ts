@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createSentimentsRepository } from '../repositories/sentiments.js';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 
 /** Minimal pool mock. */
 function makePoolMock(overrides: Record<string, unknown[]> = {}) {

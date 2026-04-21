@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import type { DbPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
 import { createVotesRepository } from '../repositories/index.js';
 import type { VotesRepository } from '../repositories/index.js';
 

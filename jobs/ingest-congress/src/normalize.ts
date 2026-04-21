@@ -6,7 +6,7 @@
  * These functions have no side-effects and depend on no I/O.
  */
 
-import type { BillStatus, VoteValue } from '@civiclens/shared';
+import type { BillStatus, VoteValue } from '@civreveal/shared';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Raw API shape types (Congress.gov v3)

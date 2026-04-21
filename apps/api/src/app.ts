@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import Fastify from 'fastify';
-import type { DbPool } from '@civiclens/db';
-import { getPool } from '@civiclens/db';
+import type { DbPool } from '@civreveal/db';
+import { getPool } from '@civreveal/db';
 import { env } from './env.js';
 import { registerRoutes } from './routes/index.js';
 import { registerErrorHandler } from './plugins/errorHandler.js';

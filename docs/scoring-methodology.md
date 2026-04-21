@@ -1,6 +1,6 @@
 # Scoring Methodology
 
-CivicLens computes an **alignment score** (0–100) for each politician that
+CivReveal computes an **alignment score** (0–100) for each politician that
 reflects how closely their voting record matches your stated policy preferences.
 This document explains exactly how those scores are calculated so you can
 evaluate the results with appropriate context.
@@ -124,7 +124,7 @@ alignment is strong and where it diverges.
 
 ## 7. What These Scores Do NOT Mean
 
-- **CivicLens does not infer ideology or political affiliation** from scores.
+- **CivReveal does not infer ideology or political affiliation** from scores.
 - **A high score does not mean a politician is "good"** or that you should vote
   for them.
 - **Scores can change** as more bills are tagged and more votes are recorded.

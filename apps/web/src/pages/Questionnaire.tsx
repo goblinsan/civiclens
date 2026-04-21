@@ -4,7 +4,7 @@ import { getQuestions, submitQuestionnaire } from '../api';
 import type { PolicyQuestion, Stance } from '../api';
 import { track } from '../analytics';
 
-const SESSION_KEY = 'civiclens_session_id';
+const SESSION_KEY = 'civreveal_session_id';
 
 const STANCE_OPTIONS: Array<{ value: Stance; label: string }> = [
   { value: 'strongly-support', label: 'Strongly Support' },

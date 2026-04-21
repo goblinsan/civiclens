@@ -12,7 +12,7 @@ export default function Layout() {
     <div className="layout-root">
       <header className="layout-header">
         <nav className="layout-nav" aria-label="Main navigation">
-          <Link to="/" className="layout-brand">CivicLens</Link>
+          <Link to="/" className="layout-brand">CivReveal</Link>
           <ul className="layout-nav-list">
             {navLinks.map(({ to, label }) => (
               <li key={to}>
@@ -28,7 +28,7 @@ export default function Layout() {
       <footer className="layout-footer">
         <div className="layout-footer-inner">
           <p className="layout-footer-copy">
-            CivicLens — civic information tool. All legislative data sourced
+            CivReveal — civic information tool. All legislative data sourced
             from official U.S. government records.
           </p>
           <nav className="layout-footer-nav" aria-label="Footer navigation">

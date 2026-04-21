@@ -1,4 +1,4 @@
-import type { DbPool, VoteRecordRow, VoteRow } from '@civiclens/db';
+import type { DbPool, VoteRecordRow, VoteRow } from '@civreveal/db';
 
 export interface VoteWithRecords extends VoteRow {
   records: VoteRecordRow[];
