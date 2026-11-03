@@ -293,6 +293,22 @@ export async function findVoteId(
 
 
 /**
+ * Load, for every stored vote whose source_id starts with `sourceIdPrefix`,
+ * the upstream last-updated time (epoch ms, or null when unknown). Used to
+ * skip re-fetching member positions for votes that have not changed upstream.
+ */
+export async function loadVoteSourceState(
+  pool: DbPool,
+  sourceIdPrefix: string,
+): Promise<Map<string, number | null>> {
+  const result = await pool.query<{ source_id: string; source_updated_at: Date | null }>(
+    `SELECT source_id, source_updated_at FROM votes WHERE source_id LIKE $1`,
+    [`${sourceIdPrefix}%`],
+  );
+  return new Map(result.rows.map((r) => [r.source_id, r.source_updated_at?.getTime() ?? null]));
+}
+
+/**
  * Upsert a roll-call vote event.
  * Uses source_id as the deduplication key (partial unique index).
  * Returns the internal UUID of the vote.
@@ -304,16 +320,18 @@ export async function upsertVote(
 ): Promise<string> {
   const result = await pool.query<{ id: string }>(
     `INSERT INTO votes
-       (bill_id, chamber, vote_date, result, yea_count, nay_count, abstain_count, not_voting_count, source_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       (bill_id, chamber, vote_date, result, yea_count, nay_count, abstain_count, not_voting_count,
+        source_id, source_updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      ON CONFLICT (source_id) WHERE source_id IS NOT NULL DO UPDATE SET
-       bill_id          = EXCLUDED.bill_id,
-       vote_date        = EXCLUDED.vote_date,
-       result           = EXCLUDED.result,
-       yea_count        = EXCLUDED.yea_count,
-       nay_count        = EXCLUDED.nay_count,
-       abstain_count    = EXCLUDED.abstain_count,
-       not_voting_count = EXCLUDED.not_voting_count
+       bill_id           = EXCLUDED.bill_id,
+       vote_date         = EXCLUDED.vote_date,
+       result            = EXCLUDED.result,
+       yea_count         = EXCLUDED.yea_count,
+       nay_count         = EXCLUDED.nay_count,
+       abstain_count     = EXCLUDED.abstain_count,
+       not_voting_count  = EXCLUDED.not_voting_count,
+       source_updated_at = EXCLUDED.source_updated_at
      RETURNING id`,
     [
       billInternalId,
@@ -325,6 +343,7 @@ export async function upsertVote(
       vote.abstainCount,
       vote.notVotingCount,
       vote.sourceId,
+      vote.sourceUpdatedAt?.toISOString() ?? null,
     ],
   );
 

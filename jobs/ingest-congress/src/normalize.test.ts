@@ -388,6 +388,14 @@ describe('normalizeHouseVoteApi', () => {
     expect(event.voteDate).toBe('2026-02-24T14:18:00-05:00');
     expect(event.result).toBe('Passed');
     expect(event.question).toBe('Recorded Vote');
+    expect(event.sourceUpdatedAt).toBe('2026-02-25T14:09:11-05:00');
+  });
+
+  it('carries the upstream update date into the normalised vote', () => {
+    const { vote } = normalizeVoteEvent(normalizeHouseVoteApi(item, []));
+    expect(vote.sourceUpdatedAt).toEqual(new Date('2026-02-25T14:09:11-05:00'));
+    const { vote: senate } = normalizeVoteEvent({ ...normalizeHouseVoteApi(item, []), sourceUpdatedAt: undefined });
+    expect(senate.sourceUpdatedAt).toBeNull();
   });
 
   it('tallies counts from member positions, including Aye/No synonyms', () => {

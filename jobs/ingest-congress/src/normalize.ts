@@ -92,6 +92,8 @@ export interface CongressVoteEvent {
   notVotingCount: number;
   billIdentifier?: { type: string; number: string; congress: number } | undefined;
   members: CongressVoteMember[];
+  /** Upstream last-updated timestamp, when the source provides one. */
+  sourceUpdatedAt?: string | undefined;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -168,6 +170,7 @@ export interface NormalizedVote {
   billCongress: number | null;
   billType: string | null;
   billNumber: string | null;
+  sourceUpdatedAt: Date | null;
 }
 
 export interface NormalizedVoteRecord {
@@ -360,6 +363,7 @@ export function normalizeVoteEvent(raw: CongressVoteEvent): {
     billCongress: raw.billIdentifier?.congress ?? null,
     billType: raw.billIdentifier?.type ?? null,
     billNumber: raw.billIdentifier?.number ?? null,
+    sourceUpdatedAt: parseDateOrNull(raw.sourceUpdatedAt),
   };
 
   const records: NormalizedVoteRecord[] = raw.members
@@ -370,6 +374,13 @@ export function normalizeVoteEvent(raw: CongressVoteEvent): {
     }));
 
   return { vote, records };
+}
+
+/** Parse an ISO-8601 string into a Date, or null when absent or invalid. */
+export function parseDateOrNull(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -394,6 +405,11 @@ export function currentSessionFor(congress: number, now: Date = new Date()): 1 |
 // ─────────────────────────────────────────────────────────────────────────────
 
 const BILL_TYPE_PATTERN = /^(HR|S|HJRES|SJRES|HCONRES|SCONRES|HRES|SRES)$/;
+
+/** Stable source_id for a House roll-call; shared by normalisation and the change check. */
+export function houseVoteSourceId(congress: number, session: number, rollCallNumber: number): string {
+  return `house-${congress}-${session}-${rollCallNumber}`;
+}
 
 /**
  * Build a CongressVoteEvent from a house-vote list item plus its member votes.
@@ -424,7 +440,7 @@ export function normalizeHouseVoteApi(
   }
 
   return {
-    sourceId: `house-${item.congress}-${item.sessionNumber}-${item.rollCallNumber}`,
+    sourceId: houseVoteSourceId(item.congress, item.sessionNumber, item.rollCallNumber),
     chamber: 'house',
     congress: item.congress,
     session: item.sessionNumber,
@@ -438,5 +454,6 @@ export function normalizeHouseVoteApi(
     notVotingCount: tally['not-voting'],
     billIdentifier,
     members,
+    sourceUpdatedAt: item.updateDate,
   };
 }

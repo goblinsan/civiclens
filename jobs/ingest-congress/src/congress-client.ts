@@ -115,6 +115,14 @@ export interface FetchMembersOptions {
 export interface FetchHouseVotesOptions {
   /** Keep only the N most recent roll-calls of the session (0 = all). */
   maxVotes?: number | undefined;
+  /**
+   * Return true to skip fetching a vote's member positions (e.g. because the
+   * stored copy already matches the item's updateDate). Skipped votes are not
+   * returned.
+   */
+  skip?: ((item: HouseVoteApiItem) => boolean) | undefined;
+  /** Parallel member-position requests (default 4). */
+  concurrency?: number | undefined;
 }
 
 export interface BillDetailResult extends CongressBillSummary {
@@ -375,7 +383,7 @@ export function createCongressClient(apiKey: string, logger: Logger) {
     session: number,
     options: FetchHouseVotesOptions = {},
   ): Promise<CongressVoteEvent[]> {
-    const { maxVotes = 0 } = options;
+    const { maxVotes = 0, skip, concurrency = 4 } = options;
     const items: HouseVoteApiItem[] = [];
     let offset = 0;
 
@@ -396,36 +404,47 @@ export function createCongressClient(apiKey: string, logger: Logger) {
     }
 
     items.sort((a, b) => b.rollCallNumber - a.rollCallNumber);
-    const toFetch = maxVotes > 0 ? items.slice(0, maxVotes) : items;
+    const window = maxVotes > 0 ? items.slice(0, maxVotes) : items;
+    const toFetch = skip ? window.filter((item) => !skip(item)) : window;
     logger.info('house votes listed', {
       congress,
       session,
       total: items.length,
+      unchanged: window.length - toFetch.length,
       fetching: toFetch.length,
     });
 
-    const events: CongressVoteEvent[] = [];
-    for (const item of toFetch) {
-      try {
-        const membersUrl = buildUrl(
-          `/house-vote/${congress}/${session}/${item.rollCallNumber}/members`,
-          apiKey,
-        );
-        const response = await fetchWithRetry(membersUrl, logger);
-        const data = (await response.json()) as HouseVoteMembersResponse;
-        events.push(normalizeHouseVoteApi(item, data.houseRollCallVoteMemberVotes?.results ?? []));
-      } catch (err) {
-        logger.warn('house vote member positions unavailable, skipping', {
-          congress,
-          session,
-          rollCallNumber: item.rollCallNumber,
-          err: String(err),
-        });
+    // Member positions are ~100 KB each and the API takes a few seconds per
+    // call, so fetch a few in parallel. Results are collected by index so the
+    // output keeps the most-recent-first order regardless of completion order.
+    const events: (CongressVoteEvent | undefined)[] = new Array(toFetch.length);
+    let next = 0;
+    const worker = async () => {
+      while (next < toFetch.length) {
+        const index = next++;
+        const item = toFetch[index]!;
+        try {
+          const membersUrl = buildUrl(
+            `/house-vote/${congress}/${session}/${item.rollCallNumber}/members`,
+            apiKey,
+          );
+          const response = await fetchWithRetry(membersUrl, logger);
+          const data = (await response.json()) as HouseVoteMembersResponse;
+          events[index] = normalizeHouseVoteApi(item, data.houseRollCallVoteMemberVotes?.results ?? []);
+        } catch (err) {
+          logger.warn('house vote member positions unavailable, skipping', {
+            congress,
+            session,
+            rollCallNumber: item.rollCallNumber,
+            err: String(err),
+          });
+        }
+        await sleep(REQUEST_DELAY_MS);
       }
-      await sleep(REQUEST_DELAY_MS);
-    }
+    };
+    await Promise.all(Array.from({ length: Math.max(1, concurrency) }, worker));
 
-    return events;
+    return events.filter((e): e is CongressVoteEvent => e !== undefined);
   }
 
   return { fetchBills, fetchBillDetail, fetchMembers, fetchMemberDetail, fetchHouseVotes };

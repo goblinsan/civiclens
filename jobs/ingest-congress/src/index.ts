@@ -36,6 +36,8 @@ import {
   normalizeBill,
   normalizeVoteEvent,
   currentSessionFor,
+  houseVoteSourceId,
+  parseDateOrNull,
 } from './normalize.js';
 import { deriveTags, isKnownPolicyArea } from './tagging.js';
 import { parseIngestSteps, stepsNeedApiKey } from './steps.js';
@@ -46,6 +48,7 @@ import {
   upsertVote,
   upsertVoteRecords,
   loadPoliticianIdMap,
+  loadVoteSourceState,
   replaceDerivedBillTags,
   saveRawPayload,
   findPoliticianId,
@@ -355,10 +358,20 @@ async function ingestHouseVotes(
 ): Promise<IngestStats> {
   const stats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
 
+  // Skip votes whose upstream updateDate matches what we already stored: no
+  // need to re-download ~100 KB of member positions for an unchanged record.
+  const stored = await loadVoteSourceState(pool, `house-${congress}-${session}-`);
   const events = await client.fetchHouseVotes(congress, session, {
     ...(options.maxVotes !== undefined && { maxVotes: options.maxVotes }),
+    skip: (item) => {
+      const known = stored.get(houseVoteSourceId(congress, session, item.rollCallNumber));
+      const upstream = parseDateOrNull(item.updateDate)?.getTime();
+      const unchanged = known !== undefined && known !== null && upstream !== undefined && known === upstream;
+      if (unchanged) stats.skipped++;
+      return unchanged;
+    },
   });
-  logger.info('house votes fetched', { session, count: events.length });
+  logger.info('house votes fetched', { session, count: events.length, unchanged: stats.skipped });
   const politicianIds = await loadPoliticianIdMap(pool);
 
   for (const event of events) {
