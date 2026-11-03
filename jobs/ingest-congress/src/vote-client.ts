@@ -1,20 +1,31 @@
 /**
  * vote-client.ts
  *
- * Fetches roll-call vote data from the official Senate.gov and House Clerk
- * XML feeds and converts them into structured CongressVoteEvent objects.
+ * Fetches Senate roll-call vote data from the official Senate.gov LIS XML
+ * feed and converts it into structured CongressVoteEvent objects.
  *
  * Senate feed: https://www.senate.gov/legislative/LIS/roll_call_lists/
- * House feed:  https://clerk.house.gov/evs/{year}/
+ *
+ * House roll-call votes come from the Congress.gov API instead
+ * (see congress-client.ts → fetchHouseVotes); the House Clerk XML index this
+ * module once scraped does not exist, and Congress.gov carries every member's
+ * position with the bill linkage already resolved.
+ *
+ * Known limitation: senate.gov returns HTTP 403 to requests from cloud
+ * provider IP ranges (including GitHub-hosted runners) regardless of
+ * User-Agent, and Congress.gov has no Senate vote endpoint yet. A list fetch
+ * failure is therefore thrown, not swallowed, so the run records a
+ * `fetch_failure` event and the gap is visible.
  */
 
 import { XMLParser } from 'fast-xml-parser';
 import type { Logger } from './logger.js';
 import type { CongressVoteEvent, CongressVoteMember } from './normalize.js';
-import { normalizeVoteValue } from './normalize.js';
 
 const SENATE_BASE = 'https://www.senate.gov/legislative/LIS';
-const HOUSE_BASE = 'https://clerk.house.gov/evs';
+
+/** Identify ourselves honestly to the upstream server. */
+const USER_AGENT = 'CivReveal/0.1 (civic transparency project; +https://github.com/goblinsan/civiclens)';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -24,7 +35,7 @@ async function fetchText(url: string, logger: Logger, maxRetries = 3): Promise<s
   let lastError: unknown;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { headers: { 'User-Agent': USER_AGENT, Accept: '*/*' } });
       if (response.ok) return await response.text();
       if (response.status === 404) throw new Error(`404 Not Found: ${url}`);
       if (response.status === 429 || response.status >= 500) {
@@ -47,7 +58,7 @@ async function fetchText(url: string, logger: Logger, maxRetries = 3): Promise<s
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '@_',
-  isArray: (tagName) => ['vote', 'member', 'recorded-vote'].includes(tagName),
+  isArray: (tagName) => ['vote', 'member'].includes(tagName),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -196,130 +207,13 @@ async function fetchSenateVoteDetail(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// House vote feed
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface HouseRollCallVote {
-  'vote-metadata'?: {
-    congress?: number | string;
-    session?: number | string;
-    'vote-number'?: number | string;
-    date?: string;
-    'action-date'?: string;
-    'legis-num'?: string;
-    'vote-question'?: string;
-    'vote-result'?: string;
-  };
-  'vote-data'?: {
-    'recorded-vote'?: Array<{
-      legislator?: {
-        '#text'?: string;
-        '@_name-id'?: string;
-        '@_party'?: string;
-        '@_state'?: string;
-      };
-      vote?: string;
-    }>;
-  };
-}
-
-/**
- * Fetch the list of roll-call vote numbers for House votes in a given year.
- */
-async function fetchHouseVoteList(year: number, logger: Logger): Promise<number[]> {
-  const url = `${HOUSE_BASE}/${year}/ROLLCALL.xml`;
-  logger.debug('fetching house vote list', { year, url });
-
-  const xml = await fetchText(url, logger);
-  const parsed = xmlParser.parse(xml) as {
-    evs?: { vote?: Array<{ rollnumber?: number | string }> };
-  };
-
-  const votes = parsed.evs?.vote ?? [];
-  return votes
-    .map((v) => Number(v.rollnumber))
-    .filter((n) => !isNaN(n) && n > 0)
-    .sort((a, b) => a - b);
-}
-
-/**
- * Fetch the full detail for a single House roll-call vote.
- */
-async function fetchHouseVoteDetail(
-  year: number,
-  congress: number,
-  rollCallNumber: number,
-  logger: Logger,
-): Promise<CongressVoteEvent | null> {
-  const paddedNum = String(rollCallNumber).padStart(3, '0');
-  const url = `${HOUSE_BASE}/${year}/roll${paddedNum}.xml`;
-  logger.debug('fetching house vote detail', { year, rollCallNumber, url });
-
-  let xml: string;
-  try {
-    xml = await fetchText(url, logger);
-  } catch (err) {
-    logger.warn('house vote detail not found', { rollCallNumber, err: String(err) });
-    return null;
-  }
-
-  const parsed = xmlParser.parse(xml) as { 'roll-call-vote'?: HouseRollCallVote };
-  const detail = parsed['roll-call-vote'];
-  if (!detail) return null;
-
-  const meta = detail['vote-metadata'];
-  const session = Number(meta?.session ?? 1);
-
-  const members: CongressVoteMember[] = (detail['vote-data']?.['recorded-vote'] ?? []).map((rv) => ({
-    bioguideId: rv.legislator?.['@_name-id'],
-    party: rv.legislator?.['@_party'],
-    state: rv.legislator?.['@_state'],
-    votePosition: rv.vote ?? 'Not Voting',
-  }));
-
-  // Parse bill identifier from legis-num, e.g. "H R 1" → { type: 'HR', number: '1' }
-  let billIdentifier: CongressVoteEvent['billIdentifier'];
-  const legisNum = meta?.['legis-num'];
-  if (legisNum) {
-    const normalized = String(legisNum).toUpperCase().replace(/\s+/g, '');
-    const match = normalized.match(/^(HR|S|HJRES|SJRES|HCONRES|SCONRES|HRES|SRES)(\d+)$/);
-    if (match?.[1] && match?.[2]) {
-      billIdentifier = { type: match[1], number: match[2], congress };
-    }
-  }
-
-  const resultText = meta?.['vote-result'] ?? '';
-  const yeaCount = members.filter((m) => normalizeVoteValue(m.votePosition) === 'yea').length;
-  const nayCount = members.filter((m) => normalizeVoteValue(m.votePosition) === 'nay').length;
-  const abstainCount = members.filter((m) => normalizeVoteValue(m.votePosition) === 'abstain').length;
-  const notVotingCount = members.filter((m) => normalizeVoteValue(m.votePosition) === 'not-voting').length;
-
-  return {
-    sourceId: `house-${congress}-${year}-${rollCallNumber}`,
-    chamber: 'house',
-    congress,
-    session,
-    rollCallNumber,
-    voteDate: meta?.['action-date'] ?? meta?.date ?? '',
-    question: meta?.['vote-question'],
-    result: resultText,
-    yeaCount,
-    nayCount,
-    abstainCount,
-    notVotingCount,
-    billIdentifier,
-    members,
-  };
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Public vote client factory
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface FetchVotesOptions {
   /** Only fetch vote numbers >= this value (for incremental sync). */
   fromRollCallNumber?: number | undefined;
-  /** Maximum number of vote details to fetch per chamber. */
+  /** Maximum number of vote details to fetch. */
   maxVotes?: number | undefined;
   /** Delay between detail requests (ms). */
   requestDelayMs?: number | undefined;
@@ -329,6 +223,10 @@ export function createVoteClient(logger: Logger) {
   /**
    * Fetch Senate roll-call votes for the given congress and session.
    * Returns vote events with member-level positions.
+   *
+   * Throws when the vote list cannot be fetched (e.g. senate.gov refusing the
+   * request) so the caller can record the failure instead of reporting an
+   * empty chamber as success.
    */
   async function fetchSenateVotes(
     congress: number,
@@ -338,13 +236,7 @@ export function createVoteClient(logger: Logger) {
     const { fromRollCallNumber = 1, maxVotes = 0, requestDelayMs = 300 } = options;
     const events: CongressVoteEvent[] = [];
 
-    let allNumbers: number[];
-    try {
-      allNumbers = await fetchSenateVoteList(congress, session, logger);
-    } catch (err) {
-      logger.error('failed to fetch senate vote list', { congress, session, err: String(err) });
-      return events;
-    }
+    const allNumbers = await fetchSenateVoteList(congress, session, logger);
 
     const numbers = allNumbers.filter((n) => n >= fromRollCallNumber);
     const toFetch = maxVotes > 0 ? numbers.slice(-maxVotes) : numbers;
@@ -365,45 +257,7 @@ export function createVoteClient(logger: Logger) {
     return events;
   }
 
-  /**
-   * Fetch House roll-call votes for the given congress and year.
-   */
-  async function fetchHouseVotes(
-    congress: number,
-    year: number,
-    options: FetchVotesOptions = {},
-  ): Promise<CongressVoteEvent[]> {
-    const { fromRollCallNumber = 1, maxVotes = 0, requestDelayMs = 300 } = options;
-    const events: CongressVoteEvent[] = [];
-
-    let allNumbers: number[];
-    try {
-      allNumbers = await fetchHouseVoteList(year, logger);
-    } catch (err) {
-      logger.error('failed to fetch house vote list', { year, err: String(err) });
-      return events;
-    }
-
-    const numbers = allNumbers.filter((n) => n >= fromRollCallNumber);
-    const toFetch = maxVotes > 0 ? numbers.slice(-maxVotes) : numbers;
-
-    logger.info('fetching house vote details', {
-      congress,
-      year,
-      total: numbers.length,
-      fetching: toFetch.length,
-    });
-
-    for (const num of toFetch) {
-      const event = await fetchHouseVoteDetail(year, congress, num, logger);
-      if (event) events.push(event);
-      await sleep(requestDelayMs);
-    }
-
-    return events;
-  }
-
-  return { fetchSenateVotes, fetchHouseVotes };
+  return { fetchSenateVotes };
 }
 
 export type VoteClient = ReturnType<typeof createVoteClient>;

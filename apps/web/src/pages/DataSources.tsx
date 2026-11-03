@@ -96,9 +96,12 @@ export default function DataSources() {
                 Limitations
               </th>
               <td style={{ padding: '0.375rem 0' }}>
-                Only covers the current and most recent congressional sessions.
                 Procedural votes not tied to a specific bill are ingested but
-                not linked to bill records.
+                not linked to bill records.{' '}
+                <strong>Currently unavailable:</strong> senate.gov refuses
+                automated requests from the cloud environment where the
+                ingestion job runs, so Senate roll-calls are not being
+                collected yet. This page will be updated when that changes.
               </td>
             </tr>
           </tbody>
@@ -109,14 +112,15 @@ export default function DataSources() {
       <div className="detail-section">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
           <h2 className="detail-section-title" style={{ marginBottom: 0, border: 'none', paddingBottom: 0 }}>
-            House Clerk XML Feed
+            Congress.gov House Roll-Call Votes
           </h2>
           <span className="source-label source-label-official">Official</span>
         </div>
         <p style={{ marginBottom: '0.75rem' }}>
-          Published by the Office of the Clerk, U.S. House of Representatives.{' '}
-          <a href="https://clerk.house.gov" target="_blank" rel="noopener noreferrer">
-            clerk.house.gov ↗
+          Published by the Library of Congress through the Congress.gov API, from
+          the records of the Office of the Clerk, U.S. House of Representatives.{' '}
+          <a href="https://api.congress.gov" target="_blank" rel="noopener noreferrer">
+            api.congress.gov ↗
           </a>
         </p>
         <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '0.9375rem' }}>
@@ -126,8 +130,9 @@ export default function DataSources() {
                 Provides
               </th>
               <td style={{ padding: '0.375rem 0' }}>
-                House roll-call vote results per year, including individual
-                representative positions (Yea/Nay/Not Voting).
+                House roll-call vote results per session, including every
+                representative's position (Yea/Nay/Present/Not Voting) and the
+                bill or resolution each vote concerns.
               </td>
             </tr>
             <tr>
@@ -135,7 +140,8 @@ export default function DataSources() {
                 Refresh cadence
               </th>
               <td style={{ padding: '0.375rem 0' }}>
-                XML feeds are fetched by calendar year during each ingestion run.
+                Fetched per congressional session during each ingestion run.
+                Congress.gov publishes House votes within a day of the vote.
               </td>
             </tr>
             <tr>
@@ -143,8 +149,9 @@ export default function DataSources() {
                 Limitations
               </th>
               <td style={{ padding: '0.375rem 0' }}>
-                Coverage is limited to the current year by default. Historical
-                years can be configured but are not fetched automatically.
+                Scheduled runs fetch only the most recent votes; older sessions
+                of the current Congress are covered by a one-time backfill run.
+                Earlier Congresses are not fetched.
               </td>
             </tr>
           </tbody>

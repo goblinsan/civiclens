@@ -153,4 +153,11 @@ jobs:
                 echo "$unknown" | sed 's/^/- /'
               fi
             fi
+            errs=$(grep -E '"level":"(error|fatal)"' ingest.log | jq -r '"- `\(.msg)`\(if .err then ": " + .err else "" end)' 2>/dev/null || true)
+            if [ -n "$errs" ]; then
+              echo
+              echo "### Errors logged"
+              echo
+              echo "$errs"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

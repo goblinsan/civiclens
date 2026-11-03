@@ -150,8 +150,9 @@ Use scores as one data point alongside your own research.
 
 ## 8. Source Data
 
-- **Voting records** are sourced from the U.S. Senate roll-call archives
-  (senate.gov) and the House Office of the Clerk (clerk.house.gov).
+- **Voting records** are sourced from the Congress.gov API (House roll-calls,
+  with every representative's position) and the U.S. Senate roll-call archives
+  (senate.gov).
 - **Bills** are sourced from Congress.gov via the Congress.gov API.
 - Data ingestion is described in [data-ingestion.md](./data-ingestion.md).
 

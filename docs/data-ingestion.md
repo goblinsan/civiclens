@@ -9,9 +9,8 @@ at MVP, what the expected refresh cadence is, and where known gaps exist.
 
 | Source | Data | Format | Auth required |
 |--------|------|--------|---------------|
-| [api.congress.gov](https://api.congress.gov) v3 | Bills, sponsors, summaries, members | JSON REST | API key (`CONGRESS_API_KEY`) |
-| [Senate.gov LIS XML](https://www.senate.gov/legislative/votes_new.htm) | Senate roll-call vote lists & individual votes | XML | None |
-| [House Clerk EVS](https://clerk.house.gov/evs/) | House roll-call vote lists & individual votes | XML | None |
+| [api.congress.gov](https://api.congress.gov) v3 | Bills, sponsors, summaries, official classification, members, **House roll-call votes** with member positions | JSON REST | API key (`CONGRESS_API_KEY`) |
+| [Senate.gov LIS XML](https://www.senate.gov/legislative/votes_new.htm) | Senate roll-call vote lists & individual votes | XML | None — but see the Senate limitation below |
 
 ---
 
@@ -57,9 +56,20 @@ re-running with earlier values and clearing `SYNC_SINCE`.
 
 ### Roll-call votes
 
-- Senate votes fetched from `senate.gov` XML feeds; House votes from
-  `clerk.house.gov` XML feeds.
+- House votes come from the Congress.gov `house-vote` endpoint (list per
+  session, then `/members` for every representative's position). Bill linkage
+  comes from the API's `legislationType` / `legislationNumber`.
+- Senate votes come from `senate.gov` XML feeds.
+- Sessions are walked most-recent first: the current session is derived from
+  the date (`SESSION` overrides it), and a full backfill (`MAX_VOTES=0`) covers
+  every session of the congress.
 - Up to `MAX_VOTES` most-recent vote details per chamber per run (default `50`).
+- **Senate limitation (open):** senate.gov answers HTTP 403 to requests from
+  cloud-provider IP ranges, including GitHub-hosted runners, regardless of
+  User-Agent, and Congress.gov has no Senate vote endpoint yet. Scheduled runs
+  therefore record a `fetch_failure` event for `senate_votes` and ingest no
+  Senate roll-calls. Options under consideration: run the Senate step from a
+  non-cloud network, or use a documented mirror of the senate.gov data.
 - Per-member positions stored as `yea / nay / abstain / not-voting`.
 - Votes are linked to a bill when the source XML identifies one; otherwise
   `bill_id` is `NULL`.
@@ -164,8 +174,7 @@ chamber per run (default `50`).
 | `CONGRESS_API_KEY` | ✅ | — | API key from [api.congress.gov](https://api.congress.gov/sign-up/) |
 | `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
 | `CONGRESS` | — | `119` | Congress number to ingest |
-| `SENATE_SESSION` | — | `1` | Senate session (1 or 2) |
-| `HOUSE_YEAR` | — | current year | Calendar year for House vote feed |
+| `SESSION` | — | derived from the date | Restrict votes to one session (`1` or `2`); default walks every session up to the current one |
 | `SYNC_SINCE` | — | (none) | ISO-8601 datetime; bills updated after this are fetched |
 | `MAX_BILLS` | — | `0` (no limit) | Cap on bills fetched per run |
 | `MAX_VOTES` | — | `50` | Max votes per chamber per run |

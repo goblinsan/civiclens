@@ -6,8 +6,17 @@ import {
   normalizeMember,
   normalizeBill,
   normalizeVoteEvent,
+  normalizeHouseVoteApi,
+  currentSessionFor,
+  firstYearOfCongress,
 } from './normalize.js';
-import type { CongressMemberSummary, CongressBillSummary, CongressVoteEvent } from './normalize.js';
+import type {
+  CongressMemberSummary,
+  CongressBillSummary,
+  CongressVoteEvent,
+  HouseVoteApiItem,
+  HouseVoteApiMemberVote,
+} from './normalize.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // normalizeBillStatus
@@ -314,5 +323,110 @@ describe('normalizeVoteEvent', () => {
     expect(vote.billCongress).toBeNull();
     expect(vote.billType).toBeNull();
     expect(vote.billNumber).toBeNull();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Congress session helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('firstYearOfCongress', () => {
+  it('maps congress numbers to their first calendar year', () => {
+    expect(firstYearOfCongress(119)).toBe(2025);
+    expect(firstYearOfCongress(118)).toBe(2023);
+    expect(firstYearOfCongress(117)).toBe(2021);
+  });
+});
+
+describe('currentSessionFor', () => {
+  it('returns session 1 in the first year and 2 in the second', () => {
+    expect(currentSessionFor(119, new Date('2025-06-01T00:00:00Z'))).toBe(1);
+    expect(currentSessionFor(119, new Date('2026-11-03T00:00:00Z'))).toBe(2);
+  });
+
+  it('clamps dates outside the congress', () => {
+    expect(currentSessionFor(119, new Date('2024-12-31T00:00:00Z'))).toBe(1);
+    expect(currentSessionFor(118, new Date('2026-01-01T00:00:00Z'))).toBe(2);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// normalizeHouseVoteApi
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('normalizeHouseVoteApi', () => {
+  const item: HouseVoteApiItem = {
+    congress: 119,
+    identifier: 1192202674,
+    legislationNumber: '1075',
+    legislationType: 'HRES',
+    legislationUrl: 'https://www.congress.gov/bill/119/house-resolution/1075',
+    result: 'Passed',
+    rollCallNumber: 74,
+    sessionNumber: 2,
+    sourceDataURL: 'https://clerk.house.gov/evs/2026/roll074.xml',
+    startDate: '2026-02-24T14:18:00-05:00',
+    updateDate: '2026-02-25T14:09:11-05:00',
+    voteType: 'Recorded Vote',
+  };
+  const memberVotes: HouseVoteApiMemberVote[] = [
+    { bioguideID: 'A000055', firstName: 'Robert', lastName: 'Aderholt', voteCast: 'Yea', voteParty: 'R', voteState: 'AL' },
+    { bioguideID: 'A000148', firstName: 'Jake', lastName: 'Auchincloss', voteCast: 'Nay', voteParty: 'D', voteState: 'MA' },
+    { bioguideID: 'A000369', firstName: 'Mark', lastName: 'Amodei', voteCast: 'Present', voteParty: 'R', voteState: 'NV' },
+    { bioguideID: 'B000001', firstName: 'Pat', lastName: 'Absent', voteCast: 'Not Voting', voteParty: 'D', voteState: 'CA' },
+    { bioguideID: 'C000001', firstName: 'Chris', lastName: 'Aye', voteCast: 'Aye', voteParty: 'R', voteState: 'TX' },
+    { bioguideID: 'D000001', firstName: 'Dana', lastName: 'No', voteCast: 'No', voteParty: 'D', voteState: 'NY' },
+  ];
+
+  it('maps identity, date, result and session', () => {
+    const event = normalizeHouseVoteApi(item, memberVotes);
+    expect(event.sourceId).toBe('house-119-2-74');
+    expect(event.chamber).toBe('house');
+    expect(event.congress).toBe(119);
+    expect(event.session).toBe(2);
+    expect(event.rollCallNumber).toBe(74);
+    expect(event.voteDate).toBe('2026-02-24T14:18:00-05:00');
+    expect(event.result).toBe('Passed');
+    expect(event.question).toBe('Recorded Vote');
+  });
+
+  it('tallies counts from member positions, including Aye/No synonyms', () => {
+    const event = normalizeHouseVoteApi(item, memberVotes);
+    expect(event.yeaCount).toBe(2);
+    expect(event.nayCount).toBe(2);
+    expect(event.abstainCount).toBe(1);
+    expect(event.notVotingCount).toBe(1);
+    expect(event.members).toHaveLength(6);
+    expect(event.members[0]).toEqual({
+      bioguideId: 'A000055',
+      firstName: 'Robert',
+      lastName: 'Aderholt',
+      party: 'R',
+      state: 'AL',
+      votePosition: 'Yea',
+    });
+  });
+
+  it('links the vote to its bill', () => {
+    expect(normalizeHouseVoteApi(item, []).billIdentifier).toEqual({ type: 'HRES', number: '1075', congress: 119 });
+    expect(normalizeHouseVoteApi({ ...item, legislationType: 'hr', legislationNumber: ' 42 ' }, []).billIdentifier)
+      .toEqual({ type: 'HR', number: '42', congress: 119 });
+  });
+
+  it('leaves billIdentifier undefined for quorum calls and unknown types', () => {
+    const { legislationNumber: _n, legislationType: _t, ...quorum } = item;
+    expect(normalizeHouseVoteApi(quorum, []).billIdentifier).toBeUndefined();
+    expect(normalizeHouseVoteApi({ ...item, legislationType: 'PN' }, []).billIdentifier).toBeUndefined();
+    expect(normalizeHouseVoteApi({ ...item, legislationNumber: 'abc' }, []).billIdentifier).toBeUndefined();
+  });
+
+  it('prefers an explicit vote question over the vote type', () => {
+    expect(normalizeHouseVoteApi({ ...item, voteQuestion: 'On Passage' }, []).question).toBe('On Passage');
+  });
+
+  it('treats a missing voteCast as not voting', () => {
+    const event = normalizeHouseVoteApi(item, [{ bioguideID: 'X000001' }]);
+    expect(event.notVotingCount).toBe(1);
+    expect(event.members[0]?.votePosition).toBe('Not Voting');
   });
 });
