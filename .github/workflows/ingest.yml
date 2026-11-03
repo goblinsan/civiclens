@@ -1,0 +1,143 @@
+name: Ingest Congress data
+
+# Runs the ingest job (jobs/ingest-congress) against the production database.
+#
+# Needs two repository secrets (Settings → Secrets and variables → Actions):
+#   DATABASE_URL       PostgreSQL connection string (include ?sslmode=require for hosted DBs)
+#   CONGRESS_API_KEY   from https://api.congress.gov/sign-up/
+#
+# Migrations are applied before every run, so a brand-new database works.
+# Closes #20 (scheduled ingestion runner).
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_bills:
+        description: 'Max bills to fetch (0 = no cap; a full congress is ~15k bills and takes hours)'
+        default: '100'
+        type: string
+      max_votes:
+        description: 'Max roll-call votes per chamber (0 = no cap)'
+        default: '25'
+        type: string
+      sync_since:
+        description: 'Only bills updated after this ISO-8601 datetime (blank = no filter)'
+        default: ''
+        type: string
+      congress:
+        description: 'Congress number'
+        default: '119'
+        type: string
+  schedule:
+    # Every 6 hours (see docs/data-ingestion.md → refresh cadence). Scheduled
+    # runs are incremental: bills updated in the last 7 days, no bill cap.
+    - cron: '17 */6 * * *'
+
+concurrency:
+  group: ingest-congress
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    name: Migrate + ingest
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      CONGRESS_API_KEY: ${{ secrets.CONGRESS_API_KEY }}
+
+    steps:
+      - name: Check secrets
+        run: |
+          missing=""
+          [ -z "$DATABASE_URL" ] && missing="$missing DATABASE_URL"
+          [ -z "$CONGRESS_API_KEY" ] && missing="$missing CONGRESS_API_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secret(s):$missing — add them under Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations
+        run: pnpm db:migrate
+
+      - name: Resolve run parameters
+        id: params
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "max_bills=${{ inputs.max_bills }}"   >> "$GITHUB_OUTPUT"
+            echo "max_votes=${{ inputs.max_votes }}"   >> "$GITHUB_OUTPUT"
+            echo "sync_since=${{ inputs.sync_since }}" >> "$GITHUB_OUTPUT"
+            echo "congress=${{ inputs.congress }}"     >> "$GITHUB_OUTPUT"
+          else
+            echo "max_bills=0"                                      >> "$GITHUB_OUTPUT"
+            echo "max_votes=100"                                    >> "$GITHUB_OUTPUT"
+            echo "sync_since=$(date -u -d '-7 days' +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+            echo "congress=119"                                     >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run ingest job
+        env:
+          CONGRESS: ${{ steps.params.outputs.congress }}
+          MAX_BILLS: ${{ steps.params.outputs.max_bills }}
+          MAX_VOTES: ${{ steps.params.outputs.max_votes }}
+          SYNC_SINCE: ${{ steps.params.outputs.sync_since }}
+          LOG_LEVEL: info
+        run: |
+          # The job reads SYNC_SINCE only when set; an empty string must be unset.
+          [ -z "$SYNC_SINCE" ] && unset SYNC_SINCE
+          pnpm --filter @civreveal/ingest-congress dev 2>&1 | tee ingest.log
+
+      - name: Write run summary
+        if: always()
+        run: |
+          {
+            echo "## Ingest run — congress ${{ steps.params.outputs.congress }}"
+            echo
+            echo "| Parameter | Value |"
+            echo "|---|---|"
+            echo "| MAX_BILLS | ${{ steps.params.outputs.max_bills }} |"
+            echo "| MAX_VOTES | ${{ steps.params.outputs.max_votes }} |"
+            echo "| SYNC_SINCE | ${{ steps.params.outputs.sync_since || '(none)' }} |"
+            echo
+            done_line=$(grep -F '"msg":"ingest-congress complete"' ingest.log | tail -1 || true)
+            if [ -z "$done_line" ]; then
+              echo "**The job did not reach completion.** Check the log above."
+              echo
+              echo '```'
+              grep -E '"level":"(error|fatal)"' ingest.log | tail -20 || true
+              echo '```'
+            else
+              echo "Duration: $(echo "$done_line" | jq -r '.durationMs / 1000 | floor')s"
+              echo
+              echo "| Entity | Inserted | Updated | Skipped | Failed |"
+              echo "|---|---|---|---|---|"
+              for k in members bills senateVotes houseVotes; do
+                echo "$done_line" | jq -r --arg k "$k" '.[$k] | "| \($k) | \(.inserted) | \(.updated) | \(.skipped) | \(.failed) |"'
+              done
+              echo
+              echo "### Policy tagging coverage"
+              echo
+              echo "$done_line" | jq -r '.bills | "- Tagged: **\(.tagged)**\n- Untagged (no tag applies): **\(.untagged)**\n- Unknown policy areas: **\(.unknownPolicyAreas | length)**"'
+              unknown=$(echo "$done_line" | jq -r '.bills.unknownPolicyAreas[]?' || true)
+              if [ -n "$unknown" ]; then
+                echo
+                echo "⚠️ Policy area terms outside the known CRS list — review \`jobs/ingest-congress/src/tagging.ts\`:"
+                echo
+                echo "$unknown" | sed 's/^/- /'
+              fi
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

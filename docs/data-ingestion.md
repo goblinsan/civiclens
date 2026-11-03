@@ -107,12 +107,12 @@ pattern matching (see `normalize.ts → normalizeBillStatus`):
 | Senate votes | Every 6 hours during session | Senate may vote on multiple days per week |
 | House votes | Every 6 hours during session | House may have 50–300 roll-calls per day during intensive periods |
 
-For production deployment, run the job via a cron scheduler (e.g., GitHub
-Actions `schedule`, Kubernetes CronJob, or AWS EventBridge) using:
-
-```bash
-CONGRESS_API_KEY=... DATABASE_URL=... node dist/index.js
-```
+In production the job runs on GitHub Actions
+(`.github/workflows/ingest.yml`): every 6 hours as an incremental sync of bills
+updated in the last 7 days, and on demand via **Actions → Ingest Congress data
+→ Run workflow** with caps and a `SYNC_SINCE` cutoff as inputs. It applies
+pending migrations first and writes a tagging-coverage summary to the run page.
+It needs the `DATABASE_URL` and `CONGRESS_API_KEY` repository secrets.
 
 ---
 

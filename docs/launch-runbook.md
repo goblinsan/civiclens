@@ -117,8 +117,20 @@ curl http://localhost:3001/ready
 
 ## 4. Starting the Ingestion Job
 
-The ingestion job is a one-shot script — run it on a schedule (e.g. daily cron)
-or manually to seed initial data.
+The ingestion job is a one-shot script. In production it runs on GitHub
+Actions (`.github/workflows/ingest.yml`), which applies migrations first:
+
+1. Add the repository secrets `DATABASE_URL` and `CONGRESS_API_KEY`
+   (Settings → Secrets and variables → Actions).
+2. **Actions → Ingest Congress data → Run workflow.** The defaults cap the
+   first run (100 bills, 25 votes per chamber) so you can confirm the pipeline
+   before a full backfill. Set `max_bills` to `0` for a full sync (hours).
+3. Read the run summary on the workflow run page: per-entity counts plus
+   tagging coverage (`tagged` / `untagged` / unknown policy areas).
+
+After that it runs itself every 6 hours as an incremental sync.
+
+To run it by hand instead:
 
 The job reads its configuration from environment variables (it does not load a
 `.env` file itself). Export them, then run it through `tsx` so the workspace
