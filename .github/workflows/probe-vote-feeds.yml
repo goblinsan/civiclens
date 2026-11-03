@@ -3,7 +3,8 @@ name: Probe vote feeds (temporary)
 # Sends only honest User-Agents: the default Node one we send today, and an
 # identifying project UA with a contact URL.
 on:
-  workflow_dispatch:
+  push:
+    branches: ['claude/quirky-ritchie-d6inud']
 
 jobs:
   probe:
