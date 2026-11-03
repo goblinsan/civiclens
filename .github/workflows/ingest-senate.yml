@@ -89,6 +89,7 @@ jobs:
       - name: Run Senate ingest step
         env:
           INGEST_STEPS: senate
+          BOT_SIGNING_KEY: ${{ secrets.BOT_SIGNING_KEY }}
           CONGRESS: ${{ steps.params.outputs.congress }}
           MAX_VOTES: ${{ steps.params.outputs.max_votes }}
           LOG_LEVEL: info

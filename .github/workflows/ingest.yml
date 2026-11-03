@@ -28,6 +28,10 @@ on:
         description: 'Congress number'
         default: '119'
         type: string
+      steps:
+        description: 'Steps to run (comma list of members,bills,senate,house). Include senate only once CivRevealBot is recognised by senate.gov'
+        default: 'members,bills,house'
+        type: string
   schedule:
     # Every 6 hours (see docs/data-ingestion.md → refresh cadence). Scheduled
     # runs are incremental: bills updated in the last 7 days, no bill cap.
@@ -95,18 +99,22 @@ jobs:
             echo "max_votes=${{ inputs.max_votes }}"   >> "$GITHUB_OUTPUT"
             echo "sync_since=${{ inputs.sync_since }}" >> "$GITHUB_OUTPUT"
             echo "congress=${{ inputs.congress }}"     >> "$GITHUB_OUTPUT"
+            echo "steps=${{ inputs.steps }}"           >> "$GITHUB_OUTPUT"
           else
             echo "max_bills=0"                                      >> "$GITHUB_OUTPUT"
             echo "max_votes=100"                                    >> "$GITHUB_OUTPUT"
             echo "sync_since=$(date -u -d '-7 days' +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
             echo "congress=119"                                     >> "$GITHUB_OUTPUT"
+            echo "steps=members,bills,house"                        >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run ingest job
         env:
-          # Senate roll-calls cannot be fetched from cloud IP ranges; they run
-          # on the self-hosted workflow (ingest-senate.yml).
-          INGEST_STEPS: members,bills,house
+          # Senate roll-calls are excluded by default: senate.gov refuses cloud
+          # IP ranges until CivRevealBot is recognised there (see docs/bot.md).
+          # Meanwhile they run on the self-hosted workflow (ingest-senate.yml).
+          INGEST_STEPS: ${{ steps.params.outputs.steps }}
+          BOT_SIGNING_KEY: ${{ secrets.BOT_SIGNING_KEY }}
           CONGRESS: ${{ steps.params.outputs.congress }}
           MAX_BILLS: ${{ steps.params.outputs.max_bills }}
           MAX_VOTES: ${{ steps.params.outputs.max_votes }}

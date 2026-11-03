@@ -21,24 +21,32 @@
 import { XMLParser } from 'fast-xml-parser';
 import type { Logger } from './logger.js';
 import type { CongressVoteEvent, CongressVoteMember } from './normalize.js';
+import { USER_AGENT } from './user-agent.js';
+import { signRequest } from './http-signature.js';
+import type { BotSigner } from './http-signature.js';
 
 const SENATE_BASE = 'https://www.senate.gov/legislative/LIS';
 /** Abort any single request that has not completed within this time. */
 const REQUEST_TIMEOUT_MS = 30_000;
 
-/** Identify ourselves honestly to the upstream server. */
-const USER_AGENT = 'CivReveal/0.1 (civic transparency project; +https://github.com/goblinsan/civiclens)';
+/** Builds the headers for one request; lets the client add a per-request signature. */
+type HeadersFor = (url: string) => Record<string, string>;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchText(url: string, logger: Logger, maxRetries = 3): Promise<string> {
+async function fetchText(
+  url: string,
+  logger: Logger,
+  headersFor: HeadersFor,
+  maxRetries = 3,
+): Promise<string> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const response = await fetch(url, {
-        headers: { 'User-Agent': USER_AGENT, Accept: '*/*' },
+        headers: headersFor(url),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
       if (response.ok) return await response.text();
@@ -125,11 +133,12 @@ async function fetchSenateVoteList(
   congress: number,
   session: number,
   logger: Logger,
+  headersFor: HeadersFor,
 ): Promise<number[]> {
   const url = `${SENATE_BASE}/roll_call_lists/vote_menu_${congress}_${session}.xml`;
   logger.debug('fetching senate vote list', { congress, session, url });
 
-  const xml = await fetchText(url, logger);
+  const xml = await fetchText(url, logger, headersFor);
   const parsed = xmlParser.parse(xml) as {
     vote_summary?: { votes?: { vote?: SenateVoteMenuItem[] } };
   };
@@ -149,6 +158,7 @@ async function fetchSenateVoteDetail(
   session: number,
   rollCallNumber: number,
   logger: Logger,
+  headersFor: HeadersFor,
 ): Promise<CongressVoteEvent | null> {
   const paddedNum = String(rollCallNumber).padStart(5, '0');
   const url =
@@ -158,7 +168,7 @@ async function fetchSenateVoteDetail(
 
   let xml: string;
   try {
-    xml = await fetchText(url, logger);
+    xml = await fetchText(url, logger, headersFor);
   } catch (err) {
     logger.warn('senate vote detail not found', { rollCallNumber, err: String(err) });
     return null;
@@ -224,7 +234,31 @@ export interface FetchVotesOptions {
   requestDelayMs?: number | undefined;
 }
 
-export function createVoteClient(logger: Logger) {
+export interface VoteClientOptions {
+  /**
+   * When set, every request carries Web Bot Auth headers (RFC 9421 signature
+   * over @authority + signature-agent) so a bot-management vendor can verify
+   * the request against the key published under `signatureAgent`.
+   */
+  signer?: BotSigner | undefined;
+  /** Origin that serves the key directory, e.g. https://civreveal.org. */
+  signatureAgent?: string | undefined;
+}
+
+export function createVoteClient(logger: Logger, options: VoteClientOptions = {}) {
+  const { signer, signatureAgent } = options;
+  if (signer && !signatureAgent) {
+    throw new Error('createVoteClient: signatureAgent is required when a signer is set');
+  }
+
+  const headersFor: HeadersFor = (url) => {
+    const headers: Record<string, string> = { 'User-Agent': USER_AGENT, Accept: '*/*' };
+    if (signer && signatureAgent) {
+      Object.assign(headers, signRequest(signer, { authority: new URL(url).host, signatureAgent }));
+    }
+    return headers;
+  };
+
   /**
    * Fetch Senate roll-call votes for the given congress and session.
    * Returns vote events with member-level positions.
@@ -241,7 +275,7 @@ export function createVoteClient(logger: Logger) {
     const { fromRollCallNumber = 1, maxVotes = 0, requestDelayMs = 300 } = options;
     const events: CongressVoteEvent[] = [];
 
-    const allNumbers = await fetchSenateVoteList(congress, session, logger);
+    const allNumbers = await fetchSenateVoteList(congress, session, logger, headersFor);
 
     const numbers = allNumbers.filter((n) => n >= fromRollCallNumber);
     const toFetch = maxVotes > 0 ? numbers.slice(-maxVotes) : numbers;
@@ -254,7 +288,7 @@ export function createVoteClient(logger: Logger) {
     });
 
     for (const num of toFetch) {
-      const event = await fetchSenateVoteDetail(congress, session, num, logger);
+      const event = await fetchSenateVoteDetail(congress, session, num, logger, headersFor);
       if (event) events.push(event);
       await sleep(requestDelayMs);
     }

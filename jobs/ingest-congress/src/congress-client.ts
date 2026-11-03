@@ -9,6 +9,7 @@
 
 import type { Logger } from './logger.js';
 import { normalizeHouseVoteApi } from './normalize.js';
+import { USER_AGENT } from './user-agent.js';
 import type {
   CongressBillSummary,
   CongressMemberSummary,
@@ -42,7 +43,10 @@ async function fetchWithRetry(
   let lastError: unknown;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+      const response = await fetch(url, {
+        headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
 
       if (response.ok) return response;
 

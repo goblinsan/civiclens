@@ -168,6 +168,42 @@ key should also stay off GitHub-hosted runners), set `INGEST_STEPS` to the full
 list and give the job `CONGRESS_API_KEY`; `INGEST_STEPS` accepts any comma
 list of `members,bills,senate,house`.
 
+### Getting CivRevealBot recognised by senate.gov (Akamai)
+
+The Senate webmaster's guidance is to register the bot with Akamai's
+"Known/Recognized bots" programme at
+<https://www.akamai.com/lp/bot-agent-registration>. Once accepted, the hosted
+workflow can fetch senate.gov directly (run **Ingest Congress data** with
+`steps` = `members,bills,senate,house`, then make that the default) and the
+self-hosted runner becomes a fallback.
+
+The bot identifies itself as `CivRevealBot/1.0 (+https://civreveal.org/bot)`
+(`jobs/ingest-congress/src/user-agent.ts`) and signs senate.gov requests with
+Web Bot Auth (RFC 9421 Ed25519 signatures) so Akamai can verify it by key
+rather than by IP. See `docs/bot.md` for the public description.
+
+One-time setup:
+
+1. Generate the signing key and publish the public half — see `site/README.md`
+   (`scripts/bot-keys.mjs`). Add the private key as the `BOT_SIGNING_KEY`
+   repository secret; both ingest workflows pass it to the job, which signs
+   only when it is present.
+2. Deploy `site/` to Cloudflare Pages at `civreveal.org` so
+   <https://civreveal.org/bot> and the key directory resolve.
+3. Submit the Akamai form:
+   - **Operator identity**: CivReveal (open-source civic project) and your name
+   - **Bot/agent name**: `CivRevealBot/1.0` — User-Agent exactly as above
+   - **Purpose**: fetches public roll-call vote XML from senate.gov a few
+     times a day at a low, sequential rate for a non-partisan voting-record site
+   - **Verification**: Web Bot Auth key directory
+     `https://civreveal.org/.well-known/http-message-signatures-directory`
+     (keyid printed by `bot-keys.mjs`), bot page `https://civreveal.org/bot`,
+     source `https://github.com/goblinsan/civiclens`; IP ranges are not stable
+     (GitHub-hosted runners), which is why the key-based method is offered
+   - **Category**: the closest research / civic-data option; not an AI bot
+4. After acceptance, run the hosted workflow with the Senate step included
+   and confirm Senate roll-calls are inserted.
+
 To run it by hand instead:
 
 The job reads its configuration from environment variables (it does not load a
