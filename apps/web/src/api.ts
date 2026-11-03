@@ -35,7 +35,25 @@ export interface BillSummary {
   sponsor_last_name: string;
   introduced_at: string;
   updated_at: string;
+  /** CivReveal policy tag slugs (derived from the official classification, or manual). */
   tags: string[];
+  /** Official CRS policy area term from Congress.gov, if assigned. */
+  policy_area: string | null;
+  /** Official CRS legislative subject terms from Congress.gov. */
+  subjects: string[];
+}
+
+export type BillTagSource = 'manual' | 'policy-area' | 'subject';
+
+export interface BillTagDetail {
+  slug: string;
+  source: BillTagSource;
+  /** The official term that produced this tag; null for manual tags. */
+  matched_on: string | null;
+}
+
+export interface BillDetail extends BillSummary {
+  tag_details: BillTagDetail[];
 }
 
 export interface PoliticianSummary {
@@ -114,7 +132,7 @@ export function listBills(params: {
   return fetchJson(`${BASE}/bills${buildQuery(params)}`);
 }
 
-export function getBill(id: string): Promise<BillSummary> {
+export function getBill(id: string): Promise<BillDetail> {
   return fetchJson(`${BASE}/bills/${id}`);
 }
 

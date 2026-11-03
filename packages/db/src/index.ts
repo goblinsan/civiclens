@@ -6,6 +6,8 @@ export type {
   OfficeRow,
   PoliticianRow,
   BillRow,
+  BillTagRow,
+  BillTagSource,
   BillVersionRow,
   PolicyTagRow,
   VoteRow,

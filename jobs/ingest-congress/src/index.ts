@@ -26,11 +26,13 @@ import {
   normalizeBill,
   normalizeVoteEvent,
 } from './normalize.js';
+import { deriveTags, isKnownPolicyArea } from './tagging.js';
 import {
   upsertPolitician,
   upsertBill,
   upsertVote,
   upsertVoteRecord,
+  replaceDerivedBillTags,
   saveRawPayload,
   findPoliticianId,
   findBillId,
@@ -75,6 +77,17 @@ interface IngestStats {
   skipped: number;
   failed: number;
 }
+
+interface BillIngestStats extends IngestStats {
+  /** Bills that received at least one derived policy tag. */
+  tagged: number;
+  /** Bills whose official classification mapped to no tag (they won't affect scores). */
+  untagged: number;
+  /** Policy area terms seen that are not in the controlled CRS list — worth a look. */
+  unknownPolicyAreas: string[];
+}
+
+const emptyStats = (): IngestStats => ({ inserted: 0, updated: 0, skipped: 0, failed: 0 });
 
 /**
  * Ingest all current congressional members.
@@ -123,6 +136,10 @@ async function ingestMembers(
 /**
  * Ingest bills for the given congress, optionally filtered by update date.
  * Bills are upserted by (congress, bill_type, bill_number).
+ *
+ * After each upsert the bill's policy tags are re-derived from its official
+ * CRS classification (see tagging.ts / docs/bill-tagging.md). Manual tags are
+ * preserved.
  */
 async function ingestBills(
   pool: DbPool,
@@ -130,8 +147,9 @@ async function ingestBills(
   logger: Logger,
   congress: number,
   options: { updatedSince?: string | undefined; maxRecords?: number | undefined } = {},
-): Promise<IngestStats> {
-  const stats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
+): Promise<BillIngestStats> {
+  const stats: BillIngestStats = { ...emptyStats(), tagged: 0, untagged: 0, unknownPolicyAreas: [] };
+  const unknownPolicyAreas = new Set<string>();
 
   const rawBills = await client.fetchBills(congress, {
     ...(options.updatedSince !== undefined && { updatedSince: options.updatedSince }),
@@ -178,7 +196,23 @@ async function ingestBills(
         raw,
       );
       const existingId = await findBillId(pool, bill.congress, bill.billType, bill.billNumber);
-      await upsertBill(pool, bill, sponsorId);
+      const billId = await upsertBill(pool, bill, sponsorId);
+
+      // ── Derive policy tags from the official classification ───────────────
+      if (bill.policyArea && !isKnownPolicyArea(bill.policyArea)) {
+        unknownPolicyAreas.add(bill.policyArea);
+      }
+      const derivedTags = deriveTags({ policyArea: bill.policyArea, subjects: bill.subjects });
+      await replaceDerivedBillTags(pool, billId, derivedTags);
+      if (derivedTags.length > 0) stats.tagged++;
+      else stats.untagged++;
+
+      logger.debug('bill tagged', {
+        billType: bill.billType,
+        billNumber: bill.billNumber,
+        policyArea: bill.policyArea,
+        tags: derivedTags.map((t) => `${t.tag}<-${t.source}:${t.matchedOn}`),
+      });
 
       if (existingId) {
         if (changed) stats.updated++;
@@ -195,6 +229,13 @@ async function ingestBills(
       });
       stats.failed++;
     }
+  }
+
+  stats.unknownPolicyAreas = [...unknownPolicyAreas].sort();
+  if (stats.unknownPolicyAreas.length > 0) {
+    logger.warn('policy area terms outside the known CRS list — review tagging.ts', {
+      unknownPolicyAreas: stats.unknownPolicyAreas,
+    });
   }
 
   return stats;
@@ -373,10 +414,10 @@ async function main(): Promise<void> {
   const congressClient = createCongressClient(env.CONGRESS_API_KEY, logger);
   const voteClient = createVoteClient(logger);
 
-  let memberStats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
-  let billStats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
-  let senateVoteStats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
-  let houseVoteStats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
+  let memberStats: IngestStats = emptyStats();
+  let billStats: BillIngestStats = { ...emptyStats(), tagged: 0, untagged: 0, unknownPolicyAreas: [] };
+  let senateVoteStats: IngestStats = emptyStats();
+  let houseVoteStats: IngestStats = emptyStats();
 
   // ── 1. Ingest members ─────────────────────────────────────────────────────
   try {

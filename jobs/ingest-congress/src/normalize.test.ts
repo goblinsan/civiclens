@@ -223,6 +223,39 @@ describe('normalizeBill', () => {
     };
     expect(normalizeBill(raw).introducedAt).toEqual(new Date('2023-05-01'));
   });
+
+  it('defaults classification to null / empty when absent', () => {
+    const result = normalizeBill(rawBill);
+    expect(result.policyArea).toBeNull();
+    expect(result.subjects).toEqual([]);
+  });
+
+  it('carries the official policy area and subject terms through', () => {
+    const raw: CongressBillSummary = {
+      ...rawBill,
+      policyArea: { name: 'Health' },
+      legislativeSubjects: ['Medicaid', 'Health care coverage and access'],
+    };
+    const result = normalizeBill(raw);
+    expect(result.policyArea).toBe('Health');
+    expect(result.subjects).toEqual(['Medicaid', 'Health care coverage and access']);
+  });
+
+  it('trims, drops blanks and de-duplicates subject terms', () => {
+    const raw: CongressBillSummary = {
+      ...rawBill,
+      policyArea: { name: '  Health  ' },
+      legislativeSubjects: [' Medicaid ', '', 'Medicaid', '   '],
+    };
+    const result = normalizeBill(raw);
+    expect(result.policyArea).toBe('Health');
+    expect(result.subjects).toEqual(['Medicaid']);
+  });
+
+  it('treats a blank policy area name as unassigned', () => {
+    const raw: CongressBillSummary = { ...rawBill, policyArea: { name: '   ' } };
+    expect(normalizeBill(raw).policyArea).toBeNull();
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

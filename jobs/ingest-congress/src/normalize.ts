@@ -59,6 +59,12 @@ export interface CongressBillSummary {
   introducedDate?: string | undefined;
   sponsors?: CongressBillSponsor[] | undefined;
   summaryText?: string | null | undefined;
+  /** Official CRS policy area term (one per bill). */
+  policyArea?: { name?: string | undefined } | undefined;
+  /** Count + referrer URL only; the names come from the /subjects endpoint. */
+  subjects?: { count?: number | undefined; url?: string | undefined } | undefined;
+  /** Official CRS legislative subject names, pre-fetched from /subjects. */
+  legislativeSubjects?: readonly string[] | undefined;
 }
 
 export interface CongressVoteMember {
@@ -113,6 +119,10 @@ export interface NormalizedBill {
   status: BillStatus;
   sponsorBioguideId: string;
   introducedAt: Date;
+  /** Official CRS policy area term, or null when Congress.gov has not assigned one yet. */
+  policyArea: string | null;
+  /** Official CRS legislative subject terms (trimmed, de-duplicated, order preserved). */
+  subjects: string[];
 }
 
 export interface NormalizedVote {
@@ -279,6 +289,11 @@ export function normalizeBill(raw: CongressBillSummary): NormalizedBill {
       ? new Date(raw.latestAction.actionDate)
       : new Date(0);
 
+  const policyArea = raw.policyArea?.name?.trim() || null;
+  const subjects = [
+    ...new Set((raw.legislativeSubjects ?? []).map((s) => s.trim()).filter((s) => s.length > 0)),
+  ];
+
   return {
     congress: raw.congress,
     billType: raw.type.toUpperCase(),
@@ -288,6 +303,8 @@ export function normalizeBill(raw: CongressBillSummary): NormalizedBill {
     status: normalizeBillStatus(latestActionText),
     sponsorBioguideId: sponsor?.bioguideId ?? '',
     introducedAt,
+    policyArea,
+    subjects,
   };
 }
 

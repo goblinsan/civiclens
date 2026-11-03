@@ -44,7 +44,14 @@ re-running with earlier values and clearing `SYNC_SINCE`.
 - All bills updated since `SYNC_SINCE` (defaults to fetching recent updates).
 - Bill types: HR, S, HJRES, SJRES, HCONRES, SCONRES, HRES, SRES.
 - Fields: congress, type, number, title, status (normalised to 8-value canonical
-  enum), sponsor bioguide ID, introduced date, and latest plain-text summary.
+  enum), sponsor bioguide ID, introduced date, latest plain-text summary, and
+  the official CRS classification: policy area (`policy_area`) and legislative
+  subject terms (`subjects`).
+- Three requests per bill: detail, `/summaries`, `/subjects`. The latter two are
+  best-effort; the bill is still stored if they fail.
+- **Policy tags** (`bill_tags`) are derived from the official classification on
+  every run using the public mapping in [bill-tagging.md](./bill-tagging.md).
+  Tags with `source = 'manual'` are preserved; all others are recomputed.
 - **Not covered at MVP**: full bill text, co-sponsors, committee referrals, CBO
   cost estimates, related bills, amendment tracking.
 

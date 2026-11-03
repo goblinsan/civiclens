@@ -3,22 +3,9 @@ import { Link } from 'react-router-dom';
 import { getMatches } from '../api';
 import type { MatchResult } from '../api';
 import { track } from '../analytics';
+import { TAG_LABELS } from '../tagLabels';
 
 const SESSION_KEY = 'civreveal_session_id';
-
-/** Labels for each policy tag. */
-const TAG_LABELS: Record<string, string> = {
-  healthcare:       'Healthcare',
-  education:        'Education',
-  environment:      'Environment',
-  economy:          'Economy',
-  defense:          'Defense',
-  immigration:      'Immigration',
-  housing:          'Housing',
-  infrastructure:   'Infrastructure',
-  'civil-rights':   'Civil Rights',
-  'foreign-policy': 'Foreign Policy',
-};
 
 function ScoreBar({ score }: { score: number }) {
   const pct = Math.round(score);
