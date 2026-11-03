@@ -1,0 +1,5 @@
+/.well-known/http-message-signatures-directory
+  Content-Type: application/http-message-signatures-directory+json
+  Cache-Control: public, max-age=86400
+  Signature-Input: binding0=("@authority");created=1793742196;keyid="iOn7cedR2yqjsPEAMQLBHlbkW9gePaFdbFr1OGb2TjU";alg="ed25519";expires=1825278196;tag="http-message-signatures-directory"
+  Signature: binding0=:wxWmkkxDEkEQEiCZTN070vqrFJNkWXBbVhfzNfto/uuTd33D984EdgU6LuAP5Ycd9Ir5FfejNv+ceURAlwOcCg==:

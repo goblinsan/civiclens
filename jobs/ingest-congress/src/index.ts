@@ -14,6 +14,12 @@
  *   INGEST_STEPS       (optional) – comma list of members,bills,senate,house;
  *                                   default all. CONGRESS_API_KEY is only
  *                                   required when members, bills or house run.
+ *   BOT_SIGNING_KEY    (optional) – Ed25519 private key (PKCS#8 PEM). When set,
+ *                                   senate.gov requests carry Web Bot Auth
+ *                                   signatures verifiable against the key
+ *                                   directory at BOT_SIGNATURE_AGENT.
+ *   BOT_SIGNATURE_AGENT (optional) – origin serving the key directory,
+ *                                   default https://civreveal.org
  *   SYNC_SINCE         (optional) – ISO-8601 datetime; only fetch bills updated after this
  *   MAX_BILLS          (optional) – max bills to fetch per run (0 = no limit)
  *   MAX_VOTES          (optional) – max votes per chamber per run (0 = no limit)
@@ -30,15 +36,19 @@ import {
   normalizeBill,
   normalizeVoteEvent,
   currentSessionFor,
+  houseVoteSourceId,
+  parseDateOrNull,
 } from './normalize.js';
 import { deriveTags, isKnownPolicyArea } from './tagging.js';
 import { parseIngestSteps, stepsNeedApiKey } from './steps.js';
+import { createBotSigner } from './http-signature.js';
 import {
   upsertPolitician,
   upsertBill,
   upsertVote,
   upsertVoteRecords,
   loadPoliticianIdMap,
+  loadVoteSourceState,
   replaceDerivedBillTags,
   saveRawPayload,
   findPoliticianId,
@@ -65,6 +75,8 @@ const envSchema = z.object({
   MAX_VOTES: z.coerce.number().int().nonnegative().default(50),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
   INGEST_STEPS: z.string().optional(),
+  BOT_SIGNING_KEY: z.string().optional(),
+  BOT_SIGNATURE_AGENT: z.string().url().default('https://civreveal.org'),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -84,6 +96,16 @@ try {
 if (stepsNeedApiKey(steps) && !env.CONGRESS_API_KEY) {
   console.error('❌ CONGRESS_API_KEY is required when the members, bills or house steps run');
   process.exit(1);
+}
+
+let botSigner: ReturnType<typeof createBotSigner> | undefined;
+if (env.BOT_SIGNING_KEY) {
+  try {
+    botSigner = createBotSigner(env.BOT_SIGNING_KEY);
+  } catch (err) {
+    console.error('❌ BOT_SIGNING_KEY is not a valid Ed25519 PKCS#8 PEM key:', String(err));
+    process.exit(1);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -336,10 +358,20 @@ async function ingestHouseVotes(
 ): Promise<IngestStats> {
   const stats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
 
+  // Skip votes whose upstream updateDate matches what we already stored: no
+  // need to re-download ~100 KB of member positions for an unchanged record.
+  const stored = await loadVoteSourceState(pool, `house-${congress}-${session}-`);
   const events = await client.fetchHouseVotes(congress, session, {
     ...(options.maxVotes !== undefined && { maxVotes: options.maxVotes }),
+    skip: (item) => {
+      const known = stored.get(houseVoteSourceId(congress, session, item.rollCallNumber));
+      const upstream = parseDateOrNull(item.updateDate)?.getTime();
+      const unchanged = known !== undefined && known !== null && upstream !== undefined && known === upstream;
+      if (unchanged) stats.skipped++;
+      return unchanged;
+    },
   });
-  logger.info('house votes fetched', { session, count: events.length });
+  logger.info('house votes fetched', { session, count: events.length, unchanged: stats.skipped });
   const politicianIds = await loadPoliticianIdMap(pool);
 
   for (const event of events) {
@@ -395,6 +427,7 @@ async function main(): Promise<void> {
     congress: env.CONGRESS,
     steps: [...steps],
     sessions,
+    botSigning: botSigner ? { keyid: botSigner.keyid, signatureAgent: env.BOT_SIGNATURE_AGENT } : null,
     syncSince: env.SYNC_SINCE,
     maxBills: env.MAX_BILLS,
     maxVotes: env.MAX_VOTES,
@@ -419,7 +452,10 @@ async function main(): Promise<void> {
   // Bind jobId to all subsequent log entries for full run correlation.
   const logger = baseLogger.child({ jobId });
   const congressClient = createCongressClient(env.CONGRESS_API_KEY ?? '', logger);
-  const voteClient = createVoteClient(logger);
+  const voteClient = createVoteClient(logger, {
+    signer: botSigner,
+    signatureAgent: env.BOT_SIGNATURE_AGENT,
+  });
 
   let memberStats: IngestStats = emptyStats();
   let billStats: BillIngestStats = { ...emptyStats(), tagged: 0, untagged: 0, unknownPolicyAreas: [] };

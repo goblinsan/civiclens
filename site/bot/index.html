@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CivRevealBot</title>
+  <meta name="description" content="What CivRevealBot fetches, how often, and how to verify it.">
+  <style>
+    :root { color-scheme: light dark; --fg: #1f2328; --muted: #59636e; --bg: #ffffff; --line: #d0d7de; --accent: #1d4ed8; }
+    @media (prefers-color-scheme: dark) { :root { --fg: #e6edf3; --muted: #9da7b3; --bg: #0d1117; --line: #30363d; --accent: #79b8ff; } }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    main { max-width: 44rem; margin: 0 auto; padding: 2.5rem 1rem 4rem; }
+    h1 { font-size: 1.75rem; margin: 0 0 .25rem; }
+    .sub { color: var(--muted); margin: 0 0 2rem; }
+    h2 { font-size: 1.125rem; margin: 2rem 0 .5rem; padding-bottom: .25rem; border-bottom: 1px solid var(--line); }
+    code { font: 0.9em ui-monospace, SFMono-Regular, Menlo, monospace; background: color-mix(in srgb, var(--fg) 8%, transparent); padding: .1em .35em; border-radius: 4px; }
+    table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+    th, td { text-align: left; vertical-align: top; padding: .4rem .6rem .4rem 0; border-bottom: 1px solid var(--line); }
+    th { white-space: nowrap; width: 9rem; color: var(--muted); font-weight: 600; }
+    a { color: var(--accent); }
+    ul { padding-left: 1.25rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>CivRevealBot</h1>
+  <p class="sub">The automated client that collects public legislative records for <a href="https://civreveal.org">CivReveal</a>, an open-source, non-partisan project that shows how members of Congress vote, using official government records only.</p>
+
+  <h2>Identity</h2>
+  <table>
+    <tr><th>User-Agent</th><td><code>CivRevealBot/1.0 (+https://civreveal.org/bot)</code></td></tr>
+    <tr><th>Operator</th><td>CivReveal (open-source project)</td></tr>
+    <tr><th>Contact</th><td><a href="https://github.com/goblinsan/civiclens/issues">github.com/goblinsan/civiclens/issues</a></td></tr>
+    <tr><th>Source code</th><td><a href="https://github.com/goblinsan/civiclens">github.com/goblinsan/civiclens</a> (<code>jobs/ingest-congress</code>)</td></tr>
+  </table>
+
+  <h2>What it fetches</h2>
+  <table>
+    <tr><th>api.congress.gov</th><td><code>/v3/member</code>, <code>/v3/bill/…</code>, <code>/v3/house-vote/…</code> — members, bills, official bill classification, House roll-call votes; with an API key, under the Library of Congress's published terms.</td></tr>
+    <tr><th>www.senate.gov</th><td><code>/legislative/LIS/roll_call_lists/vote_menu_*.xml</code>, <code>/legislative/LIS/roll_call_votes/vote*/vote_*.xml</code> — Senate roll-call votes with each senator's position.</td></tr>
+  </table>
+  <p>It fetches only those documented paths. It does not crawl, follow links, submit forms, or request anything other than the records above.</p>
+
+  <h2>How much and how often</h2>
+  <ul>
+    <li>Scheduled every 6 hours. One run fetches at most a few hundred documents.</li>
+    <li>Requests are sequential with a pause of at least 200–300 ms between them; never parallel connections to the same host.</li>
+    <li>Unchanged documents are detected by checksum and not re-processed.</li>
+    <li>Fetched records are stored verbatim so every published figure can be traced back to its source document.</li>
+  </ul>
+
+  <h2>Verification (Web Bot Auth)</h2>
+  <p>Requests to senate.gov are signed with HTTP Message Signatures (RFC 9421, Ed25519) following the Web Bot Auth profile, so they can be verified without relying on source IP addresses.</p>
+  <ul>
+    <li><code>Signature-Agent: "https://civreveal.org"</code></li>
+    <li>The signature covers <code>@authority</code> and <code>signature-agent</code>, with <code>tag="web-bot-auth"</code>, a 5-minute validity window and a 64-byte nonce.</li>
+    <li><code>keyid</code> is the JWK thumbprint of the public key.</li>
+    <li>Public key directory: <a href="/.well-known/http-message-signatures-directory"><code>/.well-known/http-message-signatures-directory</code></a>, served with a <code>Signature</code> binding it to this origin.</li>
+  </ul>
+  <p>Where the bot runs from is deliberately not part of its identity: the signature is. It runs on GitHub Actions hosted runners and, for sources that refuse cloud-provider addresses, on a machine on a residential network.</p>
+
+  <h2>Robots and courtesy</h2>
+  <p>The bot requests specific document URLs rather than crawling, so <code>robots.txt</code> crawl rules are not the natural fit; it follows the spirit of them by staying within the documented paths and the rate above. If you operate one of the hosts above and want it to behave differently — slower, at particular times, or not at all — open an issue at the contact link and it will be changed.</p>
+</main>
+</body>
+</html>

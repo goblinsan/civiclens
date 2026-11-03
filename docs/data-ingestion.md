@@ -64,15 +64,22 @@ re-running with earlier values and clearing `SYNC_SINCE`.
   the date (`SESSION` overrides it), and a full backfill (`MAX_VOTES=0`) covers
   every session of the congress.
 - Up to `MAX_VOTES` most-recent vote details per chamber per run (default `50`).
-- **Senate votes run elsewhere.** senate.gov answers HTTP 403 to requests
-  from cloud-provider IP ranges (GitHub-hosted runners, Cloudflare Workers)
-  regardless of User-Agent; Congress.gov has no Senate vote endpoint; and
-  GovTrack's mirror of the same data sits behind a bot challenge. None of that
-  is circumvented. The Senate step runs on its own workflow
+- **Senate votes run elsewhere (for now).** senate.gov answers HTTP 403 to
+  requests from cloud-provider IP ranges (GitHub-hosted runners, Cloudflare
+  Workers) regardless of User-Agent; Congress.gov has no Senate vote endpoint;
+  and GovTrack's mirror of the same data sits behind a bot challenge. None of
+  that is circumvented. The Senate step runs on its own workflow
   (`ingest-senate.yml`, `INGEST_STEPS=senate`) on a self-hosted runner on a
   residential network — see the launch runbook. The hosted workflow skips the
-  Senate step; if it is ever run with the step enabled it records a
-  `fetch_failure` event rather than reporting success.
+  Senate step by default; if run with it enabled it records a `fetch_failure`
+  event rather than reporting success.
+- **Bot identity and signing.** Every request carries
+  `User-Agent: CivRevealBot/1.0 (+https://civreveal.org/bot)`. When the
+  `BOT_SIGNING_KEY` secret is set, senate.gov requests also carry Web Bot Auth
+  signatures (RFC 9421, Ed25519) verifiable against
+  `https://civreveal.org/.well-known/http-message-signatures-directory`; this
+  is the basis of the Akamai "recognised bot" registration the Senate
+  webmaster recommended (see the launch runbook and `docs/bot.md`).
 - Per-member positions stored as `yea / nay / abstain / not-voting`.
 - Votes are linked to a bill when the source XML identifies one; otherwise
   `bill_id` is `NULL`.
@@ -179,6 +186,8 @@ chamber per run (default `50`).
 | `CONGRESS` | — | `119` | Congress number to ingest |
 | `SESSION` | — | derived from the date | Restrict votes to one session (`1` or `2`); default walks every session up to the current one |
 | `INGEST_STEPS` | — | all | Comma list of `members,bills,senate,house`. `CONGRESS_API_KEY` is only required when members, bills or house run |
+| `BOT_SIGNING_KEY` | — | (unsigned) | Ed25519 private key, PKCS#8 PEM. Enables Web Bot Auth signatures on senate.gov requests |
+| `BOT_SIGNATURE_AGENT` | — | `https://civreveal.org` | Origin serving the bot's public key directory |
 | `SYNC_SINCE` | — | (none) | ISO-8601 datetime; bills updated after this are fetched |
 | `MAX_BILLS` | — | `0` (no limit) | Cap on bills fetched per run |
 | `MAX_VOTES` | — | `50` | Max votes per chamber per run |

@@ -91,6 +91,8 @@ export interface VoteRow {
   abstain_count: number;
   not_voting_count: number;
   source_id: string | null;
+  /** Upstream "last updated" timestamp (Congress.gov updateDate); NULL when the source has none. */
+  source_updated_at: Date | null;
   created_at: Date;
 }
 
