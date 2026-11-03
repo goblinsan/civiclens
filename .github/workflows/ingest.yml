@@ -47,8 +47,17 @@ jobs:
       CONGRESS_API_KEY: ${{ secrets.CONGRESS_API_KEY }}
 
     steps:
-      - name: Check secrets
+      - name: Normalise and check secrets
         run: |
+          # Tolerate values pasted with surrounding quotes or whitespace.
+          strip() { v="$1"; v="${v#"${v%%[![:space:]]*}"}"; v="${v%"${v##*[![:space:]]}"}"; v="${v#\"}"; v="${v%\"}"; v="${v#\'}"; v="${v%\'}"; printf '%s' "$v"; }
+          DATABASE_URL="$(strip "$DATABASE_URL")"
+          CONGRESS_API_KEY="$(strip "$CONGRESS_API_KEY")"
+          echo "::add-mask::$DATABASE_URL"
+          echo "::add-mask::$CONGRESS_API_KEY"
+          echo "DATABASE_URL=$DATABASE_URL"         >> "$GITHUB_ENV"
+          echo "CONGRESS_API_KEY=$CONGRESS_API_KEY" >> "$GITHUB_ENV"
+
           missing=""
           [ -z "$DATABASE_URL" ] && missing="$missing DATABASE_URL"
           [ -z "$CONGRESS_API_KEY" ] && missing="$missing CONGRESS_API_KEY"
@@ -56,6 +65,10 @@ jobs:
             echo "::error::Missing repository secret(s):$missing — add them under Settings → Secrets and variables → Actions"
             exit 1
           fi
+          case "$DATABASE_URL" in
+            postgres://*|postgresql://*) ;;
+            *) echo "::error::DATABASE_URL must start with postgres:// or postgresql:// (got a value starting with '${DATABASE_URL:0:12}')"; exit 1 ;;
+          esac
 
       - uses: actions/checkout@v4
 
