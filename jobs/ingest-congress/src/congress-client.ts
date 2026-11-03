@@ -22,6 +22,8 @@ const BASE_URL = 'https://api.congress.gov/v3';
 const REQUEST_DELAY_MS = 200;
 /** Maximum number of records per page (API maximum). */
 const PAGE_LIMIT = 250;
+/** Abort any single request that has not completed within this time. */
+const REQUEST_TIMEOUT_MS = 30_000;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Internal helpers
@@ -40,7 +42,7 @@ async function fetchWithRetry(
   let lastError: unknown;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
 
       if (response.ok) return response;
 
