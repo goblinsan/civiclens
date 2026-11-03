@@ -1,0 +1,40 @@
+name: Probe GovTrack mirror (temporary)
+# Temporary diagnostic — removed once the GovTrack Senate-vote source is wired up.
+on:
+  push:
+    branches: ['claude/quirky-ritchie-d6inud']
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe GovTrack bulk data
+        run: |
+          UA="CivReveal/0.1 (civic transparency project; +https://github.com/goblinsan/civiclens)"
+          probe() { # label url
+            code=$(curl -sS -o /tmp/body -w '%{http_code}' --max-time 25 -A "$UA" "$2" || echo ERR)
+            printf '%-40s %s  (%s bytes)\n' "$1" "$code" "$(wc -c < /tmp/body)"
+          }
+          echo "=== robots / terms ==="
+          probe "robots.txt" "https://www.govtrack.us/robots.txt"; head -c 600 /tmp/body; echo; echo
+          echo "=== directory listings ==="
+          probe "votes/2026/ listing" "https://www.govtrack.us/data/congress/119/votes/2026/"
+          echo "senate entries: $(grep -o 'href="s[0-9]*/"' /tmp/body | wc -l)   house entries: $(grep -o 'href="h[0-9]*/"' /tmp/body | wc -l)"
+          echo "max senate number: $(grep -o 'href="s[0-9]*/"' /tmp/body | grep -o '[0-9]*' | sort -n | tail -1)"
+          echo "listing head:"; head -c 500 /tmp/body; echo; echo
+          probe "votes/2025/ listing" "https://www.govtrack.us/data/congress/119/votes/2025/"
+          echo "senate entries: $(grep -o 'href="s[0-9]*/"' /tmp/body | wc -l)   max: $(grep -o 'href="s[0-9]*/"' /tmp/body | grep -o '[0-9]*' | sort -n | tail -1)"
+          echo
+          echo "=== a 2026 senate vote ==="
+          probe "2026/s1/data.json" "https://www.govtrack.us/data/congress/119/votes/2026/s1/data.json"
+          jq 'del(.votes) + {votes_keys: (.votes | keys), sample_voter: (.votes | to_entries[0].value[0])}' /tmp/body 2>/dev/null || head -c 1500 /tmp/body
+          echo
+          echo "=== most recent 2026 senate vote + freshness ==="
+          probe "votes/2026/ listing (again)" "https://www.govtrack.us/data/congress/119/votes/2026/"
+          last=$(grep -o 'href="s[0-9]*/"' /tmp/body | grep -o '[0-9]*' | sort -n | tail -1)
+          probe "2026/s$last/data.json" "https://www.govtrack.us/data/congress/119/votes/2026/s$last/data.json"
+          jq '{vote_id, date, updated_at, question, result, bill, source_url, n_yea: (.votes.Yea|length), n_nay: (.votes.Nay|length)}' /tmp/body 2>/dev/null || head -c 800 /tmp/body
+          echo
+          echo "=== a non-existent number → expect 404 ==="
+          probe "2026/s99999/data.json" "https://www.govtrack.us/data/congress/119/votes/2026/s99999/data.json"
