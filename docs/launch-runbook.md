@@ -120,17 +120,32 @@ curl http://localhost:3001/ready
 The ingestion job is a one-shot script — run it on a schedule (e.g. daily cron)
 or manually to seed initial data.
 
+The job reads its configuration from environment variables (it does not load a
+`.env` file itself). Export them, then run it through `tsx` so the workspace
+packages resolve from source:
+
 ```bash
 # From the monorepo root
-pnpm --filter @civreveal/ingest-congress start
+set -a; source .env; set +a
+pnpm --filter @civreveal/ingest-congress dev
 ```
 
-Or directly:
+> `pnpm --filter @civreveal/ingest-congress start` (plain `node dist/index.js`)
+> does not work today: the built output imports `@civreveal/db`, whose package
+> entry point is a `.ts` source file that Node cannot load.
+
+### First run
+
+A full sync of a congress is ~15k bills at three requests each, which takes
+hours and will hit the Congress.gov rate limit. Cap the first run and confirm
+the pipeline end-to-end before opening it up:
 
 ```bash
-cd jobs/ingest-congress
-node --env-file=../../.env dist/index.js
+set -a; source .env; set +a
+MAX_BILLS=100 MAX_VOTES=10 pnpm --filter @civreveal/ingest-congress dev
 ```
+
+Then widen (`SYNC_SINCE=<date>` for incremental runs, `MAX_BILLS=0` for no cap).
 
 The job logs structured JSON to stdout/stderr.  All log lines include a `jobId`
 field (the UUID of the `run_start` audit event) for full run correlation.
@@ -144,6 +159,24 @@ curl "http://localhost:3001/audit/events?source=ingest-congress&limit=10"
 
 A successful run produces a `run_complete` event.  Failures produce
 `fetch_failure` events with error details.
+
+The `run_complete` event's `data.bills` block reports how well policy tagging
+covered the ingested bills:
+
+| Field                | Meaning |
+|----------------------|---------|
+| `tagged`             | Bills that received at least one derived policy tag |
+| `untagged`           | Bills whose official classification maps to no tag (they do not affect scores) |
+| `unknownPolicyAreas` | Policy area terms outside the known CRS list — if non-empty, review `jobs/ingest-congress/src/tagging.ts` |
+
+Or query directly:
+
+```bash
+psql "$DATABASE_URL" -c "
+  SELECT bt.source, pt.slug, count(*)
+  FROM bill_tags bt JOIN policy_tags pt ON pt.id = bt.policy_tag_id
+  GROUP BY 1, 2 ORDER BY 1, 3 DESC;"
+```
 
 ---
 
