@@ -40,7 +40,12 @@ re-running with earlier values and clearing `SYNC_SINCE`.
 
 ### Bills
 
-- All bills updated since `SYNC_SINCE` (defaults to fetching recent updates).
+- All bills updated since `SYNC_SINCE` (defaults to the whole congress).
+- The list is read in full (most recently updated first); detail, summaries
+  and subjects are fetched only for bills whose Congress.gov `updateDate`
+  differs from the stored `source_updated_at`. `MAX_BILLS` caps how many
+  bills are *fetched* per run; the rest are reported as `deferred` and picked
+  up by the next run, so repeated capped runs walk through a whole congress.
 - Bill types: HR, S, HJRES, SJRES, HCONRES, SCONRES, HRES, SRES.
 - Fields: congress, type, number, title, status (normalised to 8-value canonical
   enum), sponsor bioguide ID, introduced date, latest plain-text summary, and
@@ -189,6 +194,6 @@ chamber per run (default `50`).
 | `BOT_SIGNING_KEY` | — | (unsigned) | Ed25519 private key, PKCS#8 PEM. Enables Web Bot Auth signatures on senate.gov requests |
 | `BOT_SIGNATURE_AGENT` | — | `https://civreveal.org` | Origin serving the bot's public key directory |
 | `SYNC_SINCE` | — | (none) | ISO-8601 datetime; bills updated after this are fetched |
-| `MAX_BILLS` | — | `0` (no limit) | Cap on bills fetched per run |
+| `MAX_BILLS` | — | `0` (no limit) | Cap on bills *fetched* (detail + summaries + subjects) per run; unchanged bills are skipped first and do not count |
 | `MAX_VOTES` | — | `50` | Max votes per chamber per run |
 | `LOG_LEVEL` | — | `info` | `trace` / `debug` / `info` / `warn` / `error` / `fatal` |

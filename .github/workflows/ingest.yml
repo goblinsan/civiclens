@@ -153,6 +153,8 @@ jobs:
                 echo "$done_line" | jq -r --arg k "$k" '.[$k] | "| \($k) | \(.inserted) | \(.updated) | \(.skipped) | \(.failed) |"'
               done
               echo
+              echo "$done_line" | jq -r '.bills | "Bills unchanged upstream (skipped before fetch): **\(.skipped)** · deferred to a later run by MAX_BILLS: **\(.deferred // 0)**"'
+              echo
               echo "### Policy tagging coverage"
               echo
               echo "$done_line" | jq -r '.bills | "- Tagged: **\(.tagged)**\n- Untagged (no tag applies): **\(.untagged)**\n- Unknown policy areas: **\(.unknownPolicyAreas | length)**"'

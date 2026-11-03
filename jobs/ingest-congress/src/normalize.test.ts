@@ -265,6 +265,12 @@ describe('normalizeBill', () => {
     const raw: CongressBillSummary = { ...rawBill, policyArea: { name: '   ' } };
     expect(normalizeBill(raw).policyArea).toBeNull();
   });
+
+  it('carries the Congress.gov updateDate through, null when absent', () => {
+    expect(normalizeBill(rawBill).sourceUpdatedAt).toBeNull();
+    const raw: CongressBillSummary = { ...rawBill, updateDate: '2026-02-25T14:09:11Z' };
+    expect(normalizeBill(raw).sourceUpdatedAt).toEqual(new Date('2026-02-25T14:09:11Z'));
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

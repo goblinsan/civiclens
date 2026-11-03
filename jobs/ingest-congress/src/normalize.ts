@@ -156,6 +156,8 @@ export interface NormalizedBill {
   policyArea: string | null;
   /** Official CRS legislative subject terms (trimmed, de-duplicated, order preserved). */
   subjects: string[];
+  /** Congress.gov updateDate, when present. */
+  sourceUpdatedAt: Date | null;
 }
 
 export interface NormalizedVote {
@@ -339,7 +341,13 @@ export function normalizeBill(raw: CongressBillSummary): NormalizedBill {
     introducedAt,
     policyArea,
     subjects,
+    sourceUpdatedAt: parseDateOrNull(raw.updateDate),
   };
+}
+
+/** Key identifying a bill within a congress, matching the list and the stored row. */
+export function billKey(billType: string, billNumber: string): string {
+  return `${billType.toUpperCase()}-${billNumber}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -38,6 +38,7 @@ import {
   currentSessionFor,
   houseVoteSourceId,
   parseDateOrNull,
+  billKey,
 } from './normalize.js';
 import { deriveTags, isKnownPolicyArea } from './tagging.js';
 import { parseIngestSteps, stepsNeedApiKey } from './steps.js';
@@ -49,6 +50,7 @@ import {
   upsertVoteRecords,
   loadPoliticianIdMap,
   loadVoteSourceState,
+  loadBillSourceState,
   replaceDerivedBillTags,
   saveRawPayload,
   findPoliticianId,
@@ -120,6 +122,8 @@ interface IngestStats {
 }
 
 interface BillIngestStats extends IngestStats {
+  /** Bills listed but left for a later run because MAX_BILLS was reached. */
+  deferred: number;
   /** Bills that received at least one derived policy tag. */
   tagged: number;
   /** Bills whose official classification mapped to no tag (they won't affect scores). */
@@ -185,6 +189,11 @@ async function ingestMembers(
  * Ingest bills for the given congress, optionally filtered by update date.
  * Bills are upserted by (congress, bill_type, bill_number).
  *
+ * The full list (most recently updated first) is always read; detail,
+ * summaries and subjects are fetched only for bills whose Congress.gov
+ * updateDate differs from what is stored. `maxRecords` caps how many bills
+ * are fetched per run, so repeated capped runs walk through a whole congress.
+ *
  * After each upsert the bill's policy tags are re-derived from its official
  * CRS classification (see tagging.ts / docs/bill-tagging.md). Manual tags are
  * preserved.
@@ -196,16 +205,39 @@ async function ingestBills(
   congress: number,
   options: { updatedSince?: string | undefined; maxRecords?: number | undefined } = {},
 ): Promise<BillIngestStats> {
-  const stats: BillIngestStats = { ...emptyStats(), tagged: 0, untagged: 0, unknownPolicyAreas: [] };
+  const stats: BillIngestStats = { ...emptyStats(), deferred: 0, tagged: 0, untagged: 0, unknownPolicyAreas: [] };
   const unknownPolicyAreas = new Set<string>();
 
-  const rawBills = await client.fetchBills(congress, {
+  const listed = await client.fetchBills(congress, {
     ...(options.updatedSince !== undefined && { updatedSince: options.updatedSince }),
-    ...(options.maxRecords !== undefined && { maxRecords: options.maxRecords }),
   });
-  logger.info('bills fetched', { count: rawBills.length });
+  const stored = await loadBillSourceState(pool, congress);
+  const maxRecords = options.maxRecords ?? 0;
 
-  for (const rawSummary of rawBills) {
+  // Skip bills whose upstream updateDate matches the stored copy — no need for
+  // the three detail requests. Everything else is fetched, up to maxRecords.
+  const toFetch: typeof listed = [];
+  for (const item of listed) {
+    const known = stored.get(billKey(item.type, item.number));
+    const upstream = parseDateOrNull(item.updateDate)?.getTime();
+    if (known !== undefined && known !== null && upstream !== undefined && known === upstream) {
+      stats.skipped++;
+      continue;
+    }
+    if (maxRecords > 0 && toFetch.length >= maxRecords) {
+      stats.deferred++;
+      continue;
+    }
+    toFetch.push(item);
+  }
+  logger.info('bills listed', {
+    total: listed.length,
+    unchanged: stats.skipped,
+    fetching: toFetch.length,
+    deferred: stats.deferred,
+  });
+
+  for (const rawSummary of toFetch) {
     try {
       // Fetch full bill detail including sponsor and summary text
       const raw = await client.fetchBillDetail(congress, rawSummary.type, rawSummary.number);
@@ -458,7 +490,7 @@ async function main(): Promise<void> {
   });
 
   let memberStats: IngestStats = emptyStats();
-  let billStats: BillIngestStats = { ...emptyStats(), tagged: 0, untagged: 0, unknownPolicyAreas: [] };
+  let billStats: BillIngestStats = { ...emptyStats(), deferred: 0, tagged: 0, untagged: 0, unknownPolicyAreas: [] };
   let senateVoteStats: IngestStats = emptyStats();
   let houseVoteStats: IngestStats = emptyStats();
 

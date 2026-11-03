@@ -169,17 +169,18 @@ export async function upsertBill(
   const result = await pool.query<{ id: string }>(
     `INSERT INTO bills
        (congress, bill_type, bill_number, title, summary, status, sponsor_id, introduced_at,
-        policy_area, subjects, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::text[], NOW())
+        policy_area, subjects, source_updated_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::text[], $11, NOW())
      ON CONFLICT (congress, bill_type, bill_number) DO UPDATE SET
-       title         = EXCLUDED.title,
-       summary       = EXCLUDED.summary,
-       status        = EXCLUDED.status,
-       sponsor_id    = EXCLUDED.sponsor_id,
-       introduced_at = EXCLUDED.introduced_at,
-       policy_area   = EXCLUDED.policy_area,
-       subjects      = EXCLUDED.subjects,
-       updated_at    = NOW()
+       title             = EXCLUDED.title,
+       summary           = EXCLUDED.summary,
+       status            = EXCLUDED.status,
+       sponsor_id        = EXCLUDED.sponsor_id,
+       introduced_at     = EXCLUDED.introduced_at,
+       policy_area       = EXCLUDED.policy_area,
+       subjects          = EXCLUDED.subjects,
+       source_updated_at = EXCLUDED.source_updated_at,
+       updated_at        = NOW()
      RETURNING id`,
     [
       bill.congress,
@@ -192,6 +193,7 @@ export async function upsertBill(
       bill.introducedAt.toISOString(),
       bill.policyArea,
       bill.subjects,
+      bill.sourceUpdatedAt?.toISOString() ?? null,
     ],
   );
 
@@ -202,6 +204,24 @@ export async function upsertBill(
     );
   }
   return id;
+}
+
+/**
+ * Load, for every stored bill of a congress, Congress.gov's updateDate (epoch
+ * ms, or null when unknown), keyed by `${TYPE}-${number}`. Lets the ingest job
+ * skip the three detail requests for bills that have not changed upstream.
+ */
+export async function loadBillSourceState(
+  pool: DbPool,
+  congress: number,
+): Promise<Map<string, number | null>> {
+  const result = await pool.query<{ bill_type: string; bill_number: string; source_updated_at: Date | null }>(
+    `SELECT bill_type, bill_number, source_updated_at FROM bills WHERE congress = $1`,
+    [congress],
+  );
+  return new Map(
+    result.rows.map((r) => [`${r.bill_type.toUpperCase()}-${r.bill_number}`, r.source_updated_at?.getTime() ?? null]),
+  );
 }
 
 /**

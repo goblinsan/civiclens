@@ -50,6 +50,8 @@ export interface BillRow {
   policy_area: string | null;
   /** Official CRS legislative subject terms from Congress.gov. */
   subjects: string[];
+  /** Congress.gov updateDate for the bill; NULL for rows not written by the ingest job. */
+  source_updated_at: Date | null;
   created_at: Date;
   updated_at: Date;
 }
