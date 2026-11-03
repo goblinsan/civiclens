@@ -11,6 +11,9 @@
  *   CONGRESS           (optional) – congress number to sync, default 119
  *   SESSION            (optional) – restrict votes to one session (1 or 2);
  *                                   default: every session up to the current one
+ *   INGEST_STEPS       (optional) – comma list of members,bills,senate,house;
+ *                                   default all. CONGRESS_API_KEY is only
+ *                                   required when members, bills or house run.
  *   SYNC_SINCE         (optional) – ISO-8601 datetime; only fetch bills updated after this
  *   MAX_BILLS          (optional) – max bills to fetch per run (0 = no limit)
  *   MAX_VOTES          (optional) – max votes per chamber per run (0 = no limit)
@@ -29,6 +32,7 @@ import {
   currentSessionFor,
 } from './normalize.js';
 import { deriveTags, isKnownPolicyArea } from './tagging.js';
+import { parseIngestSteps, stepsNeedApiKey } from './steps.js';
 import {
   upsertPolitician,
   upsertBill,
@@ -51,7 +55,7 @@ import type { VoteClient } from './vote-client.js';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const envSchema = z.object({
-  CONGRESS_API_KEY: z.string().min(1, 'CONGRESS_API_KEY is required'),
+  CONGRESS_API_KEY: z.string().optional(),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   CONGRESS: z.coerce.number().int().positive().default(119),
   SESSION: z.coerce.number().int().min(1).max(2).optional(),
@@ -59,6 +63,7 @@ const envSchema = z.object({
   MAX_BILLS: z.coerce.number().int().nonnegative().default(0),
   MAX_VOTES: z.coerce.number().int().nonnegative().default(50),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
+  INGEST_STEPS: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -67,6 +72,18 @@ if (!parsed.success) {
   process.exit(1);
 }
 const env = parsed.data;
+
+let steps: ReturnType<typeof parseIngestSteps>;
+try {
+  steps = parseIngestSteps(env.INGEST_STEPS);
+} catch (err) {
+  console.error('❌', String(err));
+  process.exit(1);
+}
+if (stepsNeedApiKey(steps) && !env.CONGRESS_API_KEY) {
+  console.error('❌ CONGRESS_API_KEY is required when the members, bills or house steps run');
+  process.exit(1);
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Ingestion sub-steps
@@ -400,6 +417,7 @@ async function main(): Promise<void> {
 
   baseLogger.info('ingest-congress starting', {
     congress: env.CONGRESS,
+    steps: [...steps],
     sessions,
     syncSince: env.SYNC_SINCE,
     maxBills: env.MAX_BILLS,
@@ -414,6 +432,7 @@ async function main(): Promise<void> {
     source: 'ingest-congress',
     data: {
       congress: env.CONGRESS,
+      steps: [...steps],
       sessions,
       syncSince: env.SYNC_SINCE ?? null,
       maxBills: env.MAX_BILLS,
@@ -423,7 +442,7 @@ async function main(): Promise<void> {
 
   // Bind jobId to all subsequent log entries for full run correlation.
   const logger = baseLogger.child({ jobId });
-  const congressClient = createCongressClient(env.CONGRESS_API_KEY, logger);
+  const congressClient = createCongressClient(env.CONGRESS_API_KEY ?? '', logger);
   const voteClient = createVoteClient(logger);
 
   let memberStats: IngestStats = emptyStats();
@@ -432,82 +451,98 @@ async function main(): Promise<void> {
   let houseVoteStats: IngestStats = emptyStats();
 
   // ── 1. Ingest members ─────────────────────────────────────────────────────
-  try {
-    logger.info('step 1/4: ingesting members');
-    memberStats = await ingestMembers(pool, congressClient, logger);
-    logger.info('members ingested', { ...memberStats });
-  } catch (err) {
-    logger.error('member ingestion failed', { err: String(err) });
-    await insertIngestionEvent(pool, {
-      event_type: 'fetch_failure',
-      source: 'ingest-congress',
-      entity_type: 'members',
-      data: { error: String(err) },
-    });
+  if (steps.has('members')) {
+    try {
+      logger.info('step 1/4: ingesting members');
+      memberStats = await ingestMembers(pool, congressClient, logger);
+      logger.info('members ingested', { ...memberStats });
+    } catch (err) {
+      logger.error('member ingestion failed', { err: String(err) });
+      await insertIngestionEvent(pool, {
+        event_type: 'fetch_failure',
+        source: 'ingest-congress',
+        entity_type: 'members',
+        data: { error: String(err) },
+      });
+    }
+  } else {
+    logger.info('step 1/4: members skipped (INGEST_STEPS)');
   }
 
   // ── 2. Ingest bills ───────────────────────────────────────────────────────
-  try {
-    logger.info('step 2/4: ingesting bills', { congress: env.CONGRESS });
-    const billOptions: { updatedSince?: string; maxRecords?: number } = {};
-    if (env.SYNC_SINCE !== undefined) billOptions.updatedSince = env.SYNC_SINCE;
-    if (env.MAX_BILLS > 0) billOptions.maxRecords = env.MAX_BILLS;
-    billStats = await ingestBills(pool, congressClient, logger, env.CONGRESS, billOptions);
-    logger.info('bills ingested', { ...billStats });
-  } catch (err) {
-    logger.error('bill ingestion failed', { err: String(err) });
-    await insertIngestionEvent(pool, {
-      event_type: 'fetch_failure',
-      source: 'ingest-congress',
-      entity_type: 'bills',
-      data: { congress: env.CONGRESS, error: String(err) },
-    });
+  if (steps.has('bills')) {
+    try {
+      logger.info('step 2/4: ingesting bills', { congress: env.CONGRESS });
+      const billOptions: { updatedSince?: string; maxRecords?: number } = {};
+      if (env.SYNC_SINCE !== undefined) billOptions.updatedSince = env.SYNC_SINCE;
+      if (env.MAX_BILLS > 0) billOptions.maxRecords = env.MAX_BILLS;
+      billStats = await ingestBills(pool, congressClient, logger, env.CONGRESS, billOptions);
+      logger.info('bills ingested', { ...billStats });
+    } catch (err) {
+      logger.error('bill ingestion failed', { err: String(err) });
+      await insertIngestionEvent(pool, {
+        event_type: 'fetch_failure',
+        source: 'ingest-congress',
+        entity_type: 'bills',
+        data: { congress: env.CONGRESS, error: String(err) },
+      });
+    }
+  } else {
+    logger.info('step 2/4: bills skipped (INGEST_STEPS)');
   }
 
   // ── 3. Ingest Senate votes ────────────────────────────────────────────────
-  try {
-    logger.info('step 3/4: ingesting senate votes', { congress: env.CONGRESS, sessions });
-    let remaining = env.MAX_VOTES;
-    for (const session of sessions) {
-      if (env.MAX_VOTES > 0 && remaining <= 0) break;
-      const options: { maxVotes?: number } = {};
-      if (env.MAX_VOTES > 0) options.maxVotes = remaining;
-      const stats = await ingestSenateVotes(pool, voteClient, logger, env.CONGRESS, session, options);
-      senateVoteStats = addStats(senateVoteStats, stats);
-      remaining -= stats.inserted + stats.updated + stats.failed;
+  if (steps.has('senate')) {
+    try {
+      logger.info('step 3/4: ingesting senate votes', { congress: env.CONGRESS, sessions });
+      let remaining = env.MAX_VOTES;
+      for (const session of sessions) {
+        if (env.MAX_VOTES > 0 && remaining <= 0) break;
+        const options: { maxVotes?: number } = {};
+        if (env.MAX_VOTES > 0) options.maxVotes = remaining;
+        const stats = await ingestSenateVotes(pool, voteClient, logger, env.CONGRESS, session, options);
+        senateVoteStats = addStats(senateVoteStats, stats);
+        remaining -= stats.inserted + stats.updated + stats.failed;
+      }
+      logger.info('senate votes ingested', { ...senateVoteStats });
+    } catch (err) {
+      logger.error('senate vote ingestion failed', { err: String(err) });
+      await insertIngestionEvent(pool, {
+        event_type: 'fetch_failure',
+        source: 'ingest-congress',
+        entity_type: 'senate_votes',
+        data: { congress: env.CONGRESS, sessions, error: String(err) },
+      });
     }
-    logger.info('senate votes ingested', { ...senateVoteStats });
-  } catch (err) {
-    logger.error('senate vote ingestion failed', { err: String(err) });
-    await insertIngestionEvent(pool, {
-      event_type: 'fetch_failure',
-      source: 'ingest-congress',
-      entity_type: 'senate_votes',
-      data: { congress: env.CONGRESS, sessions, error: String(err) },
-    });
+  } else {
+    logger.info('step 3/4: senate skipped (INGEST_STEPS)');
   }
 
   // ── 4. Ingest House votes ─────────────────────────────────────────────────
-  try {
-    logger.info('step 4/4: ingesting house votes', { congress: env.CONGRESS, sessions });
-    let remaining = env.MAX_VOTES;
-    for (const session of sessions) {
-      if (env.MAX_VOTES > 0 && remaining <= 0) break;
-      const options: { maxVotes?: number } = {};
-      if (env.MAX_VOTES > 0) options.maxVotes = remaining;
-      const stats = await ingestHouseVotes(pool, congressClient, logger, env.CONGRESS, session, options);
-      houseVoteStats = addStats(houseVoteStats, stats);
-      remaining -= stats.inserted + stats.updated + stats.failed;
+  if (steps.has('house')) {
+    try {
+      logger.info('step 4/4: ingesting house votes', { congress: env.CONGRESS, sessions });
+      let remaining = env.MAX_VOTES;
+      for (const session of sessions) {
+        if (env.MAX_VOTES > 0 && remaining <= 0) break;
+        const options: { maxVotes?: number } = {};
+        if (env.MAX_VOTES > 0) options.maxVotes = remaining;
+        const stats = await ingestHouseVotes(pool, congressClient, logger, env.CONGRESS, session, options);
+        houseVoteStats = addStats(houseVoteStats, stats);
+        remaining -= stats.inserted + stats.updated + stats.failed;
+      }
+      logger.info('house votes ingested', { ...houseVoteStats });
+    } catch (err) {
+      logger.error('house vote ingestion failed', { err: String(err) });
+      await insertIngestionEvent(pool, {
+        event_type: 'fetch_failure',
+        source: 'ingest-congress',
+        entity_type: 'house_votes',
+        data: { congress: env.CONGRESS, sessions, error: String(err) },
+      });
     }
-    logger.info('house votes ingested', { ...houseVoteStats });
-  } catch (err) {
-    logger.error('house vote ingestion failed', { err: String(err) });
-    await insertIngestionEvent(pool, {
-      event_type: 'fetch_failure',
-      source: 'ingest-congress',
-      entity_type: 'house_votes',
-      data: { congress: env.CONGRESS, sessions, error: String(err) },
-    });
+  } else {
+    logger.info('step 4/4: house skipped (INGEST_STEPS)');
   }
 
   const durationMs = Date.now() - startMs;

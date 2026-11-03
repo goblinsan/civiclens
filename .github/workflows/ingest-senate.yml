@@ -1,0 +1,116 @@
+name: Ingest Senate votes (self-hosted)
+
+# Runs ONLY the Senate roll-call step of the ingest job, on a self-hosted
+# runner on a residential network.
+#
+# Why a separate workflow: senate.gov's web application firewall answers
+# HTTP 403 to requests from cloud-provider IP ranges (GitHub-hosted runners,
+# Cloudflare Workers) regardless of how the client identifies itself, Congress.gov
+# has no Senate vote endpoint, and GovTrack's mirror sits behind a bot
+# challenge. A machine on a home network is the remaining way to read the
+# official source without circumventing anything.
+#
+# Setup, labels and the security settings this needs are in
+# docs/launch-runbook.md → "Self-hosted runner for Senate votes". Until a
+# runner with the `civreveal-home` label is registered, this workflow simply
+# queues and times out; nothing else is affected.
+#
+# Needs the DATABASE_URL repository secret only. Migrations are applied by the
+# hosted "Ingest Congress data" workflow, not here.
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_votes:
+        description: 'Max Senate roll-calls to fetch, most recent first (0 = every session, full backfill)'
+        default: '25'
+        type: string
+      congress:
+        description: 'Congress number'
+        default: '119'
+        type: string
+  schedule:
+    # Every 6 hours, offset from the hosted ingest so the two never overlap.
+    - cron: '47 2,8,14,20 * * *'
+
+concurrency:
+  group: ingest-senate
+  cancel-in-progress: false
+
+jobs:
+  senate:
+    name: Senate roll-calls
+    runs-on: [self-hosted, linux, civreveal-home]
+    timeout-minutes: 120
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Normalise and check secrets
+        run: |
+          strip() { v="$1"; v="${v#"${v%%[![:space:]]*}"}"; v="${v%"${v##*[![:space:]]}"}"; v="${v#\"}"; v="${v%\"}"; v="${v#\'}"; v="${v%\'}"; printf '%s' "$v"; }
+          DATABASE_URL="$(strip "$DATABASE_URL")"
+          echo "::add-mask::$DATABASE_URL"
+          echo "DATABASE_URL=$DATABASE_URL" >> "$GITHUB_ENV"
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Missing repository secret DATABASE_URL"
+            exit 1
+          fi
+          case "$DATABASE_URL" in
+            postgres://*|postgresql://*) ;;
+            *) echo "::error::DATABASE_URL must start with postgres:// or postgresql://"; exit 1 ;;
+          esac
+
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve run parameters
+        id: params
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "max_votes=${{ inputs.max_votes }}" >> "$GITHUB_OUTPUT"
+            echo "congress=${{ inputs.congress }}"   >> "$GITHUB_OUTPUT"
+          else
+            echo "max_votes=100" >> "$GITHUB_OUTPUT"
+            echo "congress=119"  >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Senate ingest step
+        env:
+          INGEST_STEPS: senate
+          CONGRESS: ${{ steps.params.outputs.congress }}
+          MAX_VOTES: ${{ steps.params.outputs.max_votes }}
+          LOG_LEVEL: info
+        run: pnpm --filter @civreveal/ingest-congress dev 2>&1 | tee ingest.log
+
+      - name: Write run summary
+        if: always()
+        run: |
+          {
+            echo "## Senate ingest — congress ${{ steps.params.outputs.congress }} (MAX_VOTES ${{ steps.params.outputs.max_votes }})"
+            echo
+            done_line=$(grep -F '"msg":"ingest-congress complete"' ingest.log | tail -1 || true)
+            if [ -z "$done_line" ]; then
+              echo "**The job did not reach completion.** Check the log above."
+            else
+              echo "$done_line" | jq -r '.senateVotes | "| Inserted | Updated | Skipped | Failed |\n|---|---|---|---|\n| \(.inserted) | \(.updated) | \(.skipped) | \(.failed) |"'
+            fi
+            errs=$(grep -E '"level":"(error|fatal)"' ingest.log | jq -r '"- `\(.msg)`\(if .err then ": " + .err else "" end)' 2>/dev/null || true)
+            if [ -n "$errs" ]; then
+              echo
+              echo "### Errors logged"
+              echo
+              echo "$errs"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

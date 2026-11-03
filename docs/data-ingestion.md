@@ -64,12 +64,15 @@ re-running with earlier values and clearing `SYNC_SINCE`.
   the date (`SESSION` overrides it), and a full backfill (`MAX_VOTES=0`) covers
   every session of the congress.
 - Up to `MAX_VOTES` most-recent vote details per chamber per run (default `50`).
-- **Senate limitation (open):** senate.gov answers HTTP 403 to requests from
-  cloud-provider IP ranges, including GitHub-hosted runners, regardless of
-  User-Agent, and Congress.gov has no Senate vote endpoint yet. Scheduled runs
-  therefore record a `fetch_failure` event for `senate_votes` and ingest no
-  Senate roll-calls. Options under consideration: run the Senate step from a
-  non-cloud network, or use a documented mirror of the senate.gov data.
+- **Senate votes run elsewhere.** senate.gov answers HTTP 403 to requests
+  from cloud-provider IP ranges (GitHub-hosted runners, Cloudflare Workers)
+  regardless of User-Agent; Congress.gov has no Senate vote endpoint; and
+  GovTrack's mirror of the same data sits behind a bot challenge. None of that
+  is circumvented. The Senate step runs on its own workflow
+  (`ingest-senate.yml`, `INGEST_STEPS=senate`) on a self-hosted runner on a
+  residential network — see the launch runbook. The hosted workflow skips the
+  Senate step; if it is ever run with the step enabled it records a
+  `fetch_failure` event rather than reporting success.
 - Per-member positions stored as `yea / nay / abstain / not-voting`.
 - Votes are linked to a bill when the source XML identifies one; otherwise
   `bill_id` is `NULL`.
@@ -175,6 +178,7 @@ chamber per run (default `50`).
 | `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
 | `CONGRESS` | — | `119` | Congress number to ingest |
 | `SESSION` | — | derived from the date | Restrict votes to one session (`1` or `2`); default walks every session up to the current one |
+| `INGEST_STEPS` | — | all | Comma list of `members,bills,senate,house`. `CONGRESS_API_KEY` is only required when members, bills or house run |
 | `SYNC_SINCE` | — | (none) | ISO-8601 datetime; bills updated after this are fetched |
 | `MAX_BILLS` | — | `0` (no limit) | Cap on bills fetched per run |
 | `MAX_VOTES` | — | `50` | Max votes per chamber per run |

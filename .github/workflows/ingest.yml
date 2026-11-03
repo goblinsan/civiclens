@@ -104,6 +104,9 @@ jobs:
 
       - name: Run ingest job
         env:
+          # Senate roll-calls cannot be fetched from cloud IP ranges; they run
+          # on the self-hosted workflow (ingest-senate.yml).
+          INGEST_STEPS: members,bills,house
           CONGRESS: ${{ steps.params.outputs.congress }}
           MAX_BILLS: ${{ steps.params.outputs.max_bills }}
           MAX_VOTES: ${{ steps.params.outputs.max_votes }}

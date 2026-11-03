@@ -129,6 +129,45 @@ Actions (`.github/workflows/ingest.yml`), which applies migrations first:
 
 After that it runs itself every 6 hours as an incremental sync.
 
+### Self-hosted runner for Senate votes
+
+Senate roll-calls cannot be fetched from GitHub-hosted runners: senate.gov's
+web application firewall answers HTTP 403 to cloud-provider IP ranges
+(GitHub Actions, Cloudflare Workers) regardless of how the client identifies
+itself, Congress.gov has no Senate vote endpoint, and GovTrack's mirror sits
+behind a bot challenge. CivReveal does not try to get around any of that.
+Instead the Senate step runs on its own workflow,
+`.github/workflows/ingest-senate.yml`, on a **self-hosted runner on a
+residential network**, which senate.gov serves normally.
+
+One-time setup:
+
+1. **Lock down who can run workflows on your runner.** The repository is
+   public, and a self-hosted runner executes whatever workflow a run is
+   given. In **Settings → Actions → General → Fork pull request workflows**,
+   choose **Require approval for all external contributors** (or stricter).
+   Do this *before* registering the runner.
+2. **Register the runner**: **Settings → Actions → Runners → New self-hosted
+   runner → Linux**, follow the commands shown, and when asked for labels add
+   `civreveal-home` (the workflow targets `[self-hosted, linux, civreveal-home]`
+   so no other runner picks it up). Install it as a service so it survives
+   reboots.
+3. **Isolate it.** Run the runner on a machine or container that holds nothing
+   else of value and needs only outbound HTTPS. The only secret the job
+   receives is `DATABASE_URL`; the Congress.gov key never reaches it.
+4. **Actions → Ingest Senate votes (self-hosted) → Run workflow** with the
+   default cap, then with `max_votes` = `0` once for the full backfill.
+
+The runner needs Node 20 and pnpm, which `actions/setup-node` and
+`pnpm/action-setup` install into the runner's tool cache on first use. Until a
+runner with that label is online, scheduled runs of this workflow simply queue
+and time out; the hosted ingest is unaffected.
+
+To run every step on the self-hosted runner instead (for example if the API
+key should also stay off GitHub-hosted runners), set `INGEST_STEPS` to the full
+list and give the job `CONGRESS_API_KEY`; `INGEST_STEPS` accepts any comma
+list of `members,bills,senate,house`.
+
 To run it by hand instead:
 
 The job reads its configuration from environment variables (it does not load a
