@@ -11,6 +11,8 @@ const listQuerySchema = z.object({
   party: z.string().optional(),
   state: z.string().optional(),
   q: z.string().optional(),
+  /** `true` to include members who have left Congress. */
+  include_former: z.enum(['true', 'false']).optional(),
 });
 
 export async function politicianRoutes(
@@ -27,10 +29,11 @@ export async function politicianRoutes(
         .code(400)
         .send({ error: { message: 'Invalid query parameters', statusCode: 400 } });
     }
-    const { page, limit, chamber, party, state, q } = parsed.data;
+    const { page, limit, chamber, party, state, q, include_former } = parsed.data;
     const result = await repo.listPoliticians({
       page,
       limit,
+      includeFormer: include_former === 'true',
       ...(chamber !== undefined && { chamber }),
       ...(party !== undefined && { party }),
       ...(state !== undefined && { state }),

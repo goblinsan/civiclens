@@ -32,7 +32,13 @@ re-running with earlier values and clearing `SYNC_SINCE`.
 
 ### Members / politicians
 
-- All currently-serving Senate and House members.
+- All currently-serving Senate and House members. After each roster fetch,
+  members already stored but absent from the (complete) roster are marked
+  `is_current = false`; a bill whose sponsor is not in the roster triggers a
+  one-off fetch of that member, stored as a former member. The politician
+  directory and match rankings show sitting members by default
+  (`?include_former=true` lists everyone); former members keep their page and
+  voting record.
 - Fields: `bioguide_id`, full name, party, state, chamber, district, official
   website, and bioguide portrait URL.
 - **Not covered at MVP**: committees, social-media handles, committee assignments,

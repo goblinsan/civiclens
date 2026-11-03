@@ -134,8 +134,10 @@ export function createQuestionnaireRepository(pool: DbPool) {
       [profileId],
     );
 
+    // Rank sitting members only; former members keep their record but are not
+    // candidates a voter can act on.
     const politiciansResult = await pool.query<{ id: string }>(
-      `SELECT id FROM politicians`,
+      `SELECT id FROM politicians WHERE is_current = true`,
     );
 
     // Index voting data by politician.
@@ -228,7 +230,7 @@ export function createQuestionnaireRepository(pool: DbPool) {
        FROM match_results mr
        JOIN questionnaire_profiles qp ON qp.id = mr.profile_id
        JOIN politicians             p  ON p.id  = mr.politician_id
-       WHERE qp.session_id = $1
+       WHERE qp.session_id = $1 AND p.is_current = true
        ORDER BY mr.score DESC, p.last_name ASC, p.first_name ASC`,
       [sessionId],
     );

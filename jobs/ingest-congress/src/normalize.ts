@@ -35,6 +35,8 @@ export interface CongressMemberSummary {
   state?: string | undefined;
   terms?: { item?: CongressMemberTerm[] | undefined } | undefined;
   updateDate?: string | undefined;
+  /** Present on member detail responses; absent on roster lists filtered to current members. */
+  currentMember?: boolean | undefined;
 }
 
 export interface CongressBillSponsor {
@@ -141,6 +143,7 @@ export interface NormalizedPolitician {
   district: number | null;
   imageUrl: string | null;
   website: string | null;
+  isCurrent: boolean;
 }
 
 export interface NormalizedBill {
@@ -305,6 +308,7 @@ export function normalizeMember(raw: CongressMemberSummary): NormalizedPoliticia
     district: raw.district ?? null,
     imageUrl: raw.depiction?.imageUrl ?? null,
     website: raw.officialWebsiteUrl ?? null,
+    isCurrent: raw.currentMember ?? true,
   };
 }
 

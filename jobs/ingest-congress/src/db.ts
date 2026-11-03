@@ -106,8 +106,9 @@ export async function upsertPolitician(
 ): Promise<string> {
   const result = await pool.query<{ id: string }>(
     `INSERT INTO politicians
-       (bioguide_id, first_name, last_name, party, state, chamber, district, image_url, website, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+       (bioguide_id, first_name, last_name, party, state, chamber, district, image_url, website,
+        is_current, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
      ON CONFLICT (bioguide_id) DO UPDATE SET
        first_name  = EXCLUDED.first_name,
        last_name   = EXCLUDED.last_name,
@@ -117,6 +118,7 @@ export async function upsertPolitician(
        district    = EXCLUDED.district,
        image_url   = EXCLUDED.image_url,
        website     = EXCLUDED.website,
+       is_current  = EXCLUDED.is_current,
        updated_at  = NOW()
      RETURNING id`,
     [
@@ -129,12 +131,30 @@ export async function upsertPolitician(
       politician.district,
       politician.imageUrl,
       politician.website,
+      politician.isCurrent,
     ],
   );
 
   const id = result.rows[0]?.id;
   if (!id) throw new Error(`upsertPolitician: no id returned for ${politician.bioguideId}`);
   return id;
+}
+
+/**
+ * Mark every politician not in the freshly fetched roster as a former member.
+ * Returns the number of rows that changed. Callers should only invoke this
+ * with a complete roster (the caller guards against a partial fetch).
+ */
+export async function markFormerMembers(
+  pool: DbPool,
+  currentBioguideIds: readonly string[],
+): Promise<number> {
+  const result = await pool.query(
+    `UPDATE politicians SET is_current = false, updated_at = NOW()
+     WHERE is_current = true AND bioguide_id <> ALL($1::text[])`,
+    [currentBioguideIds],
+  );
+  return result.rowCount ?? 0;
 }
 
 /**

@@ -444,3 +444,23 @@ describe('normalizeHouseVoteApi', () => {
     expect(event.members[0]?.votePosition).toBe('Not Voting');
   });
 });
+
+describe('normalizeMember — current vs former', () => {
+  const base: CongressMemberSummary = {
+    bioguideId: 'X000001',
+    firstName: 'Pat',
+    lastName: 'Former',
+    partyName: 'Democratic',
+    state: 'OH',
+    terms: { item: [{ chamber: 'House of Representatives' }] },
+  };
+
+  it('treats roster entries (no currentMember field) as sitting members', () => {
+    expect(normalizeMember(base).isCurrent).toBe(true);
+  });
+
+  it('honours an explicit currentMember flag from member detail', () => {
+    expect(normalizeMember({ ...base, currentMember: false }).isCurrent).toBe(false);
+    expect(normalizeMember({ ...base, currentMember: true }).isCurrent).toBe(true);
+  });
+});

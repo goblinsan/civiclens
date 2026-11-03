@@ -122,6 +122,9 @@ export default function PoliticianDetail() {
             <div className="detail-meta">
               <span className={`party-badge party-${politician.party}`}>{politician.party}</span>
               <span className={`chamber-badge chamber-${politician.chamber}`}>{politician.chamber}</span>
+              {politician.is_current === false && (
+                <span className="tag tag-ghost" title="No longer serving in Congress">Former member</span>
+              )}
               <span>{politician.state}{politician.district != null ? ` District ${politician.district}` : ''}</span>
             </div>
             {politician.website && (

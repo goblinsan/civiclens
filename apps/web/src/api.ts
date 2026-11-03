@@ -67,6 +67,8 @@ export interface PoliticianSummary {
   district: number | null;
   image_url: string | null;
   website: string | null;
+  /** False once the member has left Congress. */
+  is_current: boolean;
 }
 
 export interface Vote {

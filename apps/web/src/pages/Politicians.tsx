@@ -33,6 +33,7 @@ function PoliticianCard({ pol }: { pol: PoliticianSummary }) {
           <div className="card-meta" style={{ marginTop: '0.25rem' }}>
             <span className={`party-badge party-${pol.party}`}>{pol.party}</span>
             <span className={`chamber-badge chamber-${pol.chamber}`}>{pol.chamber}</span>
+            {pol.is_current === false && <span className="tag tag-ghost">Former member</span>}
             <span>{pol.state}{pol.district != null ? `-${pol.district}` : ''}</span>
           </div>
         </div>
