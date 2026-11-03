@@ -79,7 +79,7 @@ describe('createAuditLogRepository', () => {
       const result = await repo.queryEvents({});
       expect(result.total).toBe(1);
       expect(result.data).toHaveLength(1);
-      expect(result.data[0].event_type).toBe('run_complete');
+      expect(result.data[0]?.event_type).toBe('run_complete');
     });
 
     it('returns an empty array when no events match', async () => {
@@ -108,7 +108,7 @@ describe('createAuditLogRepository', () => {
       });
       const repo = createAuditLogRepository(pool);
       const result = await repo.queryEvents({});
-      expect(result.data[0].occurred_at).toBe('2026-01-01T00:00:00.000Z');
+      expect(result.data[0]?.occurred_at).toBe('2026-01-01T00:00:00.000Z');
     });
   });
 });

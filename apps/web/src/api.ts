@@ -104,12 +104,12 @@ export interface SentimentCounts {
 // ─── Bills ────────────────────────────────────────────────────────────────────
 
 export function listBills(params: {
-  page?: number;
-  limit?: number;
-  status?: string;
-  tag?: string;
-  congress?: number;
-  q?: string;
+  page?: number | undefined;
+  limit?: number | undefined;
+  status?: string | undefined;
+  tag?: string | undefined;
+  congress?: number | undefined;
+  q?: string | undefined;
 }): Promise<Paginated<BillSummary>> {
   return fetchJson(`${BASE}/bills${buildQuery(params)}`);
 }
@@ -151,11 +151,12 @@ export function getVoteRecords(voteId: string): Promise<VoteRecord[]> {
 // ─── Politicians ──────────────────────────────────────────────────────────────
 
 export function listPoliticians(params: {
-  page?: number;
-  limit?: number;
-  chamber?: string;
-  party?: string;
-  state?: string;
+  page?: number | undefined;
+  limit?: number | undefined;
+  chamber?: string | undefined;
+  party?: string | undefined;
+  state?: string | undefined;
+  q?: string | undefined;
 }): Promise<Paginated<PoliticianSummary>> {
   return fetchJson(`${BASE}/politicians${buildQuery(params)}`);
 }
@@ -166,7 +167,7 @@ export function getPolitician(id: string): Promise<PoliticianSummary> {
 
 export function getPoliticianVotes(
   id: string,
-  params: { page?: number; limit?: number } = {},
+  params: { page?: number | undefined; limit?: number | undefined } = {},
 ): Promise<Paginated<PoliticianVoteRecord>> {
   return fetchJson(`${BASE}/politicians/${id}/votes${buildQuery(params)}`);
 }
