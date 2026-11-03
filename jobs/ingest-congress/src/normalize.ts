@@ -95,6 +95,37 @@ export interface CongressVoteEvent {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Raw API shape types (Congress.gov v3 house-vote endpoint)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** One entry of GET /house-vote/{congress}/{session}. */
+export interface HouseVoteApiItem {
+  congress: number;
+  identifier?: number | undefined;
+  legislationNumber?: string | undefined;
+  legislationType?: string | undefined;
+  legislationUrl?: string | undefined;
+  result?: string | undefined;
+  rollCallNumber: number;
+  sessionNumber: number;
+  sourceDataURL?: string | undefined;
+  startDate?: string | undefined;
+  updateDate?: string | undefined;
+  voteType?: string | undefined;
+  voteQuestion?: string | undefined;
+}
+
+/** One entry of GET /house-vote/{congress}/{session}/{roll}/members → results[]. */
+export interface HouseVoteApiMemberVote {
+  bioguideID?: string | undefined;
+  firstName?: string | undefined;
+  lastName?: string | undefined;
+  voteCast?: string | undefined;
+  voteParty?: string | undefined;
+  voteState?: string | undefined;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Normalised output types (maps to DB row types)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -339,4 +370,73 @@ export function normalizeVoteEvent(raw: CongressVoteEvent): {
     }));
 
   return { vote, records };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Congress session helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** First calendar year of a given Congress (the 119th began in January 2025). */
+export function firstYearOfCongress(congress: number): number {
+  return 1787 + 2 * congress;
+}
+
+/**
+ * The session (1 or 2) of the given Congress that is current on `now`.
+ * Dates before the Congress began clamp to 1; dates after it ended clamp to 2.
+ */
+export function currentSessionFor(congress: number, now: Date = new Date()): 1 | 2 {
+  return now.getUTCFullYear() - firstYearOfCongress(congress) <= 0 ? 1 : 2;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// House vote normalisation (Congress.gov house-vote API)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const BILL_TYPE_PATTERN = /^(HR|S|HJRES|SJRES|HCONRES|SCONRES|HRES|SRES)$/;
+
+/**
+ * Build a CongressVoteEvent from a house-vote list item plus its member votes.
+ * Tallies are computed from the member positions so they always agree with
+ * the per-member records we store.
+ */
+export function normalizeHouseVoteApi(
+  item: HouseVoteApiItem,
+  memberVotes: readonly HouseVoteApiMemberVote[],
+): CongressVoteEvent {
+  const members: CongressVoteMember[] = memberVotes.map((m) => ({
+    bioguideId: m.bioguideID,
+    firstName: m.firstName,
+    lastName: m.lastName,
+    party: m.voteParty,
+    state: m.voteState,
+    votePosition: m.voteCast ?? 'Not Voting',
+  }));
+
+  const tally: Record<VoteValue, number> = { yea: 0, nay: 0, abstain: 0, 'not-voting': 0 };
+  for (const m of members) tally[normalizeVoteValue(m.votePosition)]++;
+
+  let billIdentifier: CongressVoteEvent['billIdentifier'];
+  const type = item.legislationType?.toUpperCase().replace(/\s+/g, '');
+  const number = item.legislationNumber?.trim();
+  if (type && number && BILL_TYPE_PATTERN.test(type) && /^\d+$/.test(number)) {
+    billIdentifier = { type, number, congress: item.congress };
+  }
+
+  return {
+    sourceId: `house-${item.congress}-${item.sessionNumber}-${item.rollCallNumber}`,
+    chamber: 'house',
+    congress: item.congress,
+    session: item.sessionNumber,
+    rollCallNumber: item.rollCallNumber,
+    voteDate: item.startDate ?? '',
+    question: item.voteQuestion ?? item.voteType,
+    result: item.result ?? '',
+    yeaCount: tally.yea,
+    nayCount: tally.nay,
+    abstainCount: tally.abstain,
+    notVotingCount: tally['not-voting'],
+    billIdentifier,
+    members,
+  };
 }

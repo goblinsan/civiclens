@@ -1,15 +1,16 @@
 /**
  * index.ts — CivReveal Congress ingestion pipeline
  *
- * Pulls official government data from api.congress.gov, Senate.gov, and the
- * House Clerk XML feeds, normalises it, and upserts it into the database.
+ * Pulls official government data from api.congress.gov (members, bills, House
+ * roll-call votes) and Senate.gov (Senate roll-call votes), normalises it, and
+ * upserts it into the database.
  *
  * Environment variables:
  *   CONGRESS_API_KEY   (required) – api.congress.gov API key
  *   DATABASE_URL       (required) – PostgreSQL connection string
  *   CONGRESS           (optional) – congress number to sync, default 119
- *   SENATE_SESSION     (optional) – senate session number, default 1
- *   HOUSE_YEAR         (optional) – year for House vote feed, default current year
+ *   SESSION            (optional) – restrict votes to one session (1 or 2);
+ *                                   default: every session up to the current one
  *   SYNC_SINCE         (optional) – ISO-8601 datetime; only fetch bills updated after this
  *   MAX_BILLS          (optional) – max bills to fetch per run (0 = no limit)
  *   MAX_VOTES          (optional) – max votes per chamber per run (0 = no limit)
@@ -25,6 +26,7 @@ import {
   normalizeMember,
   normalizeBill,
   normalizeVoteEvent,
+  currentSessionFor,
 } from './normalize.js';
 import { deriveTags, isKnownPolicyArea } from './tagging.js';
 import {
@@ -52,8 +54,7 @@ const envSchema = z.object({
   CONGRESS_API_KEY: z.string().min(1, 'CONGRESS_API_KEY is required'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   CONGRESS: z.coerce.number().int().positive().default(119),
-  SENATE_SESSION: z.coerce.number().int().positive().default(1),
-  HOUSE_YEAR: z.coerce.number().int().positive().default(new Date().getFullYear()),
+  SESSION: z.coerce.number().int().min(1).max(2).optional(),
   SYNC_SINCE: z.string().optional(),
   MAX_BILLS: z.coerce.number().int().nonnegative().default(0),
   MAX_VOTES: z.coerce.number().int().nonnegative().default(50),
@@ -88,6 +89,13 @@ interface BillIngestStats extends IngestStats {
 }
 
 const emptyStats = (): IngestStats => ({ inserted: 0, updated: 0, skipped: 0, failed: 0 });
+
+const addStats = (a: IngestStats, b: IngestStats): IngestStats => ({
+  inserted: a.inserted + b.inserted,
+  updated: a.updated + b.updated,
+  skipped: a.skipped + b.skipped,
+  failed: a.failed + b.failed,
+});
 
 /**
  * Ingest all current congressional members.
@@ -311,22 +319,22 @@ async function ingestSenateVotes(
 }
 
 /**
- * Ingest House roll-call votes.
+ * Ingest House roll-call votes from the Congress.gov house-vote endpoint.
  */
 async function ingestHouseVotes(
   pool: DbPool,
-  voteClient: VoteClient,
+  client: CongressClient,
   logger: Logger,
   congress: number,
-  year: number,
+  session: number,
   options: { maxVotes?: number | undefined } = {},
 ): Promise<IngestStats> {
   const stats: IngestStats = { inserted: 0, updated: 0, skipped: 0, failed: 0 };
 
-  const events = await voteClient.fetchHouseVotes(congress, year, {
+  const events = await client.fetchHouseVotes(congress, session, {
     ...(options.maxVotes !== undefined && { maxVotes: options.maxVotes }),
   });
-  logger.info('house votes fetched', { count: events.length });
+  logger.info('house votes fetched', { session, count: events.length });
 
   for (const event of events) {
     try {
@@ -338,7 +346,7 @@ async function ingestHouseVotes(
       }
 
       const existingVoteId = await findVoteId(pool, event.sourceId);
-      await saveRawPayload(pool, 'house.gov', event.sourceId, event);
+      await saveRawPayload(pool, 'congress.gov', event.sourceId, event);
       const voteId = await upsertVote(pool, vote, billId);
 
       let recordsInserted = 0;
@@ -384,10 +392,15 @@ async function main(): Promise<void> {
   const baseLogger = createLogger(env.LOG_LEVEL);
   const startMs = Date.now();
 
+  // Votes are walked most-recent session first. MAX_VOTES is a per-chamber
+  // budget of most-recent votes; a full backfill (MAX_VOTES=0) covers every
+  // session of the congress.
+  const latestSession = env.SESSION ?? currentSessionFor(env.CONGRESS);
+  const sessions = env.SESSION ? [env.SESSION] : latestSession === 2 ? [2, 1] : [1];
+
   baseLogger.info('ingest-congress starting', {
     congress: env.CONGRESS,
-    senateSession: env.SENATE_SESSION,
-    houseYear: env.HOUSE_YEAR,
+    sessions,
     syncSince: env.SYNC_SINCE,
     maxBills: env.MAX_BILLS,
     maxVotes: env.MAX_VOTES,
@@ -401,8 +414,7 @@ async function main(): Promise<void> {
     source: 'ingest-congress',
     data: {
       congress: env.CONGRESS,
-      senateSession: env.SENATE_SESSION,
-      houseYear: env.HOUSE_YEAR,
+      sessions,
       syncSince: env.SYNC_SINCE ?? null,
       maxBills: env.MAX_BILLS,
       maxVotes: env.MAX_VOTES,
@@ -454,20 +466,16 @@ async function main(): Promise<void> {
 
   // ── 3. Ingest Senate votes ────────────────────────────────────────────────
   try {
-    logger.info('step 3/4: ingesting senate votes', {
-      congress: env.CONGRESS,
-      session: env.SENATE_SESSION,
-    });
-    const senateOptions: { maxVotes?: number } = {};
-    if (env.MAX_VOTES > 0) senateOptions.maxVotes = env.MAX_VOTES;
-    senateVoteStats = await ingestSenateVotes(
-      pool,
-      voteClient,
-      logger,
-      env.CONGRESS,
-      env.SENATE_SESSION,
-      senateOptions,
-    );
+    logger.info('step 3/4: ingesting senate votes', { congress: env.CONGRESS, sessions });
+    let remaining = env.MAX_VOTES;
+    for (const session of sessions) {
+      if (env.MAX_VOTES > 0 && remaining <= 0) break;
+      const options: { maxVotes?: number } = {};
+      if (env.MAX_VOTES > 0) options.maxVotes = remaining;
+      const stats = await ingestSenateVotes(pool, voteClient, logger, env.CONGRESS, session, options);
+      senateVoteStats = addStats(senateVoteStats, stats);
+      remaining -= stats.inserted + stats.updated + stats.failed;
+    }
     logger.info('senate votes ingested', { ...senateVoteStats });
   } catch (err) {
     logger.error('senate vote ingestion failed', { err: String(err) });
@@ -475,26 +483,22 @@ async function main(): Promise<void> {
       event_type: 'fetch_failure',
       source: 'ingest-congress',
       entity_type: 'senate_votes',
-      data: { congress: env.CONGRESS, session: env.SENATE_SESSION, error: String(err) },
+      data: { congress: env.CONGRESS, sessions, error: String(err) },
     });
   }
 
   // ── 4. Ingest House votes ─────────────────────────────────────────────────
   try {
-    logger.info('step 4/4: ingesting house votes', {
-      congress: env.CONGRESS,
-      year: env.HOUSE_YEAR,
-    });
-    const houseOptions: { maxVotes?: number } = {};
-    if (env.MAX_VOTES > 0) houseOptions.maxVotes = env.MAX_VOTES;
-    houseVoteStats = await ingestHouseVotes(
-      pool,
-      voteClient,
-      logger,
-      env.CONGRESS,
-      env.HOUSE_YEAR,
-      houseOptions,
-    );
+    logger.info('step 4/4: ingesting house votes', { congress: env.CONGRESS, sessions });
+    let remaining = env.MAX_VOTES;
+    for (const session of sessions) {
+      if (env.MAX_VOTES > 0 && remaining <= 0) break;
+      const options: { maxVotes?: number } = {};
+      if (env.MAX_VOTES > 0) options.maxVotes = remaining;
+      const stats = await ingestHouseVotes(pool, congressClient, logger, env.CONGRESS, session, options);
+      houseVoteStats = addStats(houseVoteStats, stats);
+      remaining -= stats.inserted + stats.updated + stats.failed;
+    }
     logger.info('house votes ingested', { ...houseVoteStats });
   } catch (err) {
     logger.error('house vote ingestion failed', { err: String(err) });
@@ -502,7 +506,7 @@ async function main(): Promise<void> {
       event_type: 'fetch_failure',
       source: 'ingest-congress',
       entity_type: 'house_votes',
-      data: { congress: env.CONGRESS, year: env.HOUSE_YEAR, error: String(err) },
+      data: { congress: env.CONGRESS, sessions, error: String(err) },
     });
   }
 

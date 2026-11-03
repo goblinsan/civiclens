@@ -47,8 +47,7 @@ Verify the following environment variables are set before deploying.
 | `DATABASE_URL`     | ✅        | Same PostgreSQL connection string as the API                  |
 | `CONGRESS_API_KEY` | ✅        | Congress.gov API key (register at <https://api.congress.gov>) |
 | `CONGRESS`         | ✅        | Congress number to ingest (e.g. `119`)                        |
-| `SENATE_SESSION`   | ✅        | Senate session number (e.g. `1`)                             |
-| `HOUSE_YEAR`       | ✅        | House vote year (e.g. `2025`)                                |
+| `SESSION`          | optional | Restrict votes to one session (`1` or `2`); default: every session up to the current one |
 | `SYNC_SINCE`       | optional | ISO-8601 date; only ingest records updated after this date    |
 | `MAX_BILLS`        | optional | Cap on number of bills to ingest per run (`0` = unlimited)    |
 | `MAX_VOTES`        | optional | Cap on number of votes to ingest per run (`0` = unlimited)    |
