@@ -37,7 +37,8 @@ import {
   upsertPolitician,
   upsertBill,
   upsertVote,
-  upsertVoteRecord,
+  upsertVoteRecords,
+  loadPoliticianIdMap,
   replaceDerivedBillTags,
   saveRawPayload,
   findPoliticianId,
@@ -284,6 +285,7 @@ async function ingestSenateVotes(
     ...(options.maxVotes !== undefined && { maxVotes: options.maxVotes }),
   });
   logger.info('senate votes fetched', { count: events.length });
+  const politicianIds = await loadPoliticianIdMap(pool);
 
   for (const event of events) {
     try {
@@ -299,29 +301,15 @@ async function ingestSenateVotes(
       await saveRawPayload(pool, 'senate.gov', event.sourceId, event);
       const voteId = await upsertVote(pool, vote, billId);
 
-      // Upsert individual vote records
-      let recordsInserted = 0;
-      for (const record of records) {
-        try {
-          const politicianId = await findPoliticianId(pool, record.voterBioguideId);
-          if (!politicianId) continue;
-          await upsertVoteRecord(pool, voteId, politicianId, record);
-          recordsInserted++;
-        } catch (err) {
-          logger.warn('failed to upsert vote record', {
-            voteSourceId: event.sourceId,
-            bioguideId: record.voterBioguideId,
-            err: String(err),
-          });
-        }
-      }
+      const { written, unknownVoters } = await upsertVoteRecords(pool, voteId, records, politicianIds);
 
       if (existingVoteId) stats.updated++;
       else stats.inserted++;
 
       logger.debug('senate vote upserted', {
         sourceId: event.sourceId,
-        recordsInserted,
+        recordsWritten: written,
+        unknownVoters,
       });
     } catch (err) {
       logger.error('failed to ingest senate vote', {
@@ -352,6 +340,7 @@ async function ingestHouseVotes(
     ...(options.maxVotes !== undefined && { maxVotes: options.maxVotes }),
   });
   logger.info('house votes fetched', { session, count: events.length });
+  const politicianIds = await loadPoliticianIdMap(pool);
 
   for (const event of events) {
     try {
@@ -366,28 +355,15 @@ async function ingestHouseVotes(
       await saveRawPayload(pool, 'congress.gov', event.sourceId, event);
       const voteId = await upsertVote(pool, vote, billId);
 
-      let recordsInserted = 0;
-      for (const record of records) {
-        try {
-          const politicianId = await findPoliticianId(pool, record.voterBioguideId);
-          if (!politicianId) continue;
-          await upsertVoteRecord(pool, voteId, politicianId, record);
-          recordsInserted++;
-        } catch (err) {
-          logger.warn('failed to upsert house vote record', {
-            voteSourceId: event.sourceId,
-            bioguideId: record.voterBioguideId,
-            err: String(err),
-          });
-        }
-      }
+      const { written, unknownVoters } = await upsertVoteRecords(pool, voteId, records, politicianIds);
 
       if (existingVoteId) stats.updated++;
       else stats.inserted++;
 
       logger.debug('house vote upserted', {
         sourceId: event.sourceId,
-        recordsInserted,
+        recordsWritten: written,
+        unknownVoters,
       });
     } catch (err) {
       logger.error('failed to ingest house vote', {
