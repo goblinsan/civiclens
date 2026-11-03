@@ -46,8 +46,23 @@ export interface BillRow {
   status: string;
   sponsor_id: string;
   introduced_at: Date;
+  /** Official CRS policy area term from Congress.gov (one per bill), if assigned. */
+  policy_area: string | null;
+  /** Official CRS legislative subject terms from Congress.gov. */
+  subjects: string[];
   created_at: Date;
   updated_at: Date;
+}
+
+export type BillTagSource = 'manual' | 'policy-area' | 'subject';
+
+export interface BillTagRow {
+  bill_id: string;
+  policy_tag_id: string;
+  source: BillTagSource;
+  /** The official term that produced the tag; NULL for manual tags. */
+  matched_on: string | null;
+  created_at: Date;
 }
 
 export interface BillVersionRow {

@@ -29,10 +29,10 @@ importers:
 
   apps/api:
     dependencies:
-      '@civiclens/db':
+      '@civreveal/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@civiclens/shared':
+      '@civreveal/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       fastify:
@@ -57,7 +57,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@civiclens/shared':
+      '@civreveal/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       react:
@@ -88,10 +88,10 @@ importers:
 
   jobs/ingest-congress:
     dependencies:
-      '@civiclens/db':
+      '@civreveal/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@civiclens/shared':
+      '@civreveal/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       fast-xml-parser:
@@ -148,7 +148,7 @@ importers:
 
   scripts:
     dependencies:
-      '@civiclens/db':
+      '@civreveal/db':
         specifier: workspace:*
         version: link:../packages/db
       pg:

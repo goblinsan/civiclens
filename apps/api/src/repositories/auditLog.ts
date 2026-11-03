@@ -30,12 +30,12 @@ export interface LogEventInput {
 }
 
 export interface QueryEventsOptions {
-  event_type?: string;
-  source?: string;
-  entity_type?: string;
-  since?: string;
-  limit?: number;
-  page?: number;
+  event_type?: string | undefined;
+  source?: string | undefined;
+  entity_type?: string | undefined;
+  since?: string | undefined;
+  limit?: number | undefined;
+  page?: number | undefined;
 }
 
 export interface AuditLogRepository {

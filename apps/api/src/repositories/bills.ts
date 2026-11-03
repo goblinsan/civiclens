@@ -1,9 +1,21 @@
-import type { DbPool, BillRow, PolicyTagRow, PoliticianRow, VoteRow } from '@civreveal/db';
+import type { DbPool, BillRow, BillTagSource, PolicyTagRow, PoliticianRow, VoteRow } from '@civreveal/db';
 
 export interface BillWithTags extends BillRow {
   tags: string[];
   sponsor_first_name: string;
   sponsor_last_name: string;
+}
+
+/** One policy tag on a bill together with where it came from. */
+export interface BillTagDetail {
+  slug: string;
+  source: BillTagSource;
+  /** The official CRS term that produced the tag; null for manual tags. */
+  matched_on: string | null;
+}
+
+export interface BillDetail extends BillWithTags {
+  tag_details: BillTagDetail[];
 }
 
 export interface ListBillsOptions {
@@ -85,9 +97,12 @@ export function createBillsRepository(pool: DbPool) {
     return { data: dataResult.rows, total, page, limit };
   }
 
-  /** Fetch a single bill with its tags and sponsor. Returns null if not found. */
-  async function getBillById(id: string): Promise<BillWithTags | null> {
-    const result = await pool.query<BillWithTags>(
+  /**
+   * Fetch a single bill with its tags (including provenance) and sponsor.
+   * Returns null if not found.
+   */
+  async function getBillById(id: string): Promise<BillDetail | null> {
+    const result = await pool.query<BillDetail>(
       `SELECT
          b.*,
          p.first_name AS sponsor_first_name,
@@ -95,7 +110,14 @@ export function createBillsRepository(pool: DbPool) {
          COALESCE(
            ARRAY_AGG(pt.slug ORDER BY pt.slug) FILTER (WHERE pt.slug IS NOT NULL),
            ARRAY[]::TEXT[]
-         ) AS tags
+         ) AS tags,
+         COALESCE(
+           JSON_AGG(
+             JSON_BUILD_OBJECT('slug', pt.slug, 'source', bt.source, 'matched_on', bt.matched_on)
+             ORDER BY pt.slug
+           ) FILTER (WHERE pt.slug IS NOT NULL),
+           '[]'::json
+         ) AS tag_details
        FROM bills b
        JOIN politicians p ON p.id = b.sponsor_id
        LEFT JOIN bill_tags bt ON bt.bill_id = b.id

@@ -35,7 +35,25 @@ export interface BillSummary {
   sponsor_last_name: string;
   introduced_at: string;
   updated_at: string;
+  /** CivReveal policy tag slugs (derived from the official classification, or manual). */
   tags: string[];
+  /** Official CRS policy area term from Congress.gov, if assigned. */
+  policy_area: string | null;
+  /** Official CRS legislative subject terms from Congress.gov. */
+  subjects: string[];
+}
+
+export type BillTagSource = 'manual' | 'policy-area' | 'subject';
+
+export interface BillTagDetail {
+  slug: string;
+  source: BillTagSource;
+  /** The official term that produced this tag; null for manual tags. */
+  matched_on: string | null;
+}
+
+export interface BillDetail extends BillSummary {
+  tag_details: BillTagDetail[];
 }
 
 export interface PoliticianSummary {
@@ -104,17 +122,17 @@ export interface SentimentCounts {
 // ─── Bills ────────────────────────────────────────────────────────────────────
 
 export function listBills(params: {
-  page?: number;
-  limit?: number;
-  status?: string;
-  tag?: string;
-  congress?: number;
-  q?: string;
+  page?: number | undefined;
+  limit?: number | undefined;
+  status?: string | undefined;
+  tag?: string | undefined;
+  congress?: number | undefined;
+  q?: string | undefined;
 }): Promise<Paginated<BillSummary>> {
   return fetchJson(`${BASE}/bills${buildQuery(params)}`);
 }
 
-export function getBill(id: string): Promise<BillSummary> {
+export function getBill(id: string): Promise<BillDetail> {
   return fetchJson(`${BASE}/bills/${id}`);
 }
 
@@ -151,11 +169,12 @@ export function getVoteRecords(voteId: string): Promise<VoteRecord[]> {
 // ─── Politicians ──────────────────────────────────────────────────────────────
 
 export function listPoliticians(params: {
-  page?: number;
-  limit?: number;
-  chamber?: string;
-  party?: string;
-  state?: string;
+  page?: number | undefined;
+  limit?: number | undefined;
+  chamber?: string | undefined;
+  party?: string | undefined;
+  state?: string | undefined;
+  q?: string | undefined;
 }): Promise<Paginated<PoliticianSummary>> {
   return fetchJson(`${BASE}/politicians${buildQuery(params)}`);
 }
@@ -166,7 +185,7 @@ export function getPolitician(id: string): Promise<PoliticianSummary> {
 
 export function getPoliticianVotes(
   id: string,
-  params: { page?: number; limit?: number } = {},
+  params: { page?: number | undefined; limit?: number | undefined } = {},
 ): Promise<Paginated<PoliticianVoteRecord>> {
   return fetchJson(`${BASE}/politicians/${id}/votes${buildQuery(params)}`);
 }

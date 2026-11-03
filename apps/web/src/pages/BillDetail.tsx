@@ -1,9 +1,81 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getBill, getBillVotes, getVoteRecords } from '../api';
-import type { BillSummary, Vote, VoteRecord } from '../api';
+import type { BillDetail as BillDetailData, BillTagDetail, Vote, VoteRecord } from '../api';
 import SentimentWidget from '../components/SentimentWidget';
 import { track } from '../analytics';
+import { tagLabel } from '../tagLabels';
+
+const TAGGING_DOC_URL = 'https://github.com/goblinsan/civiclens/blob/main/docs/bill-tagging.md';
+
+/** Plain-language explanation of where a tag came from. */
+function tagProvenance(t: BillTagDetail): string {
+  if (t.source === 'policy-area') return `from the official policy area “${t.matched_on}”`;
+  if (t.source === 'subject') return `from the official subject term “${t.matched_on}”`;
+  return 'applied manually by CivReveal';
+}
+
+function ClassificationSection({ bill }: { bill: BillDetailData }) {
+  const subjects = bill.subjects ?? [];
+  const tagDetails = bill.tag_details ?? [];
+  const muted = { color: 'var(--color-text-muted)', fontSize: '0.875rem', margin: '0 0 0.75rem' } as const;
+  const subHeading = { display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.375rem' } as const;
+
+  return (
+    <div className="detail-section">
+      <h2 className="detail-section-title">How this bill is classified</h2>
+
+      <div style={{ marginBottom: '1.25rem' }}>
+        <div style={subHeading}>
+          <h3 style={{ margin: 0, fontSize: '0.9375rem', fontWeight: 600 }}>Official classification</h3>
+          <span className="source-label source-label-official" style={{ fontSize: '0.7rem' }}>Official</span>
+        </div>
+        <p style={muted}>
+          Assigned by the Congressional Research Service and published on Congress.gov.
+        </p>
+        <p style={{ margin: '0 0 0.5rem' }}>
+          <strong>Policy area:</strong>{' '}
+          {bill.policy_area ?? <span style={{ color: 'var(--color-text-muted)' }}>not yet assigned</span>}
+        </p>
+        {subjects.length > 0 && (
+          <>
+            <p style={{ margin: '0 0 0.375rem' }}><strong>Subjects:</strong></p>
+            <div className="card-tags">
+              {subjects.map((s) => <span key={s} className="tag tag-ghost">{s}</span>)}
+            </div>
+          </>
+        )}
+      </div>
+
+      <div>
+        <div style={subHeading}>
+          <h3 style={{ margin: 0, fontSize: '0.9375rem', fontWeight: 600 }}>CivReveal policy tags</h3>
+          <span className="source-label source-label-platform" style={{ fontSize: '0.7rem' }}>Platform</span>
+        </div>
+        <p style={muted}>
+          Derived from the official classification using a fixed, public rule set. Tags decide
+          which questionnaire topics this bill counts toward; they describe what the bill is
+          about, not which way a “yea” vote pushes it.{' '}
+          <a href={TAGGING_DOC_URL} target="_blank" rel="noopener noreferrer">See the rules ↗</a>
+        </p>
+        {tagDetails.length === 0 ? (
+          <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
+            No policy tag applies to this bill, so it does not count toward any alignment score.
+          </p>
+        ) : (
+          <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.9 }}>
+            {tagDetails.map((t) => (
+              <li key={t.slug}>
+                <span className="tag" style={{ marginRight: '0.5rem' }}>{tagLabel(t.slug)}</span>
+                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>{tagProvenance(t)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -121,7 +193,7 @@ function VoteRecordsTable({ voteId }: { voteId: string }) {
 
 export default function BillDetail() {
   const { id } = useParams<{ id: string }>();
-  const [bill, setBill]     = useState<BillSummary | null>(null);
+  const [bill, setBill]     = useState<BillDetailData | null>(null);
   const [votes, setVotes]   = useState<Vote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]   = useState<string | null>(null);
@@ -186,7 +258,7 @@ export default function BillDetail() {
         </div>
         {bill.tags.length > 0 && (
           <div className="card-tags" style={{ marginTop: '0.5rem' }}>
-            {bill.tags.map(t => <span key={t} className="tag">{t.replace(/-/g, ' ')}</span>)}
+            {bill.tags.map(t => <span key={t} className="tag">{tagLabel(t)}</span>)}
           </div>
         )}
       </div>
@@ -211,6 +283,9 @@ export default function BillDetail() {
           </p>
         </div>
       )}
+
+      {/* Official classification + derived policy tags */}
+      <ClassificationSection bill={bill} />
 
       {/* Sentiment widget */}
       <SentimentWidget billId={bill.id} />

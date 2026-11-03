@@ -61,7 +61,8 @@ async function seed() {
     // ── Bills ────────────────────────────────────────────────────────────────
     await client.query(`
       INSERT INTO bills
-        (id, congress, bill_type, bill_number, title, summary, status, sponsor_id, introduced_at)
+        (id, congress, bill_type, bill_number, title, summary, status, sponsor_id, introduced_at,
+         policy_area, subjects)
       VALUES
         (
           '04000000-0000-0000-0000-000000000001',
@@ -70,7 +71,9 @@ async function seed() {
           'Expands Medicaid eligibility thresholds and subsidizes premiums for low-income families.',
           'committee',
           '03000000-0000-0000-0000-000000000001',
-          '2023-02-15T00:00:00Z'
+          '2023-02-15T00:00:00Z',
+          'Health',
+          ARRAY['Health care coverage and access', 'Medicaid', 'Congressional oversight']
         ),
         (
           '04000000-0000-0000-0000-000000000002',
@@ -79,7 +82,9 @@ async function seed() {
           'Authorizes $500 billion in green infrastructure spending over ten years.',
           'floor',
           '03000000-0000-0000-0000-000000000001',
-          '2023-03-01T00:00:00Z'
+          '2023-03-01T00:00:00Z',
+          'Energy',
+          ARRAY['Alternative and renewable resources', 'Climate change and greenhouse gases']
         ),
         (
           '04000000-0000-0000-0000-000000000003',
@@ -88,7 +93,9 @@ async function seed() {
           'Increases funding for border patrol personnel and physical infrastructure.',
           'passed-house',
           '03000000-0000-0000-0000-000000000004',
-          '2023-04-10T00:00:00Z'
+          '2023-04-10T00:00:00Z',
+          'Immigration',
+          ARRAY['Border security and unlawful immigration', 'Law enforcement officers']
         ),
         (
           '04000000-0000-0000-0000-000000000004',
@@ -97,7 +104,9 @@ async function seed() {
           'Creates incentives for local governments to loosen single-family zoning restrictions.',
           'introduced',
           '03000000-0000-0000-0000-000000000002',
-          '2023-05-20T00:00:00Z'
+          '2023-05-20T00:00:00Z',
+          'Housing and Community Development',
+          ARRAY['Housing supply and affordability', 'Land use and conservation']
         ),
         (
           '04000000-0000-0000-0000-000000000005',
@@ -106,20 +115,24 @@ async function seed() {
           'Directs $200 billion toward road, bridge, and broadband repair programs.',
           'signed',
           '03000000-0000-0000-0000-000000000003',
-          '2023-01-05T00:00:00Z'
+          '2023-01-05T00:00:00Z',
+          'Transportation and Public Works',
+          ARRAY['Roads and highways', 'Broadband and internet access']
         )
       ON CONFLICT (congress, bill_type, bill_number) DO NOTHING
     `);
 
     // ── Bill tags ────────────────────────────────────────────────────────────
+    // Mirrors what the ingest job would derive from the policy_area / subjects
+    // above (see docs/bill-tagging.md), plus one manual tag to exercise that path.
     await client.query(`
-      INSERT INTO bill_tags (bill_id, policy_tag_id) VALUES
-        ('04000000-0000-0000-0000-000000000001', '01000000-0000-0000-0000-000000000001'),
-        ('04000000-0000-0000-0000-000000000002', '01000000-0000-0000-0000-000000000003'),
-        ('04000000-0000-0000-0000-000000000002', '01000000-0000-0000-0000-000000000004'),
-        ('04000000-0000-0000-0000-000000000003', '01000000-0000-0000-0000-000000000006'),
-        ('04000000-0000-0000-0000-000000000004', '01000000-0000-0000-0000-000000000007'),
-        ('04000000-0000-0000-0000-000000000005', '01000000-0000-0000-0000-000000000008')
+      INSERT INTO bill_tags (bill_id, policy_tag_id, source, matched_on) VALUES
+        ('04000000-0000-0000-0000-000000000001', '01000000-0000-0000-0000-000000000001', 'policy-area', 'Health'),
+        ('04000000-0000-0000-0000-000000000002', '01000000-0000-0000-0000-000000000003', 'policy-area', 'Energy'),
+        ('04000000-0000-0000-0000-000000000002', '01000000-0000-0000-0000-000000000004', 'manual',      NULL),
+        ('04000000-0000-0000-0000-000000000003', '01000000-0000-0000-0000-000000000006', 'policy-area', 'Immigration'),
+        ('04000000-0000-0000-0000-000000000004', '01000000-0000-0000-0000-000000000007', 'policy-area', 'Housing and Community Development'),
+        ('04000000-0000-0000-0000-000000000005', '01000000-0000-0000-0000-000000000008', 'policy-area', 'Transportation and Public Works')
       ON CONFLICT DO NOTHING
     `);
 

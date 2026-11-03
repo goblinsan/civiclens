@@ -24,9 +24,15 @@ Politicians and bills are both categorised using a fixed set of **policy tags**:
 | `immigration`   | Immigration     |
 | `infrastructure`| Infrastructure  |
 
-Each bill can carry one or more of these tags. Tagging is performed manually
-using a rules-based system; the methodology is kept transparent so that it can
-be audited and improved over time.
+Each bill can carry one or more of these tags. Tags are **derived automatically
+from the official classification** that the Congressional Research Service
+assigns to every bill on Congress.gov — one *policy area* term plus a list of
+*legislative subject* terms — using a fixed, public mapping. Official terms that
+are not in the mapping produce no tag, and a bill with no tag does not affect
+any score. Every bill page shows its official classification and the exact
+official term each tag was derived from.
+
+The full mapping and derivation rules are in [bill-tagging.md](./bill-tagging.md).
 
 ---
 
@@ -128,8 +134,13 @@ alignment is strong and where it diverges.
 - **A high score does not mean a politician is "good"** or that you should vote
   for them.
 - **Scores can change** as more bills are tagged and more votes are recorded.
-- **Bill tagging is an editorial judgment**. A bill may carry a tag while
-  representing a complex policy trade-off that a single tag cannot capture.
+- **A tag says what a bill is about, not which way a vote pushes it.** Two
+  bills tagged *healthcare* can move health coverage in opposite directions,
+  and today a "yea" on either counts the same way. This is the main known
+  limitation of the current model.
+- **Tags are only as good as the official classification and the mapping.** A
+  bill may carry a tag while representing a complex policy trade-off that a
+  single tag cannot capture.
 - **Abstentions and absences are excluded**, so a politician who consistently
   skips votes on a topic will appear neutral regardless of their stated views.
 

@@ -10,11 +10,26 @@ export default function ScoringMethodology() {
       </p>
 
       <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.5rem' }}>1. Policy Taxonomy</h2>
-      <p style={{ marginBottom: '1rem' }}>
-        Politicians and bills are categorised using a fixed set of <strong>policy tags</strong>:
+      <p style={{ marginBottom: '0.75rem' }}>
+        Bills are categorised using a fixed set of <strong>policy tags</strong>:
         Civil Rights, Defense, Economy, Education, Environment, Foreign Policy, Healthcare,
         Housing, Immigration, and Infrastructure. Each bill can carry one or more tags.
-        Tagging is performed manually using a rules-based system.
+      </p>
+      <p style={{ marginBottom: '0.75rem' }}>
+        Tags are <strong>derived automatically from the official classification</strong> that
+        the Congressional Research Service assigns to every bill on Congress.gov: one
+        <em> policy area</em> term (for example “Health” or “Armed Forces and National
+        Security”) plus a list of <em>legislative subject</em> terms (for example “Medicaid”
+        or “Voting rights”). A fixed, public mapping converts those official terms into
+        CivReveal tags. Official terms that are not in the mapping produce no tag, and a bill
+        with no tag does not affect any score.
+      </p>
+      <p style={{ marginBottom: '1rem' }}>
+        Every bill page shows its official classification and, for each tag, the exact
+        official term it was derived from. The full mapping is published in{' '}
+        <a href="https://github.com/goblinsan/civiclens/blob/main/docs/bill-tagging.md" target="_blank" rel="noopener noreferrer">
+          docs/bill-tagging.md ↗
+        </a>.
       </p>
 
       <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.5rem' }}>2. Questionnaire Responses</h2>
@@ -110,7 +125,8 @@ export default function ScoringMethodology() {
         <li>CivReveal does <strong>not</strong> infer ideology or political affiliation from scores.</li>
         <li>A high score does not mean a politician is "better" or that you should vote for them.</li>
         <li>Scores can change as more bills are tagged and more votes are recorded.</li>
-        <li>Bill tagging is an editorial judgment; a single tag may not capture a bill's full complexity.</li>
+        <li>A tag says what a bill is <em>about</em>, not which direction a "yea" vote pushes that topic. Two bills tagged Healthcare can move health coverage in opposite directions, and today both count the same way.</li>
+        <li>Tags are only as good as the official classification and the public mapping; a single tag may not capture a bill's full complexity.</li>
         <li>Abstentions and non-participation are excluded — a politician who often skips votes on a topic will appear neutral.</li>
       </ul>
 

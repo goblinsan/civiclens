@@ -15,6 +15,7 @@
 import { createHash } from 'node:crypto';
 import type { DbPool } from '@civreveal/db';
 import type { NormalizedBill, NormalizedPolitician, NormalizedVote, NormalizedVoteRecord } from './normalize.js';
+import type { DerivedTag } from './tagging.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Audit / ingestion event helpers
@@ -167,14 +168,17 @@ export async function upsertBill(
 ): Promise<string> {
   const result = await pool.query<{ id: string }>(
     `INSERT INTO bills
-       (congress, bill_type, bill_number, title, summary, status, sponsor_id, introduced_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+       (congress, bill_type, bill_number, title, summary, status, sponsor_id, introduced_at,
+        policy_area, subjects, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::text[], NOW())
      ON CONFLICT (congress, bill_type, bill_number) DO UPDATE SET
        title         = EXCLUDED.title,
        summary       = EXCLUDED.summary,
        status        = EXCLUDED.status,
        sponsor_id    = EXCLUDED.sponsor_id,
        introduced_at = EXCLUDED.introduced_at,
+       policy_area   = EXCLUDED.policy_area,
+       subjects      = EXCLUDED.subjects,
        updated_at    = NOW()
      RETURNING id`,
     [
@@ -186,6 +190,8 @@ export async function upsertBill(
       bill.status,
       sponsorInternalId,
       bill.introducedAt.toISOString(),
+      bill.policyArea,
+      bill.subjects,
     ],
   );
 
@@ -213,6 +219,57 @@ export async function findBillId(
     [congress, billType, billNumber],
   );
   return result.rows[0]?.id ?? null;
+}
+
+/**
+ * Replace the automatically derived policy tags for a bill.
+ *
+ * Tags with source 'manual' are never touched: they survive re-ingestion and
+ * take precedence if the derivation would produce the same tag. Everything
+ * else is recomputed from scratch so a change to the mapping rules (or to the
+ * bill's official classification) is reflected on the next run.
+ *
+ * Returns the number of derived tags written.
+ */
+export async function replaceDerivedBillTags(
+  pool: DbPool,
+  billInternalId: string,
+  tags: readonly DerivedTag[],
+): Promise<number> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(
+      `DELETE FROM bill_tags WHERE bill_id = $1 AND source <> 'manual'`,
+      [billInternalId],
+    );
+
+    let written = 0;
+    if (tags.length > 0) {
+      const result = await client.query(
+        `INSERT INTO bill_tags (bill_id, policy_tag_id, source, matched_on)
+         SELECT $1, pt.id, x.source, x.matched_on
+         FROM unnest($2::text[], $3::text[], $4::text[]) AS x(slug, source, matched_on)
+         JOIN policy_tags pt ON pt.slug = x.slug
+         ON CONFLICT (bill_id, policy_tag_id) DO NOTHING`,
+        [
+          billInternalId,
+          tags.map((t) => t.tag),
+          tags.map((t) => t.source),
+          tags.map((t) => t.matchedOn),
+        ],
+      );
+      written = result.rowCount ?? 0;
+    }
+
+    await client.query('COMMIT');
+    return written;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -110,8 +110,10 @@ export default function Transparency() {
           </li>
           <li>
             <strong>Policy tag accuracy.</strong> Bills are tagged with policy
-            categories using a rules-based system. A single tag may not capture
-            the full scope or complexity of a bill.
+            categories derived from their official Congress.gov classification
+            using a fixed public mapping. A single tag may not capture the full
+            scope or complexity of a bill, and a tag describes what a bill is
+            about, not which way a vote on it pushes that topic.
           </li>
           <li>
             <strong>Score sensitivity.</strong> Alignment scores are only as

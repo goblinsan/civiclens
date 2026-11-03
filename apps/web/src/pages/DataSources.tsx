@@ -218,8 +218,10 @@ export default function DataSources() {
               </th>
               <td style={{ padding: '0.375rem 0' }}>
                 Bills are tagged with policy categories (e.g., Healthcare,
-                Education) using a rules-based system. Tags are editorial
-                judgments and may not capture every aspect of a bill.
+                Education) derived from the official Congressional Research
+                Service classification on Congress.gov, using a fixed public
+                mapping. Each bill page shows which official term produced
+                each tag. A tag may not capture every aspect of a bill.
               </td>
             </tr>
             <tr>

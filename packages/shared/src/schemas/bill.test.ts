@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { BillSchema } from './bill';
+import { BillSchema } from './bill.js';
 
 describe('BillSchema', () => {
   it('validates a valid bill', () => {

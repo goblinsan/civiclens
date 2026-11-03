@@ -104,6 +104,7 @@ export interface FetchMembersOptions {
 
 export interface BillDetailResult extends CongressBillSummary {
   summaryText: string | null;
+  legislativeSubjects: string[];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -144,6 +145,13 @@ interface BillSummariesResponse {
     updateDate?: string;
     versionCode?: string;
   }>;
+}
+
+interface BillSubjectsResponse {
+  subjects?: {
+    legislativeSubjects?: Array<{ name?: string }>;
+    policyArea?: { name?: string };
+  };
 }
 
 interface MemberListResponse {
@@ -211,7 +219,12 @@ export function createCongressClient(apiKey: string, logger: Logger) {
   }
 
   /**
-   * Fetch the full detail for a single bill, including sponsor and summary text.
+   * Fetch the full detail for a single bill, including sponsor, summary text,
+   * and the official CRS classification (policy area + legislative subjects).
+   *
+   * Three requests run in parallel: detail, summaries, subjects. The summaries
+   * and subjects calls are best-effort — if either fails the bill is still
+   * returned, just without that data.
    */
   async function fetchBillDetail(
     congress: number,
@@ -219,14 +232,17 @@ export function createCongressClient(apiKey: string, logger: Logger) {
     billNumber: string,
   ): Promise<BillDetailResult | null> {
     const type = billType.toLowerCase();
-    const detailUrl = buildUrl(`/bill/${congress}/${type}/${billNumber}`, apiKey);
-    const summariesUrl = buildUrl(`/bill/${congress}/${type}/${billNumber}/summaries`, apiKey);
+    const base = `/bill/${congress}/${type}/${billNumber}`;
+    const detailUrl = buildUrl(base, apiKey);
+    const summariesUrl = buildUrl(`${base}/summaries`, apiKey);
+    const subjectsUrl = buildUrl(`${base}/subjects`, apiKey);
 
     logger.debug('GET bill detail', { congress, billType, billNumber });
 
-    const [detailRes, summaryRes] = await Promise.all([
+    const [detailRes, summaryRes, subjectsRes] = await Promise.all([
       fetchWithRetry(detailUrl, logger),
       fetchWithRetry(summariesUrl, logger).catch(() => null),
+      fetchWithRetry(subjectsUrl, logger).catch(() => null),
     ]);
 
     const detailData = (await detailRes.json()) as BillDetailResponse;
@@ -243,8 +259,28 @@ export function createCongressClient(apiKey: string, logger: Logger) {
       }
     }
 
+    const legislativeSubjects: string[] = [];
+    let policyArea = bill.policyArea;
+    if (subjectsRes?.ok) {
+      const subjectsData = (await subjectsRes.json()) as BillSubjectsResponse;
+      for (const item of subjectsData.subjects?.legislativeSubjects ?? []) {
+        if (item.name) legislativeSubjects.push(item.name);
+      }
+      // The subjects endpoint also carries the policy area; use it as a fallback.
+      if (!policyArea?.name && subjectsData.subjects?.policyArea?.name) {
+        policyArea = { name: subjectsData.subjects.policyArea.name };
+      }
+    } else {
+      logger.warn('bill subjects unavailable', { congress, billType, billNumber });
+    }
+
     await sleep(REQUEST_DELAY_MS);
-    return { ...bill, summaryText };
+    return {
+      ...bill,
+      ...(policyArea !== undefined && { policyArea }),
+      summaryText,
+      legislativeSubjects,
+    };
   }
 
   /**
