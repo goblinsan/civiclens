@@ -23,6 +23,8 @@ import type { Logger } from './logger.js';
 import type { CongressVoteEvent, CongressVoteMember } from './normalize.js';
 
 const SENATE_BASE = 'https://www.senate.gov/legislative/LIS';
+/** Abort any single request that has not completed within this time. */
+const REQUEST_TIMEOUT_MS = 30_000;
 
 /** Identify ourselves honestly to the upstream server. */
 const USER_AGENT = 'CivReveal/0.1 (civic transparency project; +https://github.com/goblinsan/civiclens)';
@@ -35,7 +37,10 @@ async function fetchText(url: string, logger: Logger, maxRetries = 3): Promise<s
   let lastError: unknown;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const response = await fetch(url, { headers: { 'User-Agent': USER_AGENT, Accept: '*/*' } });
+      const response = await fetch(url, {
+        headers: { 'User-Agent': USER_AGENT, Accept: '*/*' },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
       if (response.ok) return await response.text();
       if (response.status === 404) throw new Error(`404 Not Found: ${url}`);
       if (response.status === 429 || response.status >= 500) {

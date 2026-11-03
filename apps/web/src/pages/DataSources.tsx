@@ -97,11 +97,11 @@ export default function DataSources() {
               </th>
               <td style={{ padding: '0.375rem 0' }}>
                 Procedural votes not tied to a specific bill are ingested but
-                not linked to bill records.{' '}
-                <strong>Currently unavailable:</strong> senate.gov refuses
-                automated requests from the cloud environment where the
-                ingestion job runs, so Senate roll-calls are not being
-                collected yet. This page will be updated when that changes.
+                not linked to bill records. senate.gov refuses automated
+                requests from cloud providers, so Senate roll-calls are
+                collected by a separate scheduled job running outside cloud
+                networks; Senate data may lag the House when that job is
+                offline. Each vote shows when it was last updated.
               </td>
             </tr>
           </tbody>

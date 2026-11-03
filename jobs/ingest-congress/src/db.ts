@@ -334,20 +334,51 @@ export async function upsertVote(
 }
 
 /**
- * Upsert an individual vote record (politician position on a roll-call vote).
- * Uses (vote_id, politician_id) as the deduplication key.
+ * Load the bioguide_id → internal id map for every politician in one query.
+ * Vote ingestion resolves hundreds of voters per roll-call; doing that with a
+ * lookup per voter costs a database round trip each, which on a remote
+ * database turned a 25-vote run into 13 minutes.
  */
-export async function upsertVoteRecord(
+export async function loadPoliticianIdMap(pool: DbPool): Promise<Map<string, string>> {
+  const result = await pool.query<{ id: string; bioguide_id: string }>(
+    `SELECT id, bioguide_id FROM politicians`,
+  );
+  return new Map(result.rows.map((r) => [r.bioguide_id, r.id]));
+}
+
+/**
+ * Upsert every member position of one roll-call vote in a single statement.
+ * Voters whose bioguide ID is not in `politicianIds` (e.g. former members not
+ * yet ingested) are skipped and counted. If the same politician appears twice
+ * the last position wins.
+ */
+export async function upsertVoteRecords(
   pool: DbPool,
   voteInternalId: string,
-  politicianInternalId: string,
-  record: NormalizedVoteRecord,
-): Promise<void> {
+  records: readonly NormalizedVoteRecord[],
+  politicianIds: ReadonlyMap<string, string>,
+): Promise<{ written: number; unknownVoters: number }> {
+  const byPolitician = new Map<string, string>();
+  let unknownVoters = 0;
+  for (const record of records) {
+    const politicianId = politicianIds.get(record.voterBioguideId);
+    if (!politicianId) {
+      unknownVoters++;
+      continue;
+    }
+    byPolitician.set(politicianId, record.value);
+  }
+  if (byPolitician.size === 0) return { written: 0, unknownVoters };
+
+  const ids = [...byPolitician.keys()];
+  const values = ids.map((id) => byPolitician.get(id) as string);
   await pool.query(
     `INSERT INTO vote_records (vote_id, politician_id, value)
-     VALUES ($1, $2, $3)
+     SELECT $1, x.politician_id, x.value
+     FROM unnest($2::uuid[], $3::text[]) AS x(politician_id, value)
      ON CONFLICT (vote_id, politician_id) DO UPDATE SET
        value = EXCLUDED.value`,
-    [voteInternalId, politicianInternalId, record.value],
+    [voteInternalId, ids, values],
   );
+  return { written: ids.length, unknownVoters };
 }
