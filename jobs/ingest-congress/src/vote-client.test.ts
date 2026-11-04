@@ -16,6 +16,15 @@ describe('describeRefusal', () => {
     expect(r).toBe(' (Senate.gov - Unauthorized)');
   });
 
+  it('extracts the Reference ID from senate.gov\'s own block page', async () => {
+    const html =
+      '<html><head><title>Senate.gov - Unauthorized</title></head><body>Sorry, a potential security risk was ' +
+      'detected in your submitted request. The Webmaster has been alerted. Reference ID: 18.bc4ce17.1793800131.3f2d0eb2 ' +
+      'You can proceed to www.senate.gov.</body></html>';
+    const r = await describeRefusal(new Response(html, { status: 403 }));
+    expect(r).toBe(' (Akamai reference #18.bc4ce17.1793800131.3f2d0eb2)');
+  });
+
   it('drops comments, styles and scripts from the excerpt', async () => {
     const html =
       '<!DOCTYPE html><!-- served by x --><html><head><title>Senate.gov - Unauthorized</title>' +
