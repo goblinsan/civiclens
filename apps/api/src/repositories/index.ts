@@ -35,3 +35,6 @@ export type {
   LogEventInput,
   QueryEventsOptions,
 } from './auditLog.js';
+
+export { createStatsRepository } from './stats.js';
+export type { StatsRepository, SiteStats } from './stats.js';
