@@ -9,7 +9,7 @@ What runs where, once this is done:
 | Piece | Where | How it gets updated |
 | --- | --- | --- |
 | Web app (civreveal.org) | Cloudflare Pages | Pages builds `apps/web` on every push to `main` |
-| API (api.civreveal.org) | Home server, Docker, port 127.0.0.1:3001, via the tunnel | `api-image.yml` builds → publishes to GHCR → deploys on the self-hosted runner |
+| API (api.civreveal.org) | Home server, Docker, port 3001 (loopback, or the LAN address when `cloudflared` is on another box), via the tunnel | `api-image.yml` builds → publishes to GHCR → deploys on the self-hosted runner |
 | Ingest job (all four steps incl. Senate) | Home server, self-hosted runner | `ingest.yml`, every 6 h and on demand |
 | Database | Neon (unchanged) | — |
 | CI (lint/typecheck/test/build) | GitHub-hosted runners | on every PR |
@@ -58,6 +58,17 @@ curl -s http://127.0.0.1:3001/ready && echo     # expect {"status":"ready"}
 exit
 ```
 
+If `cloudflared` runs on a **different** machine than the API, the container
+must bind to this box's LAN address instead of loopback, now and on every later
+deploy. The address comes from `CIVREVEAL_BIND_ADDR` (compose default
+`127.0.0.1`); prefix the `up` command with it here, and set it for the runner
+in step 5 so deploys use the same value:
+
+```bash
+CIVREVEAL_BIND_ADDR=<api-host-lan-ip> docker compose -f deploy/docker-compose.yml up -d
+curl -s http://<api-host-lan-ip>:3001/health && echo
+```
+
 Build the image locally the first time — it both validates the Dockerfile and
 avoids depending on the registry before `api-image.yml` has run on `main`:
 
@@ -77,7 +88,7 @@ tunnel → Public Hostname → Add):
 | Subdomain | `api` |
 | Domain | `civreveal.org` |
 | Type | `HTTP` |
-| URL | `localhost:3001` (or `<api-host-ip>:3001` if `cloudflared` runs on a different machine than the API — then bind the API to that interface in `deploy/docker-compose.yml`) |
+| URL | `localhost:3001` when `cloudflared` runs on the API box; otherwise `<api-host-lan-ip>:3001`, with `CIVREVEAL_BIND_ADDR=<api-host-lan-ip>` set for the container (step 3) and for the runner (step 5) |
 
 Cloudflare creates the DNS record. Verify from anywhere:
 
@@ -102,6 +113,18 @@ cd /home/ghrunner/actions-runner && sudo ./svc.sh install ghrunner && sudo ./svc
 
 Settings → Actions → Runners should show it **Idle** with labels `self-hosted`,
 `Linux`, `X64`/`ARM64`, `civreveal-home`.
+
+If the API binds to a LAN address (step 3), give the runner the same value so
+every deploy keeps it. The runner reads `~/actions-runner/.env` into each job's
+environment:
+
+```bash
+echo 'CIVREVEAL_BIND_ADDR=<api-host-lan-ip>' | sudo -u ghrunner tee -a /home/ghrunner/actions-runner/.env
+cd /home/ghrunner/actions-runner && sudo ./svc.sh stop && sudo ./svc.sh start
+```
+
+The deploy job prints `API bound to <addr>:3001` and waits for `/health` on
+that address.
 
 ## 6. Cloudflare Pages: serve the real app
 
@@ -129,8 +152,12 @@ Retry the latest deployment. `https://civreveal.org` now serves the app;
 - **Actions → API image → Run workflow**: proves the build → publish → deploy
   path end to end (the deploy job runs on your runner and waits for `/health`).
 - **Actions → Ingest Congress data → Run workflow** with defaults: the first
-  ingest from home, Senate step included. The summary should show Senate
-  roll-calls inserted for the first time.
+  ingest from home, Senate step included. Members, bills and House votes
+  should complete as before. The Senate step is still subject to senate.gov's
+  Akamai bot protection: until the CivRevealBot registration is accepted it
+  may answer HTTP 403 even from here (the first home run did). The error line
+  in the summary carries the Akamai reference number from the block page;
+  quote it when following up with the Senate webmaster.
 
 ## Verification checklist
 
@@ -148,6 +175,10 @@ Then open https://civreveal.org → Browse Bills.
 - Logs: `docker logs -f civreveal-api` (JSON lines, one per request).
 - The API container restarts on reboot (`restart: unless-stopped`); the
   runner is a systemd service; `cloudflared` is whatever you already run.
+- `CIVREVEAL_BIND_ADDR` lives in `~/actions-runner/.env` (and nowhere in the
+  repo). If a deploy ever comes up on loopback while the tunnel targets the
+  LAN address, that file lost the line or the runner service was not
+  restarted after editing it.
 - To roll back: `docker compose -f deploy/docker-compose.yml pull` with a
   specific tag edited into the compose file (`civreveal-api:<git sha>`), or
   re-run the API image workflow from an earlier commit.

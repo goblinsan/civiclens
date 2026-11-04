@@ -75,10 +75,14 @@ jobs:
           docker image prune -f >/dev/null
 
       - name: Wait for health
+        # CIVREVEAL_BIND_ADDR comes from the runner's own environment
+        # (~/actions-runner/.env); unset means loopback, same as the compose file.
         run: |
+          addr="${CIVREVEAL_BIND_ADDR:-127.0.0.1}"
+          echo "API bound to $addr:3001"
           for i in $(seq 1 30); do
-            if wget -qO- http://127.0.0.1:3001/health >/dev/null 2>&1; then
-              echo "API healthy"; wget -qO- http://127.0.0.1:3001/health; echo; exit 0
+            if wget -qO- "http://$addr:3001/health" >/dev/null 2>&1; then
+              echo "API healthy"; wget -qO- "http://$addr:3001/health"; echo; exit 0
             fi
             sleep 2
           done
