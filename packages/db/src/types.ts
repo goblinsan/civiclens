@@ -38,6 +38,13 @@ export interface PoliticianRow {
   updated_at: Date;
 }
 
+export interface CboEstimate {
+  title: string;
+  url: string;
+  pubDate: string | null;
+  description: string | null;
+}
+
 export interface BillRow {
   id: string;
   congress: number;
@@ -54,6 +61,8 @@ export interface BillRow {
   subjects: string[];
   /** Congress.gov updateDate for the bill; NULL for rows not written by the ingest job. */
   source_updated_at: Date | null;
+  /** CBO cost estimates linked from Congress.gov bill detail: [{title, url, pubDate, description}]. */
+  cbo_estimates: CboEstimate[];
   created_at: Date;
   updated_at: Date;
 }
@@ -97,6 +106,8 @@ export interface VoteRow {
   source_id: string | null;
   /** Upstream "last updated" timestamp (Congress.gov updateDate); NULL when the source has none. */
   source_updated_at: Date | null;
+  /** The question put to the chamber ("On Passage", "On Motion to Recommit"…); NULL for older rows. */
+  question: string | null;
   created_at: Date;
 }
 
@@ -169,4 +180,57 @@ export interface IngestionEventRow {
   entity_id: string | null;
   data: Record<string, unknown>;
   occurred_at: Date;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Goal-based scoring (migration 009)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface PolicyGoalRow {
+  id: string;
+  slug: string;
+  area_slug: string;
+  area_label: string;
+  statement: string;
+  legislation_note: string;
+  candidate_terms: string[];
+  sort_order: number;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface BillGoalEffectRow {
+  id: string;
+  bill_id: string;
+  goal_id: string;
+  effect: 'advances' | 'hinders';
+  strength: 1 | 2 | 3;
+  rationale: string;
+  evidence: string;
+  coded_by: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface QuestionnaireGoalAnswerRow {
+  id: string;
+  profile_id: string;
+  goal_id: string;
+  stance: 'support' | 'oppose';
+  importance: 1 | 2 | 3;
+  created_at: Date;
+}
+
+export interface BillBriefRow {
+  id: string;
+  bill_id: string;
+  plain_summary: string;
+  scenarios: unknown[];
+  likely_beneficiaries: unknown[];
+  likely_costs: unknown[];
+  official_estimates: unknown[];
+  coded_by: string;
+  created_at: Date;
+  updated_at: Date;
 }

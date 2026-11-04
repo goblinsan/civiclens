@@ -1,0 +1,801 @@
+{
+  "version": 1,
+  "areas": [
+    {
+      "slug": "energy",
+      "label": "Energy",
+      "goals": [
+        {
+          "slug": "energy-renewables-support",
+          "statement": "Expand federal financial support for solar and wind power",
+          "legislationNote": "creates or extends tax credits, grants or loan guarantees for renewable generation; repeal or phase-out hinders",
+          "candidateTerms": [
+            "Alternative and renewable resources",
+            "Solar energy",
+            "Wind power",
+            "Energy research"
+          ]
+        },
+        {
+          "slug": "energy-nuclear-expand",
+          "statement": "Expand nuclear power generation",
+          "legislationNote": "funds advanced reactor demonstration, shortens NRC licensing, extends liability or fuel-supply support",
+          "candidateTerms": [
+            "Nuclear power",
+            "Energy research",
+            "Radioactive wastes and releases"
+          ]
+        },
+        {
+          "slug": "energy-fossil-expand",
+          "statement": "Expand domestic oil, gas and coal production",
+          "legislationNote": "opens federal lands or waters to leasing, speeds pipeline or export approvals, limits royalty increases",
+          "candidateTerms": [
+            "Oil and gas",
+            "Coal",
+            "Pipelines",
+            "Public lands and natural resources"
+          ]
+        },
+        {
+          "slug": "energy-permitting-streamline",
+          "statement": "Shorten federal permitting for energy and transmission projects",
+          "legislationNote": "sets review deadlines, narrows NEPA scope, limits litigation windows (for any energy type)",
+          "candidateTerms": [
+            "Environmental regulatory procedures",
+            "Electric power generation, transmission",
+            "Infrastructure development"
+          ]
+        },
+        {
+          "slug": "energy-efficiency-standards",
+          "statement": "Set stricter federal efficiency standards for appliances, vehicles and buildings",
+          "legislationNote": "raises or preserves standards; a bill blocking a standard hinders",
+          "candidateTerms": [
+            "Energy efficiency and conservation",
+            "Motor vehicles",
+            "Building construction"
+          ]
+        },
+        {
+          "slug": "energy-ev-support",
+          "statement": "Expand federal support for electric vehicles and charging",
+          "legislationNote": "purchase credits, charging grants, fleet mandates; repeal hinders",
+          "candidateTerms": [
+            "Hybrid, electric, and advanced technology vehicles",
+            "Motor fuels"
+          ]
+        },
+        {
+          "slug": "energy-grid-invest",
+          "statement": "Increase federal investment in the electric grid and energy storage",
+          "legislationNote": "transmission funding, storage credits, interregional planning mandates",
+          "candidateTerms": [
+            "Electric power generation, transmission",
+            "Energy storage, supplies, demand"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "environment",
+      "label": "Environment and public lands",
+      "goals": [
+        {
+          "slug": "env-ghg-limits",
+          "statement": "Limit greenhouse-gas emissions by federal rule",
+          "legislationNote": "authorises or preserves EPA emissions standards, carbon fees or methane rules; a bill blocking or repealing them hinders",
+          "candidateTerms": [
+            "Climate change and greenhouse gases",
+            "Air quality"
+          ]
+        },
+        {
+          "slug": "env-pollution-rules",
+          "statement": "Tighten federal limits on air and water pollution",
+          "legislationNote": "stricter standards for PFAS, particulates, discharge permits; rollbacks hinder",
+          "candidateTerms": [
+            "Air quality",
+            "Water quality",
+            "Hazardous wastes and toxic substances"
+          ]
+        },
+        {
+          "slug": "env-public-lands-protect",
+          "statement": "Keep more federal land under conservation protection",
+          "legislationNote": "designates wilderness, monuments or refuges; transfers, sales or opening to extraction hinder",
+          "candidateTerms": [
+            "Public lands",
+            "Land use and conservation",
+            "Wilderness",
+            "Parks, recreation areas, trails"
+          ]
+        },
+        {
+          "slug": "env-species-protect",
+          "statement": "Keep strong federal protection for endangered species",
+          "legislationNote": "preserves or extends Endangered Species Act listings and habitat rules; delistings by statute or exemptions hinder",
+          "candidateTerms": [
+            "Endangered and threatened species",
+            "Wildlife conservation and habitat protection"
+          ]
+        },
+        {
+          "slug": "env-climate-adaptation",
+          "statement": "Fund federal programmes for climate and disaster resilience",
+          "legislationNote": "flood, wildfire and coastal resilience grants, FEMA mitigation funding",
+          "candidateTerms": [
+            "Climate change and greenhouse gases",
+            "Emergency planning and evacuation",
+            "Floods and storm protection"
+          ]
+        },
+        {
+          "slug": "env-international-climate",
+          "statement": "Keep the U.S. in international climate agreements and climate finance",
+          "legislationNote": "funds Green Climate Fund, preserves treaty participation; withdrawal or defunding hinders",
+          "candidateTerms": [
+            "Climate change and greenhouse gases",
+            "International organizations and cooperation"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "healthcare",
+      "label": "Health care",
+      "goals": [
+        {
+          "slug": "health-public-coverage-expand",
+          "statement": "Expand public health coverage (Medicare, Medicaid, ACA subsidies)",
+          "legislationNote": "lowers Medicare age, extends enhanced ACA credits, expands Medicaid eligibility; cuts or work requirements hinder",
+          "candidateTerms": [
+            "Health care coverage and access",
+            "Medicare",
+            "Medicaid",
+            "Health care costs and insurance"
+          ]
+        },
+        {
+          "slug": "health-single-payer",
+          "statement": "Replace private insurance with a single federal health plan",
+          "legislationNote": "Medicare for All–type bills",
+          "candidateTerms": [
+            "Health care coverage and access"
+          ]
+        },
+        {
+          "slug": "health-drug-price-negotiation",
+          "statement": "Let the federal government negotiate or cap prescription drug prices",
+          "legislationNote": "extends Medicare negotiation, insulin caps, importation; repeal hinders",
+          "candidateTerms": [
+            "Prescription drugs",
+            "Medicare"
+          ]
+        },
+        {
+          "slug": "health-private-market-expand",
+          "statement": "Expand private and employer-based coverage options",
+          "legislationNote": "association health plans, HSA expansion, short-term plans, cross-state sale",
+          "candidateTerms": [
+            "Health care costs and insurance",
+            "Employee benefits and pensions"
+          ]
+        },
+        {
+          "slug": "health-abortion-access",
+          "statement": "Keep abortion legal and accessible under federal law",
+          "legislationNote": "codifies access, funds providers; federal restrictions or funding bans hinder",
+          "candidateTerms": [
+            "Abortion",
+            "Women's health"
+          ]
+        },
+        {
+          "slug": "health-mental-health-fund",
+          "statement": "Increase federal funding for mental health and addiction treatment",
+          "legislationNote": "SAMHSA funding, parity enforcement, crisis lines",
+          "candidateTerms": [
+            "Mental health",
+            "Drug, alcohol, tobacco use"
+          ]
+        },
+        {
+          "slug": "health-rural-fund",
+          "statement": "Increase federal support for rural hospitals and providers",
+          "legislationNote": "rural hospital payments, telehealth extensions, provider loan forgiveness",
+          "candidateTerms": [
+            "Rural conditions and development",
+            "Hospital care",
+            "Health personnel"
+          ]
+        },
+        {
+          "slug": "health-vaccine-public-health",
+          "statement": "Fund federal public-health and vaccination programmes",
+          "legislationNote": "CDC and vaccine programme funding, pandemic preparedness; cuts hinder",
+          "candidateTerms": [
+            "Health promotion and preventive care",
+            "Immunology and vaccination",
+            "Emergency planning and evacuation"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "education",
+      "label": "Education",
+      "goals": [
+        {
+          "slug": "edu-k12-federal-fund",
+          "statement": "Increase federal funding for public K–12 schools",
+          "legislationNote": "Title I, IDEA, school meals, facilities",
+          "candidateTerms": [
+            "Elementary and secondary education",
+            "Education programs funding",
+            "Special education"
+          ]
+        },
+        {
+          "slug": "edu-school-choice",
+          "statement": "Let federal money follow students to private, charter or home schooling",
+          "legislationNote": "federal scholarship tax credits, vouchers, charter grants",
+          "candidateTerms": [
+            "Elementary and secondary education",
+            "Income tax credits"
+          ]
+        },
+        {
+          "slug": "edu-student-debt-relief",
+          "statement": "Cancel or reduce existing federal student loan debt",
+          "legislationNote": "forgiveness programmes, income-driven repayment expansion; bills blocking relief hinder",
+          "candidateTerms": [
+            "Student aid and college costs",
+            "Higher education"
+          ]
+        },
+        {
+          "slug": "edu-college-cost-aid",
+          "statement": "Increase federal grants and tuition support for college",
+          "legislationNote": "Pell increases, free community college",
+          "candidateTerms": [
+            "Student aid and college costs",
+            "Higher education"
+          ]
+        },
+        {
+          "slug": "edu-vocational-fund",
+          "statement": "Expand federal support for apprenticeships and vocational training",
+          "legislationNote": "Perkins funding, apprenticeship grants, short-term Pell",
+          "candidateTerms": [
+            "Vocational and technical education",
+            "Employment and training programs"
+          ]
+        },
+        {
+          "slug": "edu-early-childhood",
+          "statement": "Fund federal pre-K and child care programmes",
+          "legislationNote": "Head Start, child care block grants, universal pre-K",
+          "candidateTerms": [
+            "Preschool education",
+            "Child care and development"
+          ]
+        },
+        {
+          "slug": "edu-federal-role-reduce",
+          "statement": "Reduce the federal role in education policy",
+          "legislationNote": "abolishes or shrinks the Department of Education, block-grants programmes, removes federal mandates",
+          "candidateTerms": [
+            "Education programs funding",
+            "Executive agency funding and structure"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "taxes-spending",
+      "label": "Taxes and spending",
+      "goals": [
+        {
+          "slug": "tax-high-income-raise",
+          "statement": "Raise taxes on high incomes and large estates",
+          "legislationNote": "higher top rates, estate tax expansion, capital-gains alignment; cuts for those brackets hinder",
+          "candidateTerms": [
+            "Income tax rates",
+            "Transfer and inheritance taxes",
+            "Capital gains tax"
+          ]
+        },
+        {
+          "slug": "tax-corporate-raise",
+          "statement": "Raise taxes on corporations",
+          "legislationNote": "higher corporate rate, minimum tax, buyback excise; cuts hinder",
+          "candidateTerms": [
+            "Corporate finance and management",
+            "Income tax rates"
+          ]
+        },
+        {
+          "slug": "tax-broad-cuts",
+          "statement": "Cut income taxes across the board",
+          "legislationNote": "rate reductions for most brackets, standard-deduction increases",
+          "candidateTerms": [
+            "Income tax rates",
+            "Income tax deductions"
+          ]
+        },
+        {
+          "slug": "tax-family-credits",
+          "statement": "Expand tax credits for families and low earners",
+          "legislationNote": "child tax credit, EITC, child care credit expansions",
+          "candidateTerms": [
+            "Income tax credits",
+            "Child care and development"
+          ]
+        },
+        {
+          "slug": "fiscal-deficit-reduce",
+          "statement": "Reduce the federal deficit through spending limits",
+          "legislationNote": "caps, sequestration, balanced-budget rules; bills raising spending without offsets hinder",
+          "candidateTerms": [
+            "Budget deficits and national debt",
+            "Budget process"
+          ]
+        },
+        {
+          "slug": "fiscal-debt-ceiling-raise",
+          "statement": "Raise or suspend the debt ceiling when needed",
+          "legislationNote": "clean debt-limit increases; refusals or conditions hinder",
+          "candidateTerms": [
+            "Budget deficits and national debt"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "work-safety-net",
+      "label": "Work and the safety net",
+      "goals": [
+        {
+          "slug": "work-min-wage-raise",
+          "statement": "Raise the federal minimum wage",
+          "legislationNote": "increases, indexing; preemption of increases hinders",
+          "candidateTerms": [
+            "Minimum wage",
+            "Wages and earnings"
+          ]
+        },
+        {
+          "slug": "work-union-strengthen",
+          "statement": "Strengthen federal protections for union organising",
+          "legislationNote": "PRO Act–type measures, penalties for interference; right-to-work federalisation hinders",
+          "candidateTerms": [
+            "Labor-management relations",
+            "Employee hiring"
+          ]
+        },
+        {
+          "slug": "work-paid-leave",
+          "statement": "Create a federal paid family and medical leave programme",
+          "legislationNote": "paid leave insurance, mandated leave",
+          "candidateTerms": [
+            "Employee leave",
+            "Family relationships"
+          ]
+        },
+        {
+          "slug": "safety-net-expand",
+          "statement": "Expand federal assistance programmes (SNAP, TANF, housing aid)",
+          "legislationNote": "benefit increases, eligibility expansion; work requirements, cuts or time limits hinder",
+          "candidateTerms": [
+            "Poverty and welfare assistance",
+            "Food assistance and relief"
+          ]
+        },
+        {
+          "slug": "social-security-preserve-benefits",
+          "statement": "Keep Social Security benefits at current or higher levels",
+          "legislationNote": "benefit increases, payroll-tax cap lift; retirement-age increases or benefit formula cuts hinder",
+          "candidateTerms": [
+            "Social security and elderly assistance"
+          ]
+        },
+        {
+          "slug": "work-gig-classification",
+          "statement": "Keep independent-contractor status for gig and freelance work",
+          "legislationNote": "codifies contractor tests; reclassification mandates hinder",
+          "candidateTerms": [
+            "Employee hiring",
+            "Wages and earnings"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "defense-veterans",
+      "label": "Defense and veterans",
+      "goals": [
+        {
+          "slug": "defense-spending-increase",
+          "statement": "Increase total defense spending",
+          "legislationNote": "topline increases above inflation; cuts or freezes hinder",
+          "candidateTerms": [
+            "Defense spending",
+            "Military procurement, research, weapons development"
+          ]
+        },
+        {
+          "slug": "defense-overseas-reduce",
+          "statement": "Reduce U.S. military deployments abroad",
+          "legislationNote": "troop withdrawals, basing reductions, AUMF repeal",
+          "candidateTerms": [
+            "Military operations and strategy",
+            "Military facilities and property"
+          ]
+        },
+        {
+          "slug": "defense-nuclear-modernise",
+          "statement": "Modernise and expand the nuclear arsenal",
+          "legislationNote": "new warheads, delivery systems; arms-reduction mandates hinder",
+          "candidateTerms": [
+            "Nuclear weapons",
+            "Arms control and nonproliferation"
+          ]
+        },
+        {
+          "slug": "veterans-benefits-expand",
+          "statement": "Expand veterans' health care and benefits",
+          "legislationNote": "toxic-exposure coverage, GI Bill expansions, VA staffing",
+          "candidateTerms": [
+            "Veterans' medical care",
+            "Veterans' education, employment, rehabilitation",
+            "Veterans' pensions and compensation"
+          ]
+        },
+        {
+          "slug": "defense-war-powers",
+          "statement": "Require congressional approval before military action",
+          "legislationNote": "war-powers resolutions, AUMF sunsets; open-ended authorisations hinder",
+          "candidateTerms": [
+            "Military operations and strategy",
+            "Congressional oversight"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "immigration",
+      "label": "Immigration",
+      "goals": [
+        {
+          "slug": "imm-border-enforcement",
+          "statement": "Increase border enforcement and physical barriers",
+          "legislationNote": "wall funding, more agents, detention capacity",
+          "candidateTerms": [
+            "Border security and unlawful immigration",
+            "Detention of persons"
+          ]
+        },
+        {
+          "slug": "imm-legalisation-path",
+          "statement": "Create a path to legal status for undocumented residents",
+          "legislationNote": "DACA codification, earned legalisation; bills barring it hinder",
+          "candidateTerms": [
+            "Immigration status and procedures",
+            "Citizenship and naturalization"
+          ]
+        },
+        {
+          "slug": "imm-legal-levels-increase",
+          "statement": "Increase legal immigration and work visas",
+          "legislationNote": "H-1B or H-2 caps up, green-card backlog relief, per-country cap removal",
+          "candidateTerms": [
+            "Visas and passports",
+            "Foreign labor"
+          ]
+        },
+        {
+          "slug": "imm-asylum-restrict",
+          "statement": "Restrict asylum eligibility and speed removals",
+          "legislationNote": "third-country bars, expedited removal expansion; bills expanding asylum hinder",
+          "candidateTerms": [
+            "Refugees, asylum and displaced persons",
+            "Immigration status and procedures"
+          ]
+        },
+        {
+          "slug": "imm-interior-enforcement",
+          "statement": "Expand interior enforcement and mandatory employment verification",
+          "legislationNote": "E-Verify mandates, cooperation requirements for local police, deportation priorities",
+          "candidateTerms": [
+            "Border security and unlawful immigration",
+            "Employee hiring"
+          ]
+        },
+        {
+          "slug": "imm-refugee-admissions",
+          "statement": "Increase refugee admissions",
+          "legislationNote": "higher caps, special immigrant visa expansions",
+          "candidateTerms": [
+            "Refugees, asylum and displaced persons"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "housing",
+      "label": "Housing",
+      "goals": [
+        {
+          "slug": "housing-federal-build",
+          "statement": "Increase federal funding for affordable housing construction",
+          "legislationNote": "LIHTC expansion, HOME and public-housing capital funds",
+          "candidateTerms": [
+            "Low- and moderate-income housing",
+            "Public housing",
+            "Housing supply and affordability"
+          ]
+        },
+        {
+          "slug": "housing-vouchers-expand",
+          "statement": "Expand rental assistance and housing vouchers",
+          "legislationNote": "Section 8 funding, universal voucher proposals; cuts hinder",
+          "candidateTerms": [
+            "Low- and moderate-income housing",
+            "Poverty and welfare assistance"
+          ]
+        },
+        {
+          "slug": "housing-zoning-incentives",
+          "statement": "Tie federal money to local zoning that allows more housing",
+          "legislationNote": "YIMBY-style grant conditions, density incentives",
+          "candidateTerms": [
+            "Housing supply and affordability",
+            "Land use and conservation"
+          ]
+        },
+        {
+          "slug": "housing-homeownership-support",
+          "statement": "Expand federal support for first-time homebuyers",
+          "legislationNote": "down-payment assistance, FHA expansion, mortgage credits",
+          "candidateTerms": [
+            "Housing finance and home ownership"
+          ]
+        },
+        {
+          "slug": "housing-homelessness-fund",
+          "statement": "Increase federal funding for homelessness services",
+          "legislationNote": "Continuum of Care, Housing First funding",
+          "candidateTerms": [
+            "Homelessness and emergency shelter"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "infrastructure",
+      "label": "Infrastructure",
+      "goals": [
+        {
+          "slug": "infra-transit-rail-fund",
+          "statement": "Increase federal funding for public transit and passenger rail",
+          "legislationNote": "Amtrak, transit formula and capital grants",
+          "candidateTerms": [
+            "Public transit",
+            "Railroads",
+            "Transportation programs funding"
+          ]
+        },
+        {
+          "slug": "infra-highway-fund",
+          "statement": "Increase federal funding for roads and highways",
+          "legislationNote": "highway trust fund increases, bridge programmes",
+          "candidateTerms": [
+            "Roads and highways",
+            "Transportation programs funding"
+          ]
+        },
+        {
+          "slug": "infra-broadband-fund",
+          "statement": "Fund universal broadband access",
+          "legislationNote": "BEAD-type grants, affordability subsidies",
+          "candidateTerms": [
+            "Internet, web applications, social media",
+            "Telephone and wireless communication"
+          ]
+        },
+        {
+          "slug": "infra-water-fund",
+          "statement": "Increase federal funding for water systems",
+          "legislationNote": "lead-pipe replacement, state revolving funds, dam safety",
+          "candidateTerms": [
+            "Water resources funding",
+            "Water quality",
+            "Dams and canals"
+          ]
+        },
+        {
+          "slug": "infra-user-fees-private",
+          "statement": "Fund infrastructure through user fees and private investment",
+          "legislationNote": "tolling, public-private partnerships, mileage fees",
+          "candidateTerms": [
+            "Transportation programs funding",
+            "Public-private cooperation"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "civil-rights-justice",
+      "label": "Civil rights, justice and public safety",
+      "goals": [
+        {
+          "slug": "rights-voting-access",
+          "statement": "Expand federal voting-access rules",
+          "legislationNote": "automatic registration, mail voting standards, preclearance restoration; federal ID or roll-purge mandates hinder",
+          "candidateTerms": [
+            "Voting rights",
+            "Elections, voting, political campaign regulation"
+          ]
+        },
+        {
+          "slug": "rights-voter-id",
+          "statement": "Require identification and citizenship proof to vote in federal elections",
+          "legislationNote": "ID mandates, citizenship documentation",
+          "candidateTerms": [
+            "Elections, voting, political campaign regulation",
+            "Voting rights"
+          ]
+        },
+        {
+          "slug": "rights-lgbt-protections",
+          "statement": "Add sexual orientation and gender identity to federal anti-discrimination law",
+          "legislationNote": "Equality Act–type bills; exemptions or rollbacks hinder",
+          "candidateTerms": [
+            "Sex, gender, sexual orientation discrimination"
+          ]
+        },
+        {
+          "slug": "rights-gun-restrictions",
+          "statement": "Tighten federal firearm regulation",
+          "legislationNote": "universal background checks, assault-weapons limits, red-flag funding; concealed-carry reciprocity or repeal hinder",
+          "candidateTerms": [
+            "Firearms and explosives"
+          ]
+        },
+        {
+          "slug": "rights-gun-rights-expand",
+          "statement": "Expand federal protection of firearm ownership",
+          "legislationNote": "national reciprocity, repeal of registration or NFA provisions",
+          "candidateTerms": [
+            "Firearms and explosives"
+          ]
+        },
+        {
+          "slug": "justice-sentencing-reduce",
+          "statement": "Reduce federal sentences and incarceration",
+          "legislationNote": "mandatory-minimum repeal, retroactive relief, reentry funding; new mandatory minimums hinder",
+          "candidateTerms": [
+            "Sentencing",
+            "Correctional facilities and imprisonment"
+          ]
+        },
+        {
+          "slug": "justice-police-fund",
+          "statement": "Increase federal funding for local police",
+          "legislationNote": "COPS grants, equipment programmes",
+          "candidateTerms": [
+            "Law enforcement administration and funding"
+          ]
+        },
+        {
+          "slug": "justice-police-accountability",
+          "statement": "Set federal standards for police conduct and accountability",
+          "legislationNote": "qualified-immunity limits, use-of-force standards, misconduct registries",
+          "candidateTerms": [
+            "Law enforcement officers",
+            "Civil actions and liability"
+          ]
+        },
+        {
+          "slug": "rights-privacy-surveillance",
+          "statement": "Limit federal surveillance and data collection",
+          "legislationNote": "FISA 702 warrant requirements, data-broker limits; reauthorisations without limits hinder",
+          "candidateTerms": [
+            "Right of privacy",
+            "Intelligence activities, surveillance, classified information"
+          ]
+        },
+        {
+          "slug": "rights-campaign-finance",
+          "statement": "Tighten federal limits and disclosure for campaign money",
+          "legislationNote": "disclosure mandates, public financing, contribution limits",
+          "candidateTerms": [
+            "Elections, voting, political campaign regulation"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "foreign-policy-trade",
+      "label": "Foreign policy and trade",
+      "goals": [
+        {
+          "slug": "foreign-ukraine-aid",
+          "statement": "Continue military and economic aid to Ukraine",
+          "legislationNote": "appropriations, lend-lease; conditions or cuts hinder",
+          "candidateTerms": [
+            "Ukraine",
+            "Military assistance, sales, and agreements",
+            "Foreign aid and international relief"
+          ]
+        },
+        {
+          "slug": "foreign-israel-aid",
+          "statement": "Continue military aid to Israel without new conditions",
+          "legislationNote": "appropriations, Iron Dome funding; conditioning aid on conduct hinders",
+          "candidateTerms": [
+            "Israel",
+            "Military assistance, sales, and agreements"
+          ]
+        },
+        {
+          "slug": "foreign-aid-overall",
+          "statement": "Maintain or increase overall foreign aid and development funding",
+          "legislationNote": "USAID, global health, humanitarian accounts; cuts hinder",
+          "candidateTerms": [
+            "Foreign aid and international relief"
+          ]
+        },
+        {
+          "slug": "foreign-china-restrict",
+          "statement": "Restrict trade and investment with China",
+          "legislationNote": "outbound investment screening, tariffs, entity-list expansion, TikTok-type divestiture",
+          "candidateTerms": [
+            "China",
+            "Trade restrictions",
+            "Foreign and international investments"
+          ]
+        },
+        {
+          "slug": "trade-tariffs-increase",
+          "statement": "Raise tariffs to protect domestic industry",
+          "legislationNote": "broad or sectoral tariff authority; tariff rollbacks hinder",
+          "candidateTerms": [
+            "Tariffs",
+            "Trade restrictions"
+          ]
+        },
+        {
+          "slug": "trade-agreements-expand",
+          "statement": "Enter new free-trade agreements",
+          "legislationNote": "trade promotion authority, agreement approvals",
+          "candidateTerms": [
+            "Trade agreements and negotiations",
+            "Free trade and trade barriers"
+          ]
+        },
+        {
+          "slug": "foreign-alliances-maintain",
+          "statement": "Maintain NATO and treaty alliance commitments",
+          "legislationNote": "bars on withdrawal, burden-sharing funding; withdrawal authorisations hinder",
+          "candidateTerms": [
+            "Collective security",
+            "Europe",
+            "International organizations and cooperation"
+          ]
+        },
+        {
+          "slug": "foreign-sanctions-expand",
+          "statement": "Expand sanctions on adversary governments",
+          "legislationNote": "Russia, Iran, North Korea sanctions bills; waivers or lifting hinder",
+          "candidateTerms": [
+            "Sanctions",
+            "Russia",
+            "Iran"
+          ]
+        }
+      ]
+    }
+  ]
+}

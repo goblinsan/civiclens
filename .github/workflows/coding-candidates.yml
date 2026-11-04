@@ -1,0 +1,39 @@
+name: Coding candidates
+
+# Exports every bill with a recorded roll-call vote (title, official CRS
+# classification and summary, each roll-call, matching candidate goals) as a
+# JSON artifact, so bill → goal effect codings (data/bill-goal-effects) can be
+# drafted and reviewed without database access. Read-only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      congress:
+        description: 'Congress number'
+        default: '119'
+        type: string
+
+jobs:
+  export:
+    name: Export bills with roll-call votes
+    runs-on: [self-hosted, linux, civreveal-home]
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Export
+        env:
+          CONGRESS: ${{ inputs.congress }}
+        run: pnpm --filter @civreveal/scripts --silent export-candidates > coding-candidates-${{ inputs.congress }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coding-candidates-${{ inputs.congress }}
+          path: coding-candidates-${{ inputs.congress }}.json
+          retention-days: 14

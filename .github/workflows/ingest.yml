@@ -96,6 +96,9 @@ jobs:
       - name: Apply migrations
         run: pnpm db:migrate
 
+      - name: Sync policy goals and bill effect codings
+        run: pnpm db:sync-goals
+
       - name: Resolve run parameters
         id: params
         run: |

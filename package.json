@@ -17,7 +17,8 @@
     "typecheck": "pnpm -r typecheck",
     "db:migrate": "pnpm --filter @civreveal/scripts migrate",
     "db:seed": "pnpm --filter @civreveal/scripts seed",
-    "db:reset": "pnpm --filter @civreveal/scripts db:reset"
+    "db:reset": "pnpm --filter @civreveal/scripts db:reset",
+    "db:sync-goals": "pnpm --filter @civreveal/scripts sync-goals"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",

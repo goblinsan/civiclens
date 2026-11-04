@@ -4,3 +4,4 @@ export * from './schemas/politician.js';
 export * from './schemas/vote.js';
 export * from './schemas/questionnaire.js';
 export * from './schemas/match.js';
+export * from './schemas/policyGoal.js';

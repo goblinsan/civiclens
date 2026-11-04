@@ -361,8 +361,8 @@ export async function upsertVote(
   const result = await pool.query<{ id: string }>(
     `INSERT INTO votes
        (bill_id, chamber, vote_date, result, yea_count, nay_count, abstain_count, not_voting_count,
-        source_id, source_updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        source_id, source_updated_at, question)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      ON CONFLICT (source_id) WHERE source_id IS NOT NULL DO UPDATE SET
        bill_id           = EXCLUDED.bill_id,
        vote_date         = EXCLUDED.vote_date,
@@ -371,7 +371,8 @@ export async function upsertVote(
        nay_count         = EXCLUDED.nay_count,
        abstain_count     = EXCLUDED.abstain_count,
        not_voting_count  = EXCLUDED.not_voting_count,
-       source_updated_at = EXCLUDED.source_updated_at
+       source_updated_at = EXCLUDED.source_updated_at,
+       question          = EXCLUDED.question
      RETURNING id`,
     [
       billInternalId,
@@ -384,6 +385,7 @@ export async function upsertVote(
       vote.notVotingCount,
       vote.sourceId,
       vote.sourceUpdatedAt?.toISOString() ?? null,
+      vote.question,
     ],
   );
 
