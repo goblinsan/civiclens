@@ -4,8 +4,14 @@
 #   (fill in DATABASE_URL etc.)
 #   docker compose -f deploy/docker-compose.yml up -d
 #
-# The API listens on 127.0.0.1:3001 only; the existing Cloudflare Tunnel routes
-# api.civreveal.org to it. Nothing is exposed to the LAN or the internet directly.
+# The API binds to CIVREVEAL_BIND_ADDR (default 127.0.0.1) port 3001; the
+# existing Cloudflare Tunnel routes api.civreveal.org to it. Keep the loopback
+# default when cloudflared runs on this machine. When cloudflared runs on
+# another box, set CIVREVEAL_BIND_ADDR to this machine's LAN address so the
+# tunnel can reach it — and set it where the deploy runs, i.e. in the
+# self-hosted runner's ~/actions-runner/.env, otherwise the next deploy rebinds
+# the container to loopback and the tunnel route breaks. Nothing is exposed to
+# the internet directly either way.
 # The deploy workflow (.github/workflows/api-image.yml) runs this same file on
 # the self-hosted runner after every image publish.
 
@@ -17,7 +23,7 @@ services:
     env_file:
       - ${CIVREVEAL_ENV_FILE:-/opt/civreveal/api.env}
     ports:
-      - "127.0.0.1:3001:3001"
+      - "${CIVREVEAL_BIND_ADDR:-127.0.0.1}:3001:3001"
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "5" }

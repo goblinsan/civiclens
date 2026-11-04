@@ -2,8 +2,9 @@ name: Ingest Congress data
 
 # Runs the ingest job (jobs/ingest-congress) against the production database,
 # on the self-hosted runner on the home network (docs/home-server-setup.md).
-# senate.gov refuses cloud-provider IP ranges, so running from home is what
-# lets the Senate step work alongside members, bills and House votes.
+# senate.gov refuses cloud-provider IP ranges, so running from home is a
+# precondition for the Senate step; it also needs senate.gov's Akamai bot
+# registration for CivRevealBot to be accepted (docs/data-ingestion.md).
 #
 # Needs repository secrets (Settings → Secrets and variables → Actions):
 #   DATABASE_URL       PostgreSQL connection string (include ?sslmode=require for hosted DBs)

@@ -36,6 +36,24 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Pulls the operator-facing detail out of a refusal so the log carries what a
+ * webmaster needs to look the request up. Akamai's block page carries a
+ * "Reference #18.xxxx.yyyy" that identifies the decision on their side.
+ */
+export async function describeRefusal(response: Response): Promise<string> {
+  let body = '';
+  try {
+    body = (await response.text()).slice(0, 4000);
+  } catch {
+    return '';
+  }
+  const reference = /Reference(?:&#32;|&nbsp;|\s)*#\s*([0-9a-f.]+)/i.exec(body);
+  if (reference) return ` (Akamai reference #${reference[1]})`;
+  const text = body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return text ? ` (${text.slice(0, 160)})` : '';
+}
+
 async function fetchText(
   url: string,
   logger: Logger,
@@ -56,7 +74,7 @@ async function fetchText(
         logger.warn('vote feed fetch failed, will retry', { url, status: response.status, attempt });
         if (attempt < maxRetries) { await sleep(delay); continue; }
       }
-      throw new Error(`HTTP ${response.status}: ${url}`);
+      throw new Error(`HTTP ${response.status}: ${url}${await describeRefusal(response)}`);
     } catch (err) {
       lastError = err;
       if (attempt < maxRetries) {
