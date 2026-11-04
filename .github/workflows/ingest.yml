@@ -53,6 +53,9 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       CONGRESS_API_KEY: ${{ secrets.CONGRESS_API_KEY }}
+      # The home runner has a local time zone; hosted runners are UTC. Pin it so
+      # timestamps parse the same everywhere.
+      TZ: UTC
 
     steps:
       - name: Normalise and check secrets

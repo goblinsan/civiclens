@@ -34,12 +34,21 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Fetch with exponential back-off on transient failures. */
-async function fetchWithRetry(
+/**
+ * Fetch a JSON document with exponential back-off on transient failures.
+ *
+ * The body is consumed here, inside the request's timeout window. Returning
+ * the Response and reading it later is unsafe: the AbortSignal keeps running
+ * after the headers arrive, and if the body is still unread when it fires
+ * (e.g. while a sibling request in a Promise.all is slow) the stream is
+ * cancelled and `.json()` fails with "Body is unusable". A failed body read
+ * is retried like any other transient error.
+ */
+async function fetchJson<T>(
   url: string,
   logger: Logger,
   maxRetries = 3,
-): Promise<Response> {
+): Promise<T> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -48,13 +57,13 @@ async function fetchWithRetry(
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
 
-      if (response.ok) return response;
+      if (response.ok) return (await response.json()) as T;
 
       // Retry on rate-limit or server-side errors
       if (response.status === 429 || response.status >= 500) {
         const delay = Math.pow(2, attempt) * 1000;
         logger.warn('fetch failed, will retry', {
-          url,
+          url: redact(url),
           status: response.status,
           attempt,
           retryAfterMs: delay,
@@ -65,13 +74,13 @@ async function fetchWithRetry(
         }
       }
 
-      throw new Error(`HTTP ${response.status} ${response.statusText}: ${url}`);
+      throw new Error(`HTTP ${response.status} ${response.statusText}: ${redact(url)}`);
     } catch (err) {
       lastError = err;
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 1000;
         logger.warn('fetch error, will retry', {
-          url,
+          url: redact(url),
           err: String(err),
           attempt,
           retryAfterMs: delay,
@@ -80,7 +89,12 @@ async function fetchWithRetry(
       }
     }
   }
-  throw lastError ?? new Error(`Failed to fetch ${url}`);
+  throw lastError ?? new Error(`Failed to fetch ${redact(url)}`);
+}
+
+/** Hide the API key in anything that reaches the log. */
+function redact(url: string): string {
+  return url.replace(/api_key=[^&]+/, 'api_key=***');
 }
 
 /** Append ?format=json&api_key=… and optional extra params. */
@@ -232,10 +246,9 @@ export function createCongressClient(apiKey: string, logger: Logger) {
       }
 
       const url = buildUrl(`/bill/${congress}`, apiKey, params);
-      logger.debug('GET bills page', { url: url.replace(apiKey, '***'), offset });
+      logger.debug('GET bills page', { url: redact(url), offset });
 
-      const response = await fetchWithRetry(url, logger);
-      const data = (await response.json()) as BillListResponse;
+      const data = await fetchJson<BillListResponse>(url, logger);
 
       const page = data.bills ?? [];
       results.push(...page);
@@ -273,19 +286,17 @@ export function createCongressClient(apiKey: string, logger: Logger) {
 
     logger.debug('GET bill detail', { congress, billType, billNumber });
 
-    const [detailRes, summaryRes, subjectsRes] = await Promise.all([
-      fetchWithRetry(detailUrl, logger),
-      fetchWithRetry(summariesUrl, logger).catch(() => null),
-      fetchWithRetry(subjectsUrl, logger).catch(() => null),
+    const [detailData, summaryData, subjectsData] = await Promise.all([
+      fetchJson<BillDetailResponse>(detailUrl, logger),
+      fetchJson<BillSummariesResponse>(summariesUrl, logger).catch(() => null),
+      fetchJson<BillSubjectsResponse>(subjectsUrl, logger).catch(() => null),
     ]);
 
-    const detailData = (await detailRes.json()) as BillDetailResponse;
     const bill = detailData.bill;
     if (!bill) return null;
 
     let summaryText: string | null = null;
-    if (summaryRes?.ok) {
-      const summaryData = (await summaryRes.json()) as BillSummariesResponse;
+    if (summaryData) {
       const latest = summaryData.summaries?.[0];
       if (latest?.text) {
         // Strip HTML tags from summary text
@@ -295,8 +306,7 @@ export function createCongressClient(apiKey: string, logger: Logger) {
 
     const legislativeSubjects: string[] = [];
     let policyArea = bill.policyArea;
-    if (subjectsRes?.ok) {
-      const subjectsData = (await subjectsRes.json()) as BillSubjectsResponse;
+    if (subjectsData) {
       for (const item of subjectsData.subjects?.legislativeSubjects ?? []) {
         if (item.name) legislativeSubjects.push(item.name);
       }
@@ -335,10 +345,9 @@ export function createCongressClient(apiKey: string, logger: Logger) {
       };
 
       const url = buildUrl('/member', apiKey, params);
-      logger.debug('GET members page', { url: url.replace(apiKey, '***'), offset });
+      logger.debug('GET members page', { url: redact(url), offset });
 
-      const response = await fetchWithRetry(url, logger);
-      const data = (await response.json()) as MemberListResponse;
+      const data = await fetchJson<MemberListResponse>(url, logger);
 
       const page = data.members ?? [];
       results.push(...page);
@@ -362,8 +371,7 @@ export function createCongressClient(apiKey: string, logger: Logger) {
     const url = buildUrl(`/member/${bioguideId}`, apiKey);
     logger.debug('GET member detail', { bioguideId });
 
-    const response = await fetchWithRetry(url, logger);
-    const data = (await response.json()) as MemberDetailResponse;
+    const data = await fetchJson<MemberDetailResponse>(url, logger);
 
     await sleep(REQUEST_DELAY_MS);
     return data.member ?? null;
@@ -394,8 +402,7 @@ export function createCongressClient(apiKey: string, logger: Logger) {
         limit: String(PAGE_LIMIT),
         offset: String(offset),
       });
-      const response = await fetchWithRetry(url, logger);
-      const data = (await response.json()) as HouseVoteListResponse;
+      const data = await fetchJson<HouseVoteListResponse>(url, logger);
       const page = data.houseRollCallVotes ?? [];
       items.push(...page);
       if (page.length < PAGE_LIMIT) break;
@@ -428,8 +435,7 @@ export function createCongressClient(apiKey: string, logger: Logger) {
             `/house-vote/${congress}/${session}/${item.rollCallNumber}/members`,
             apiKey,
           );
-          const response = await fetchWithRetry(membersUrl, logger);
-          const data = (await response.json()) as HouseVoteMembersResponse;
+          const data = await fetchJson<HouseVoteMembersResponse>(membersUrl, logger);
           events[index] = normalizeHouseVoteApi(item, data.houseRollCallVoteMemberVotes?.results ?? []);
         } catch (err) {
           logger.warn('house vote member positions unavailable, skipping', {

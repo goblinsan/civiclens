@@ -389,9 +389,17 @@ export function normalizeVoteEvent(raw: CongressVoteEvent): {
 }
 
 /** Parse an ISO-8601 string into a Date, or null when absent or invalid. */
+/**
+ * Parse an upstream timestamp. Congress.gov publishes UTC; a value that carries
+ * a time but no zone designator (e.g. "2026-02-25T14:09:11") is read as UTC
+ * rather than as the machine's local time, so the same string parses to the
+ * same instant on a hosted runner (UTC) and on the home server (local zone).
+ * Date-only values ("2026-02-25") are already UTC per the ECMAScript spec.
+ */
 export function parseDateOrNull(value: string | null | undefined): Date | null {
   if (!value) return null;
-  const date = new Date(value);
+  const text = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(value) ? `${value}Z` : value;
+  const date = new Date(text);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
