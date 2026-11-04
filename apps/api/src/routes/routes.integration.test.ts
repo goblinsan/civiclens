@@ -52,11 +52,6 @@ const fakeProfile = {
   created_at: new Date(),
 };
 
-const fakeTag = {
-  id: 'tag-uuid-1',
-  slug: 'healthcare',
-  label: 'Healthcare',
-};
 
 const fakeSentiment = {
   id: 'sentiment-uuid-1',
@@ -167,13 +162,33 @@ describe('GET /politicians/:id', () => {
   });
 });
 
+// ─── GET /questionnaire/goals ─────────────────────────────────────────────────
+
+describe('GET /questionnaire/goals', () => {
+  it('groups active goals by area in sort order', async () => {
+    const pool = makePoolMock({
+      'FROM policy_goals WHERE is_active': [
+        { slug: 'energy-nuclear-expand', area_slug: 'energy', area_label: 'Energy', statement: 'Expand nuclear power generation', legislation_note: 'funds reactors', sort_order: 1 },
+        { slug: 'energy-grid-invest', area_slug: 'energy', area_label: 'Energy', statement: 'Increase federal investment in the electric grid and energy storage', legislation_note: 'transmission funding', sort_order: 2 },
+        { slug: 'housing-vouchers-expand', area_slug: 'housing', area_label: 'Housing', statement: 'Expand rental assistance and housing vouchers', legislation_note: 'Section 8', sort_order: 3 },
+      ],
+    });
+    const app = await buildApp({ pool });
+    const res = await app.inject({ method: 'GET', url: '/questionnaire/goals' });
+    expect(res.statusCode).toBe(200);
+    const body = res.json<{ areas: Array<{ slug: string; goals: unknown[] }> }>();
+    expect(body.areas.map((a) => a.slug)).toEqual(['energy', 'housing']);
+    expect(body.areas[0]!.goals).toHaveLength(2);
+  });
+});
+
 // ─── POST /questionnaire/submit ───────────────────────────────────────────────
 
 describe('POST /questionnaire/submit', () => {
-  it('returns 200 with sessionId and profileId on valid submission', async () => {
+  it('returns 200 with sessionId, profileId and the number of answers stored', async () => {
     const pool = makePoolMock({
-      'INSERT INTO questionnaire_profiles': [fakeProfile],  // upsertProfile RETURNING
-      'WHERE slug = ANY': [fakeTag],                        // upsertAnswers tag lookup
+      'INSERT INTO questionnaire_profiles': [fakeProfile],
+      'INSERT INTO questionnaire_goal_answers': [{}],
     });
     const app = await buildApp({ pool });
     const res = await app.inject({
@@ -182,18 +197,16 @@ describe('POST /questionnaire/submit', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         sessionId: 'test-session-abc',
-        responses: [{ tag: 'healthcare', stance: 'support' }],
+        answers: [{ goal: 'energy-nuclear-expand', stance: 'support', importance: 3 }],
       }),
     });
     expect(res.statusCode).toBe(200);
-    const body = res.json<{ sessionId: string; profileId: string }>();
-    expect(body.sessionId).toBe('test-session-abc');
-    expect(body.profileId).toBe('profile-uuid-1');
+    const body = res.json<{ sessionId: string; profileId: string; answered: number }>();
+    expect(body).toEqual({ sessionId: 'test-session-abc', profileId: 'profile-uuid-1', answered: 1 });
   });
 
   it('returns 400 when body is invalid', async () => {
-    const pool = makePoolMock();
-    const app = await buildApp({ pool });
+    const app = await buildApp({ pool: makePoolMock() });
     const res = await app.inject({
       method: 'POST',
       url: '/questionnaire/submit',
@@ -203,14 +216,27 @@ describe('POST /questionnaire/submit', () => {
     expect(res.statusCode).toBe(400);
   });
 
-  it('returns 400 when responses array is empty', async () => {
-    const pool = makePoolMock();
+  it('returns 400 when answers array is empty or the stance is unknown', async () => {
+    const app = await buildApp({ pool: makePoolMock() });
+    for (const answers of [[], [{ goal: 'x', stance: 'neutral' }]]) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/questionnaire/submit',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-abc', answers }),
+      });
+      expect(res.statusCode).toBe(400);
+    }
+  });
+
+  it('returns 400 when no answer names a known goal', async () => {
+    const pool = makePoolMock({ 'INSERT INTO questionnaire_profiles': [fakeProfile] });
     const app = await buildApp({ pool });
     const res = await app.inject({
       method: 'POST',
       url: '/questionnaire/submit',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ sessionId: 'test-session-abc', responses: [] }),
+      body: JSON.stringify({ sessionId: 'test-session-abc', answers: [{ goal: 'no-such-goal', stance: 'support' }] }),
     });
     expect(res.statusCode).toBe(400);
   });
@@ -225,7 +251,7 @@ describe('GET /questionnaire/matches', () => {
       profile_id: 'profile-uuid-1',
       politician_id: 'pol-uuid-1',
       score: '75.00',
-      breakdown: { healthcare: 80 },
+      breakdown: { model: 'goals-v1', goals: { 'energy-nuclear-expand': { score: 80, votes: 3, agreed: 2 } }, _total_votes: 3 },
       computed_at: new Date(),
       first_name: 'Alice',
       last_name: 'Anderson',
@@ -241,31 +267,46 @@ describe('GET /questionnaire/matches', () => {
       'FROM match_results': [fakeMatch],
     });
     const app = await buildApp({ pool });
-    const res = await app.inject({
-      method: 'GET',
-      url: '/questionnaire/matches?sessionId=test-session-abc',
-    });
+    const res = await app.inject({ method: 'GET', url: '/questionnaire/matches?sessionId=test-session-abc' });
     expect(res.statusCode).toBe(200);
-    const body = res.json<unknown[]>();
-    expect(Array.isArray(body)).toBe(true);
-    expect(body).toHaveLength(1);
+    expect(res.json<unknown[]>()).toHaveLength(1);
   });
 
   it('returns 404 when session has no profile', async () => {
-    const pool = makePoolMock();
-    const app = await buildApp({ pool });
-    const res = await app.inject({
-      method: 'GET',
-      url: '/questionnaire/matches?sessionId=unknown-session',
-    });
+    const app = await buildApp({ pool: makePoolMock() });
+    const res = await app.inject({ method: 'GET', url: '/questionnaire/matches?sessionId=unknown-session' });
     expect(res.statusCode).toBe(404);
   });
 
   it('returns 400 when sessionId is missing', async () => {
-    const pool = makePoolMock();
-    const app = await buildApp({ pool });
+    const app = await buildApp({ pool: makePoolMock() });
     const res = await app.inject({ method: 'GET', url: '/questionnaire/matches' });
     expect(res.statusCode).toBe(400);
+  });
+
+  it('serves the votes that counted for one politician', async () => {
+    const pool = makePoolMock({
+      'questionnaire_profiles WHERE session_id': [fakeProfile],
+      'AS agreed': [{ vote_id: 'v1', bill_type: 'HR', bill_number: '1', goal_slug: 'energy-nuclear-expand', position: 'yea', agreed: true }],
+    });
+    const app = await buildApp({ pool });
+    const res = await app.inject({
+      method: 'GET',
+      url: '/questionnaire/matches/pol-uuid-1/evidence?sessionId=test-session-abc',
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json<Array<{ agreed: boolean }>>()[0]!.agreed).toBe(true);
+  });
+});
+
+// ─── GET /bills/:id/analysis ──────────────────────────────────────────────────
+
+describe('GET /bills/:id/analysis', () => {
+  it('returns codings and the brief, empty when none exist', async () => {
+    const app = await buildApp({ pool: makePoolMock() });
+    const res = await app.inject({ method: 'GET', url: '/bills/bill-uuid-1/analysis' });
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ effects: [], brief: null });
   });
 });
 

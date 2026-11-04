@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { DbPool } from '@civreveal/db';
-import { createBillsRepository, createSentimentsRepository, createAuditLogRepository } from '../repositories/index.js';
-import type { BillsRepository, SentimentsRepository, AuditLogRepository } from '../repositories/index.js';
+import { createBillsRepository, createSentimentsRepository, createAuditLogRepository, createGoalsRepository } from '../repositories/index.js';
+import type { BillsRepository, SentimentsRepository, AuditLogRepository, GoalsRepository } from '../repositories/index.js';
 import { checkRateLimit } from '../plugins/rateLimiter.js';
 import { env } from '../env.js';
 
@@ -67,6 +67,17 @@ export async function billRoutes(
   const repo: BillsRepository = createBillsRepository(opts.pool);
   const sentimentRepo: SentimentsRepository = createSentimentsRepository(opts.pool);
   const auditRepo: AuditLogRepository = createAuditLogRepository(opts.pool);
+  const goalsRepo: GoalsRepository = createGoalsRepository(opts.pool);
+
+  // GET /bills/:id/analysis — reviewed goal codings and the plain-language brief
+  app.get<{ Params: { id: string } }>('/:id/analysis', async (request, reply) => {
+    const [effects, brief] = await Promise.all([
+      goalsRepo.listBillGoalEffects(request.params.id),
+      goalsRepo.getBillBrief(request.params.id),
+    ]);
+    reply.header('Cache-Control', 'public, max-age=300');
+    return reply.send({ effects, brief });
+  });
 
   // GET /bills  — list / search
   app.get('/', async (request, reply) => {

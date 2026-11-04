@@ -18,7 +18,12 @@ export { createQuestionnaireRepository } from './questionnaire.js';
 export type {
   QuestionnaireRepository,
   MatchResultWithPolitician,
+  MatchEvidenceRow,
+  GoalAnswerInput,
 } from './questionnaire.js';
+
+export { createGoalsRepository } from './goals.js';
+export type { GoalsRepository, GoalArea, BillGoalEffectDetail } from './goals.js';
 
 export { createSentimentsRepository } from './sentiments.js';
 export type {

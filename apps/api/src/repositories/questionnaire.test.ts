@@ -2,13 +2,13 @@ import { describe, it, expect, vi } from 'vitest';
 import { createQuestionnaireRepository } from '../repositories/questionnaire.js';
 import type { DbPool } from '@civreveal/db';
 
+type Call = [string, unknown[] | undefined];
+
 function makePoolMock(overrides: Record<string, unknown[]> = {}) {
   const mock = {
     query: vi.fn(async (sql: string, _params?: unknown[]) => {
       for (const [pattern, rows] of Object.entries(overrides)) {
-        if (sql.includes(pattern)) {
-          return { rows, rowCount: rows.length };
-        }
+        if (sql.includes(pattern)) return { rows, rowCount: rows.length };
       }
       return { rows: [], rowCount: 0 };
     }),
@@ -16,11 +16,9 @@ function makePoolMock(overrides: Record<string, unknown[]> = {}) {
   return mock as unknown as DbPool;
 }
 
-const fakeTag = {
-  id: '01000000-0000-0000-0000-000000000001',
-  slug: 'healthcare',
-  label: 'Healthcare',
-};
+function calls(pool: DbPool): Call[] {
+  return (pool.query as unknown as ReturnType<typeof vi.fn>).mock.calls as Call[];
+}
 
 const fakeProfile = {
   id: '07000000-0000-0000-0000-000000000001',
@@ -29,225 +27,114 @@ const fakeProfile = {
   created_at: new Date(),
 };
 
-const fakePolitician = { id: 'pol-uuid-1' };
-
-const fakeMatchResult = {
-  id: 'mr-uuid-1',
-  profile_id: '07000000-0000-0000-0000-000000000001',
-  politician_id: 'pol-uuid-1',
-  score: '75.00',
-  breakdown: { healthcare: 80 },
-  computed_at: new Date(),
-  first_name: 'Alice',
-  last_name: 'Anderson',
-  party: 'Democrat',
-  state: 'CA',
-  chamber: 'senate' as const,
-  image_url: null,
-  bioguide_id: 'A000001',
-  total_votes: 3,
-};
-
 describe('createQuestionnaireRepository', () => {
-  describe('listPolicyTags', () => {
-    it('returns all policy tags', async () => {
-      const pool = makePoolMock({ 'FROM policy_tags': [fakeTag] });
-      const repo = createQuestionnaireRepository(pool);
-      const tags = await repo.listPolicyTags();
-      expect(tags).toHaveLength(1);
-      expect(tags[0]?.slug).toBe('healthcare');
-    });
-
-    it('returns empty array when no tags', async () => {
-      const pool = makePoolMock();
-      const repo = createQuestionnaireRepository(pool);
-      const tags = await repo.listPolicyTags();
-      expect(tags).toHaveLength(0);
-    });
-  });
-
   describe('getProfileBySessionId', () => {
     it('returns the profile when found', async () => {
       const pool = makePoolMock({ 'WHERE session_id': [fakeProfile] });
-      const repo = createQuestionnaireRepository(pool);
-      const profile = await repo.getProfileBySessionId('test-session-123');
-      expect(profile).not.toBeNull();
+      const profile = await createQuestionnaireRepository(pool).getProfileBySessionId('test-session-123');
       expect(profile?.session_id).toBe('test-session-123');
     });
 
     it('returns null when not found', async () => {
-      const pool = makePoolMock();
-      const repo = createQuestionnaireRepository(pool);
-      const profile = await repo.getProfileBySessionId('nonexistent');
+      const profile = await createQuestionnaireRepository(makePoolMock()).getProfileBySessionId('nonexistent');
       expect(profile).toBeNull();
     });
   });
 
   describe('upsertProfile', () => {
-    it('returns the upserted profile', async () => {
-      const pool = makePoolMock({ 'RETURNING': [fakeProfile] });
-      const repo = createQuestionnaireRepository(pool);
-      const profile = await repo.upsertProfile('test-session-123');
+    it('inserts or refreshes submitted_at and returns the row', async () => {
+      const pool = makePoolMock({ RETURNING: [fakeProfile] });
+      const profile = await createQuestionnaireRepository(pool).upsertProfile('test-session-123');
       expect(profile.session_id).toBe('test-session-123');
-    });
-
-    it('calls INSERT ... ON CONFLICT', async () => {
-      const pool = makePoolMock({ 'RETURNING': [fakeProfile] });
-      const repo = createQuestionnaireRepository(pool);
-      await repo.upsertProfile('test-session-123');
-      const call = (pool.query as ReturnType<typeof vi.fn>).mock.calls[0] as [string, unknown[]];
-      expect(call[0]).toContain('ON CONFLICT');
-      expect(call[0]).toContain('submitted_at');
+      expect(calls(pool)[0]![0]).toContain('ON CONFLICT');
+      expect(calls(pool)[0]![0]).toContain('submitted_at');
     });
   });
 
-  describe('upsertAnswers', () => {
-    it('does nothing when responses array is empty', async () => {
+  describe('replaceGoalAnswers', () => {
+    it('removes answers not in the list, then upserts the rest by slug', async () => {
+      const pool = makePoolMock({ 'INSERT INTO questionnaire_goal_answers': [{}, {}] });
+      const stored = await createQuestionnaireRepository(pool).replaceGoalAnswers('prof-id', [
+        { goalSlug: 'energy-nuclear-expand', stance: 'support', importance: 3 },
+        { goalSlug: 'health-single-payer', stance: 'oppose', importance: 1 },
+      ]);
+      expect(stored).toBe(2);
+      const [del, ins] = calls(pool);
+      expect(del![0]).toContain('DELETE FROM questionnaire_goal_answers');
+      expect(del![1]).toEqual(['prof-id', ['energy-nuclear-expand', 'health-single-payer']]);
+      expect(ins![0]).toContain('JOIN policy_goals g ON g.slug = x.slug AND g.is_active');
+      expect(ins![1]).toEqual([
+        'prof-id',
+        ['energy-nuclear-expand', 'health-single-payer'],
+        ['support', 'oppose'],
+        [3, 1],
+      ]);
+    });
+
+    it('with no answers only clears the profile', async () => {
       const pool = makePoolMock();
-      const repo = createQuestionnaireRepository(pool);
-      await repo.upsertAnswers('prof-id', []);
-      expect((pool.query as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(0);
-    });
-
-    it('looks up tag IDs and inserts answers', async () => {
-      const pool = makePoolMock({ 'WHERE slug': [fakeTag] });
-      const repo = createQuestionnaireRepository(pool);
-      await repo.upsertAnswers('prof-id', [{ tagSlug: 'healthcare', stance: 'support' }]);
-      const calls = (pool.query as ReturnType<typeof vi.fn>).mock.calls as [string, unknown[]][];
-      // First call: fetch tag IDs
-      expect(calls[0]![0]).toContain('policy_tags');
-      // Second call: upsert answer
-      expect(calls[1]![0]).toContain('questionnaire_answers');
-      expect(calls[1]![1]).toContain('support');
-    });
-
-    it('skips responses whose tag slug is not found', async () => {
-      // Pool returns no tags.
-      const pool = makePoolMock({ 'WHERE slug': [] });
-      const repo = createQuestionnaireRepository(pool);
-      await repo.upsertAnswers('prof-id', [{ tagSlug: 'unknown-tag', stance: 'support' }]);
-      // Only one query (the tag lookup) should be made.
-      expect((pool.query as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(1);
+      const stored = await createQuestionnaireRepository(pool).replaceGoalAnswers('prof-id', []);
+      expect(stored).toBe(0);
+      expect(calls(pool)).toHaveLength(1);
     });
   });
 
   describe('computeAndSaveMatchResults', () => {
-    it('upserts match results for each politician', async () => {
-      // Return one politician, one voting data row
-      const votingRow = {
-        politician_id: 'pol-uuid-1',
-        tag_slug: 'healthcare',
-        stance: 'support',
-        vote_value: 'yea',
-        vote_count: '2',
-      };
+    it('aggregates decisive votes on coded bills, scores, and stores one row per sitting member', async () => {
+      const aggregated = [
+        { politician_id: 'pol-1', goal_slug: 'energy-nuclear-expand', stance: 'support', importance: 2, effect: 'advances', strength: 2, value: 'yea', vote_count: 2 },
+        { politician_id: 'pol-1', goal_slug: 'energy-nuclear-expand', stance: 'support', importance: 2, effect: 'advances', strength: 2, value: 'nay', vote_count: 1 },
+      ];
       const pool = makePoolMock({
-        'FROM questionnaire_answers': [votingRow],
-        'FROM politicians': [fakePolitician],
+        'FROM questionnaire_goal_answers qa': aggregated,
+        'FROM politicians WHERE is_current': [{ id: 'pol-1' }, { id: 'pol-2' }],
       });
-      const repo = createQuestionnaireRepository(pool);
-      await repo.computeAndSaveMatchResults('prof-uuid-1');
+      await createQuestionnaireRepository(pool).computeAndSaveMatchResults('prof-id');
 
-      const calls = (pool.query as ReturnType<typeof vi.fn>).mock.calls as [string, unknown[]][];
-      // At minimum we expect calls for voting data, politicians list, and upsert
-      expect(calls.length).toBeGreaterThanOrEqual(3);
-      // Last call should be the match_results upsert
-      const upsertCall = calls[calls.length - 1]!;
-      expect(upsertCall[0]).toContain('match_results');
+      const agg = calls(pool)[0]!;
+      expect(agg[0]).toContain("v.question ~* '^on (passage");
+      expect(agg[0]).toContain("v.question !~* 'recommit");
+
+      const insert = calls(pool).find((c) => c[0].includes('INSERT INTO match_results'))!;
+      const [profileId, ids, scores, breakdowns] = insert[1] as [string, string[], string[], string[]];
+      expect(profileId).toBe('prof-id');
+      expect(ids).toEqual(['pol-1', 'pol-2']);
+      // pol-1: raw = 4·2 − 4·1 = 4, max = 12 → (1/3 + 1)/2 = 66.67
+      expect(scores).toEqual(['66.67', '50.00']);
+      const b1 = JSON.parse(breakdowns[0]!);
+      expect(b1.model).toBe('goals-v1');
+      expect(b1._total_votes).toBe(3);
+      expect(b1.goals['energy-nuclear-expand']).toEqual({ score: 66.7, votes: 3, agreed: 2 });
+      expect(JSON.parse(breakdowns[1]!)).toEqual({ model: 'goals-v1', goals: {}, _total_votes: 0 });
     });
 
-    it('defaults to score 50 when no relevant votes exist', async () => {
-      const pool = makePoolMock({
-        'FROM questionnaire_answers': [],          // no voting data
-        'FROM politicians': [fakePolitician],
-      });
-      const repo = createQuestionnaireRepository(pool);
-      await repo.computeAndSaveMatchResults('prof-uuid-1');
-
-      const calls = (pool.query as ReturnType<typeof vi.fn>).mock.calls as [string, unknown[]][];
-      const upsertCall = calls[calls.length - 1]!;
-      // score param is index 2 (0-based $3)
-      expect(upsertCall[1]![2]).toBe('50.00');
-    });
-
-    it('computes 100% score when user supports and politician always voted yea', async () => {
-      const votingRow = {
-        politician_id: 'pol-uuid-1',
-        tag_slug: 'healthcare',
-        stance: 'strongly-support',  // weight = 2
-        vote_value: 'yea',           // direction = +1  → raw = 2, max = 2
-        vote_count: '5',
-      };
-      const pool = makePoolMock({
-        'FROM questionnaire_answers': [votingRow],
-        'FROM politicians': [fakePolitician],
-      });
-      const repo = createQuestionnaireRepository(pool);
-      await repo.computeAndSaveMatchResults('prof-uuid-1');
-
-      const calls = (pool.query as ReturnType<typeof vi.fn>).mock.calls as [string, unknown[]][];
-      const upsertCall = calls[calls.length - 1]!;
-      // (2/2 + 1) / 2 * 100 = 100
-      expect(upsertCall[1]![2]).toBe('100.00');
-    });
-
-    it('computes 0% score when user supports and politician always voted nay', async () => {
-      const votingRow = {
-        politician_id: 'pol-uuid-1',
-        tag_slug: 'healthcare',
-        stance: 'strongly-support', // weight = 2
-        vote_value: 'nay',          // direction = -1  → raw = -2, max = 2
-        vote_count: '3',
-      };
-      const pool = makePoolMock({
-        'FROM questionnaire_answers': [votingRow],
-        'FROM politicians': [fakePolitician],
-      });
-      const repo = createQuestionnaireRepository(pool);
-      await repo.computeAndSaveMatchResults('prof-uuid-1');
-
-      const calls = (pool.query as ReturnType<typeof vi.fn>).mock.calls as [string, unknown[]][];
-      const upsertCall = calls[calls.length - 1]!;
-      // (-2/2 + 1) / 2 * 100 = 0
-      expect(upsertCall[1]![2]).toBe('0.00');
-    });
-
-    it('computes 100% score when user opposes and politician always voted nay', async () => {
-      const votingRow = {
-        politician_id: 'pol-uuid-1',
-        tag_slug: 'immigration',
-        stance: 'strongly-oppose', // weight = -2
-        vote_value: 'nay',         // direction = -1  → raw = (-2)*(-1) = 2, max = 2
-        vote_count: '4',
-      };
-      const pool = makePoolMock({
-        'FROM questionnaire_answers': [votingRow],
-        'FROM politicians': [fakePolitician],
-      });
-      const repo = createQuestionnaireRepository(pool);
-      await repo.computeAndSaveMatchResults('prof-uuid-1');
-
-      const calls = (pool.query as ReturnType<typeof vi.fn>).mock.calls as [string, unknown[]][];
-      const upsertCall = calls[calls.length - 1]!;
-      expect(upsertCall[1]![2]).toBe('100.00');
+    it('writes nothing when there are no sitting members', async () => {
+      const pool = makePoolMock();
+      await createQuestionnaireRepository(pool).computeAndSaveMatchResults('prof-id');
+      expect(calls(pool).some((c) => c[0].includes('INSERT INTO match_results'))).toBe(false);
     });
   });
 
   describe('getMatchResultsBySessionId', () => {
-    it('returns ranked match results with politician info', async () => {
-      const pool = makePoolMock({ 'FROM match_results': [fakeMatchResult] });
-      const repo = createQuestionnaireRepository(pool);
-      const results = await repo.getMatchResultsBySessionId('test-session-123');
+    it('returns ranked rows for sitting members', async () => {
+      const row = { id: 'mr-1', politician_id: 'pol-1', score: '75.00', breakdown: {}, total_votes: 3 };
+      const pool = makePoolMock({ 'FROM match_results': [row] });
+      const results = await createQuestionnaireRepository(pool).getMatchResultsBySessionId('s');
       expect(results).toHaveLength(1);
-      expect(results[0]?.score).toBe('75.00');
-      expect(results[0]?.first_name).toBe('Alice');
+      expect(calls(pool)[0]![0]).toContain('p.is_current = true');
+      expect(calls(pool)[0]![0]).toContain('ORDER BY mr.score DESC');
     });
+  });
 
-    it('returns empty array when no results exist', async () => {
-      const pool = makePoolMock();
-      const repo = createQuestionnaireRepository(pool);
-      const results = await repo.getMatchResultsBySessionId('unknown-session');
-      expect(results).toHaveLength(0);
+  describe('getMatchEvidence', () => {
+    it('lists decisive votes for one politician with the agreement computed in SQL', async () => {
+      const pool = makePoolMock({ 'AS agreed': [{ vote_id: 'v1', agreed: true }] });
+      const rows = await createQuestionnaireRepository(pool).getMatchEvidence('s', 'pol-1');
+      expect(rows[0]?.agreed).toBe(true);
+      const call = calls(pool)[0]!;
+      expect(call[0]).toContain('vr.politician_id = $2');
+      expect(call[0]).toContain("v.question ~* '^on (passage");
+      expect(call[1]).toEqual(['s', 'pol-1']);
     });
   });
 });

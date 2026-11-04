@@ -1,32 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getQuestions, submitQuestionnaire } from '../api';
-import type { PolicyQuestion, Stance } from '../api';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { getGoalAreas, submitQuestionnaire } from '../api';
+import type { GoalArea, GoalImportance, GoalStance } from '../api';
 import { track } from '../analytics';
 
 const SESSION_KEY = 'civreveal_session_id';
+const DRAFT_KEY = 'civreveal_goal_answers';
 
-const STANCE_OPTIONS: Array<{ value: Stance; label: string }> = [
-  { value: 'strongly-support', label: 'Strongly Support' },
-  { value: 'support',          label: 'Support' },
-  { value: 'neutral',          label: 'Skip / No Opinion' },
-  { value: 'oppose',           label: 'Oppose' },
-  { value: 'strongly-oppose',  label: 'Strongly Oppose' },
-];
+interface Answer {
+  stance: GoalStance;
+  importance: GoalImportance;
+}
 
-/** Friendly description for each policy-tag slug. */
-const TAG_DESCRIPTIONS: Record<string, string> = {
-  healthcare:       'Government healthcare programs, insurance coverage, and public health funding.',
-  education:        'Federal education spending, student loans, and public school policy.',
-  environment:      'Environmental regulations, climate policy, and clean-energy investment.',
-  economy:          'Tax policy, economic stimulus, trade, and government spending.',
-  defense:          'Military funding, national-defense programs, and veterans benefits.',
-  immigration:      'Border security, immigration pathways, and visa policy.',
-  housing:          'Affordable-housing programs, zoning reform, and rent assistance.',
-  infrastructure:   'Roads, bridges, broadband, transit, and federal infrastructure investment.',
-  'civil-rights':   'Civil rights protections, voting rights, and equality legislation.',
-  'foreign-policy': 'International engagement, foreign aid, and diplomatic alliances.',
-};
+const IMPORTANCE_LABELS: Record<GoalImportance, string> = { 1: 'A little', 2: 'Some', 3: 'A lot' };
 
 function getOrCreateSessionId(): string {
   let id = localStorage.getItem(SESSION_KEY);
@@ -37,54 +23,113 @@ function getOrCreateSessionId(): string {
   return id;
 }
 
+function loadDraft(): Record<string, Answer> {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, Answer>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function Choice({
+  active,
+  tone,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  tone?: 'support' | 'oppose';
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      className={`goal-choice${active ? ' goal-choice-active' : ''}${tone ? ` goal-choice-${tone}` : ''}`}
+      aria-pressed={active}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function Questionnaire() {
   const navigate = useNavigate();
-  const [questions, setQuestions]   = useState<PolicyQuestion[]>([]);
-  const [stances, setStances]       = useState<Record<string, Stance>>({});
-  const [loading, setLoading]       = useState(true);
+  const [areas, setAreas] = useState<GoalArea[]>([]);
+  const [chosenAreas, setChosenAreas] = useState<Set<string>>(new Set());
+  const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError]           = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getQuestions()
-      .then((qs) => {
-        setQuestions(qs);
-        // Pre-fill all stances to 'neutral' so nothing is blank.
-        const defaults: Record<string, Stance> = {};
-        for (const q of qs) defaults[q.slug] = 'neutral';
-        setStances(defaults);
+    getGoalAreas()
+      .then(({ areas }) => {
+        setAreas(areas);
+        const draft = loadDraft();
+        setAnswers(draft);
+        // Reopen the areas the draft touched.
+        const touched = new Set<string>();
+        for (const area of areas) {
+          if (area.goals.some((g) => draft[g.slug])) touched.add(area.slug);
+        }
+        setChosenAreas(touched);
         setLoading(false);
         track('questionnaire_started');
       })
       .catch(() => {
-        setError('Failed to load questions. Please try again.');
+        setError('Failed to load the goals. Please try again.');
         setLoading(false);
       });
   }, []);
 
-  function handleStance(slug: string, value: Stance) {
-    setStances((prev) => ({ ...prev, [slug]: value }));
+  useEffect(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(answers));
+    } catch {
+      /* storage unavailable: the draft just isn't kept */
+    }
+  }, [answers]);
+
+  const answeredCount = Object.keys(answers).length;
+  const goalsShown = useMemo(
+    () => areas.filter((a) => chosenAreas.has(a.slug)).reduce((n, a) => n + a.goals.length, 0),
+    [areas, chosenAreas],
+  );
+
+  function toggleArea(slug: string) {
+    setChosenAreas((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
   }
 
-  function handleReset() {
-    const defaults: Record<string, Stance> = {};
-    for (const q of questions) defaults[q.slug] = 'neutral';
-    setStances(defaults);
+  function setStance(goal: string, stance: GoalStance | null) {
+    setAnswers((prev) => {
+      const next = { ...prev };
+      if (stance === null) delete next[goal];
+      else next[goal] = { stance, importance: prev[goal]?.importance ?? 2 };
+      return next;
+    });
+  }
+
+  function setImportance(goal: string, importance: GoalImportance) {
+    setAnswers((prev) => (prev[goal] ? { ...prev, [goal]: { ...prev[goal]!, importance } } : prev));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-
-    // Generate (or reuse) a session ID.
     const sessionId = getOrCreateSessionId();
-
-    const responses = Object.entries(stances).map(([tag, stance]) => ({ tag, stance }));
-
+    const payload = Object.entries(answers).map(([goal, a]) => ({ goal, stance: a.stance, importance: a.importance }));
     try {
-      await submitQuestionnaire({ sessionId, responses });
-      track('questionnaire_completed', { answeredCount });
+      await submitQuestionnaire({ sessionId, answers: payload });
+      track('questionnaire_completed', { answeredCount: payload.length });
       navigate('/matches');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Submission failed. Please try again.');
@@ -92,21 +137,23 @@ export default function Questionnaire() {
     }
   }
 
-  const answeredCount = Object.values(stances).filter((s) => s !== 'neutral').length;
+  function handleReset() {
+    setAnswers({});
+  }
 
   if (loading) {
     return (
       <div>
-        <h1 className="page-heading">Policy Questionnaire</h1>
-        <p className="color-muted">Loading questions…</p>
+        <h1 className="page-heading">Your policy goals</h1>
+        <p className="color-muted">Loading goals…</p>
       </div>
     );
   }
 
-  if (error && questions.length === 0) {
+  if (error && areas.length === 0) {
     return (
       <div>
-        <h1 className="page-heading">Policy Questionnaire</h1>
+        <h1 className="page-heading">Your policy goals</h1>
         <p style={{ color: 'var(--color-danger)' }}>{error}</p>
       </div>
     );
@@ -114,98 +161,95 @@ export default function Questionnaire() {
 
   return (
     <div>
-      <h1 className="page-heading">Policy Questionnaire</h1>
+      <h1 className="page-heading">Your policy goals</h1>
       <p style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
-        Tell us your views on key policy areas. We'll compare them with how
-        politicians have actually voted to show you your closest matches.
+        Each goal is a concrete direction Congress could take. Say whether you support or oppose
+        it and how much it matters to you. Goals are independent: supporting one never implies a
+        position on another, and you can skip anything.
       </p>
       <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
-        All questions are optional — skip any topic you'd prefer not to answer.
-        {answeredCount > 0 && (
-          <> <strong>{answeredCount}</strong> of {questions.length} answered.</>
-        )}
+        Your matches are the members whose recorded votes on bills that advance or hinder these
+        goals agree with you most often. <Link to="/methodology">How scoring works →</Link>
       </p>
 
       <form onSubmit={(e) => { void handleSubmit(e); }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
-          {questions.map((q) => (
-            <fieldset key={q.slug} className="card" style={{ border: '1px solid var(--color-border)', padding: '1.25rem', margin: 0 }}>
-              <legend style={{ fontWeight: 600, fontSize: '1.0625rem', paddingInline: '0.25rem' }}>
-                {q.label}
-              </legend>
-              {TAG_DESCRIPTIONS[q.slug] && (
-                <p style={{ margin: '0.25rem 0 0.875rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
-                  {TAG_DESCRIPTIONS[q.slug]}
-                </p>
-              )}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {STANCE_OPTIONS.map((opt) => {
-                  const checked = stances[q.slug] === opt.value;
+        <section className="goal-areas" aria-label="Choose areas">
+          <h2 className="goal-step">1. Pick the areas you care about</h2>
+          <div className="goal-area-chips">
+            {areas.map((area) => {
+              const active = chosenAreas.has(area.slug);
+              const answeredHere = area.goals.filter((g) => answers[g.slug]).length;
+              return (
+                <button
+                  key={area.slug}
+                  type="button"
+                  className={`goal-chip${active ? ' goal-chip-active' : ''}`}
+                  aria-pressed={active}
+                  onClick={() => toggleArea(area.slug)}
+                >
+                  {area.label}
+                  {answeredHere > 0 && <span className="goal-chip-count">{answeredHere}</span>}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {chosenAreas.size > 0 && (
+          <section aria-label="Answer goals">
+            <h2 className="goal-step">
+              2. Support, oppose or skip each goal
+              <span className="goal-step-count">{answeredCount} of {goalsShown} answered</span>
+            </h2>
+            {areas.filter((a) => chosenAreas.has(a.slug)).map((area) => (
+              <div key={area.slug} className="goal-area">
+                <h3 className="goal-area-title">{area.label}</h3>
+                {area.goals.map((goal) => {
+                  const answer = answers[goal.slug];
                   return (
-                    <label
-                      key={opt.value}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.375rem',
-                        padding: '0.375rem 0.75rem',
-                        border: `1px solid ${checked ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                        borderRadius: 'var(--radius)',
-                        background: checked ? 'var(--color-primary-light)' : 'var(--color-surface)',
-                        color: checked ? 'var(--color-primary)' : 'var(--color-text)',
-                        cursor: 'pointer',
-                        fontSize: '0.875rem',
-                        fontWeight: checked ? 600 : 400,
-                        transition: 'background 0.1s, border-color 0.1s',
-                        userSelect: 'none',
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        name={q.slug}
-                        value={opt.value}
-                        checked={checked}
-                        onChange={() => handleStance(q.slug, opt.value)}
-                        style={{ display: 'none' }}
-                      />
-                      {opt.label}
-                    </label>
+                    <fieldset key={goal.slug} className="goal-card">
+                      <legend className="goal-statement">{goal.statement}</legend>
+                      <p className="goal-note">{goal.legislation_note}</p>
+                      <div className="goal-choices">
+                        <Choice active={answer?.stance === 'support'} tone="support" onClick={() => setStance(goal.slug, answer?.stance === 'support' ? null : 'support')}>
+                          Support
+                        </Choice>
+                        <Choice active={answer?.stance === 'oppose'} tone="oppose" onClick={() => setStance(goal.slug, answer?.stance === 'oppose' ? null : 'oppose')}>
+                          Oppose
+                        </Choice>
+                        <Choice active={!answer} onClick={() => setStance(goal.slug, null)}>
+                          Skip
+                        </Choice>
+                      </div>
+                      {answer && (
+                        <div className="goal-importance" role="group" aria-label="How much this matters">
+                          <span className="goal-importance-label">Matters to me:</span>
+                          {([1, 2, 3] as const).map((level) => (
+                            <Choice key={level} active={answer.importance === level} onClick={() => setImportance(goal.slug, level)}>
+                              {IMPORTANCE_LABELS[level]}
+                            </Choice>
+                          ))}
+                        </div>
+                      )}
+                    </fieldset>
                   );
                 })}
               </div>
-            </fieldset>
-          ))}
-        </div>
-
-        {error && (
-          <p style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>{error}</p>
+            ))}
+          </section>
         )}
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={submitting || answeredCount === 0}
-          >
-            {submitting ? 'Computing matches…' : 'See My Matches →'}
+        {error && <p style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>{error}</p>}
+
+        <div className="goal-actions">
+          <button type="submit" className="btn btn-primary" disabled={submitting || answeredCount === 0}>
+            {submitting ? 'Computing matches…' : answeredCount === 0 ? 'Answer a goal to continue' : `See my matches (${answeredCount} answered) →`}
           </button>
-          <button
-            type="button"
-            className="btn btn-ghost"
-            onClick={handleReset}
-            disabled={submitting}
-          >
-            Reset All
+          <button type="button" className="btn btn-ghost" onClick={handleReset} disabled={submitting || answeredCount === 0}>
+            Clear answers
           </button>
         </div>
-
-        {answeredCount === 0 && (
-          <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>
-            Answer at least one question to see matches.
-          </p>
-        )}
       </form>
     </div>
   );
 }
-

@@ -194,20 +194,41 @@ export function getPoliticianVotes(
   return fetchJson(`${BASE}/politicians/${id}/votes${buildQuery(params)}`);
 }
 
-// ─── Questionnaire ────────────────────────────────────────────────────────────
+// ─── Questionnaire (goal-based) ───────────────────────────────────────────────
 
-export interface PolicyQuestion {
-  id: string;
+export type GoalStance = 'support' | 'oppose';
+export type GoalImportance = 1 | 2 | 3;
+
+export interface PolicyGoal {
   slug: string;
-  label: string;
+  statement: string;
+  /** What a bill that advances the goal typically does; what hindering looks like. */
+  legislation_note: string;
 }
 
-export type Stance =
-  | 'strongly-support'
-  | 'support'
-  | 'neutral'
-  | 'oppose'
-  | 'strongly-oppose';
+export interface GoalArea {
+  slug: string;
+  label: string;
+  goals: PolicyGoal[];
+}
+
+export interface GoalAnswer {
+  goal: string;
+  stance: GoalStance;
+  importance: GoalImportance;
+}
+
+export interface GoalScore {
+  score: number;
+  votes: number;
+  agreed: number;
+}
+
+export interface MatchBreakdown {
+  model?: string;
+  goals?: Record<string, GoalScore>;
+  _total_votes?: number;
+}
 
 export interface MatchResult {
   id: string;
@@ -215,8 +236,7 @@ export interface MatchResult {
   politician_id: string;
   /** NUMERIC from pg – kept as string to avoid precision loss. */
   score: string;
-  /** Per-tag alignment scores (0–100) plus `_total_votes` count. */
-  breakdown: Record<string, number>;
+  breakdown: MatchBreakdown;
   computed_at: string;
   first_name: string;
   last_name: string;
@@ -225,22 +245,93 @@ export interface MatchResult {
   chamber: 'senate' | 'house';
   image_url: string | null;
   bioguide_id: string;
+  /** Decisive yea/nay votes on coded bills behind the score. */
   total_votes: number;
 }
 
-export function getQuestions(): Promise<PolicyQuestion[]> {
-  return fetchJson(`${BASE}/questionnaire/questions`);
+/** One vote that moved a politician's score. */
+export interface MatchEvidence {
+  vote_id: string;
+  vote_date: string;
+  question: string;
+  chamber: 'senate' | 'house';
+  bill_id: string;
+  bill_type: string;
+  bill_number: string;
+  bill_title: string;
+  goal_slug: string;
+  goal_statement: string;
+  effect: 'advances' | 'hinders';
+  strength: number;
+  stance: GoalStance;
+  importance: number;
+  position: 'yea' | 'nay';
+  agreed: boolean;
+}
+
+export function getGoalAreas(): Promise<{ areas: GoalArea[] }> {
+  return fetchJson(`${BASE}/questionnaire/goals`);
 }
 
 export function submitQuestionnaire(body: {
   sessionId: string;
-  responses: Array<{ tag: string; stance: Stance }>;
-}): Promise<{ sessionId: string; profileId: string }> {
+  answers: GoalAnswer[];
+}): Promise<{ sessionId: string; profileId: string; answered: number }> {
   return fetchJson(`${BASE}/questionnaire/submit`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+}
+
+export function getMatchEvidence(sessionId: string, politicianId: string): Promise<MatchEvidence[]> {
+  return fetchJson(`${BASE}/questionnaire/matches/${politicianId}/evidence${buildQuery({ sessionId })}`);
+}
+
+// ─── Bill analysis (reviewed goal codings and brief) ─────────────────────────
+
+export interface BillGoalEffect {
+  goal_slug: string;
+  goal_statement: string;
+  area_label: string;
+  effect: 'advances' | 'hinders';
+  strength: 1 | 2 | 3;
+  rationale: string;
+  evidence: string;
+  coded_by: string;
+}
+
+export interface BillPrecedent {
+  what: string;
+  when: string;
+  result: string;
+  source?: string;
+}
+
+export interface BillScenario {
+  outcome: string;
+  assumptions: string[];
+  likelihood: 'likely' | 'plausible' | 'uncertain';
+  precedents: BillPrecedent[];
+}
+
+export interface BillStakeholder {
+  who: string;
+  how: string;
+}
+
+export interface BillBrief {
+  plain_summary: string;
+  scenarios: BillScenario[];
+  likely_beneficiaries: BillStakeholder[];
+  likely_costs: BillStakeholder[];
+  official_estimates: Array<{ source: string; url: string; finding: string }>;
+  coded_by: string;
+  updated_at: string;
+}
+
+export function getBillAnalysis(id: string): Promise<{ effects: BillGoalEffect[]; brief: BillBrief | null }> {
+  return fetchJson(`${BASE}/bills/${id}/analysis`);
 }
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
