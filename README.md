@@ -101,6 +101,7 @@ The web dev server proxies `/api/*` → `http://localhost:3001` with path rewrit
 |--------|------|-------------|
 | `GET` | `/health` | Liveness check — returns service metadata |
 | `GET` | `/ready` | Readiness check — returns `{ status: "ready" }` |
+| `GET` | `/stats` | Headline counts (members, bills, votes) and last ingest time |
 
 ### Example responses
 

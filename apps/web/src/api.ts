@@ -1,6 +1,8 @@
 /** Typed API client for the CivReveal backend. */
 
-const BASE = '/api';
+import { env } from './env';
+
+const BASE = env.API_BASE_URL;
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init);
@@ -239,6 +241,22 @@ export function submitQuestionnaire(body: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+}
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+
+export interface SiteStats {
+  members: number;
+  bills: number;
+  bills_tagged: number;
+  house_votes: number;
+  senate_votes: number;
+  vote_records: number;
+  last_ingest_at: string | null;
+}
+
+export function getStats(): Promise<SiteStats> {
+  return fetchJson(`${BASE}/stats`);
 }
 
 export function getMatches(sessionId: string): Promise<MatchResult[]> {

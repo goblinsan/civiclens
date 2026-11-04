@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import type { DbPool } from '@civreveal/db';
 import { getPool } from '@civreveal/db';
 import { env } from './env.js';
@@ -16,6 +17,12 @@ export async function buildApp(overrides?: { pool?: DbPool | null }) {
   });
 
   await registerErrorHandler(app);
+
+  // The web app is served from its own origin (Cloudflare Pages); allow it.
+  const corsOrigins = (env.CORS_ORIGINS ?? '').split(',').map((o) => o.trim()).filter(Boolean);
+  if (corsOrigins.length > 0) {
+    await app.register(cors, { origin: corsOrigins, methods: ['GET', 'POST'] });
+  }
 
   const pool =
     overrides?.pool !== undefined

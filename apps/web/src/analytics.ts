@@ -5,7 +5,9 @@
  * silently swallowed so analytics can never break the user experience.
  */
 
-const ANALYTICS_URL = '/api/analytics/events';
+import { env } from './env';
+
+const ANALYTICS_URL = `${env.API_BASE_URL}/analytics/events`;
 
 /**
  * Track a product analytics event.  Safe to call anywhere — never throws.
