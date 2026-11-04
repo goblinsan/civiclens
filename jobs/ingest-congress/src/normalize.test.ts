@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  parseDateOrNull,
   normalizeBillStatus,
   normalizeVoteValue,
   normalizeVoteResult,
@@ -462,5 +463,24 @@ describe('normalizeMember — current vs former', () => {
   it('honours an explicit currentMember flag from member detail', () => {
     expect(normalizeMember({ ...base, currentMember: false }).isCurrent).toBe(false);
     expect(normalizeMember({ ...base, currentMember: true }).isCurrent).toBe(true);
+  });
+});
+
+describe('parseDateOrNull', () => {
+  it('reads a zone-less timestamp as UTC regardless of the machine zone', () => {
+    expect(parseDateOrNull('2026-02-25T14:09:11')?.toISOString()).toBe('2026-02-25T14:09:11.000Z');
+    expect(parseDateOrNull('2026-02-25T14:09')?.toISOString()).toBe('2026-02-25T14:09:00.000Z');
+  });
+
+  it('keeps explicit zones and date-only values as they are', () => {
+    expect(parseDateOrNull('2026-02-25T14:09:11Z')?.toISOString()).toBe('2026-02-25T14:09:11.000Z');
+    expect(parseDateOrNull('2026-02-25T14:09:11-05:00')?.toISOString()).toBe('2026-02-25T19:09:11.000Z');
+    expect(parseDateOrNull('2026-02-25')?.toISOString()).toBe('2026-02-25T00:00:00.000Z');
+  });
+
+  it('returns null for empty or unparseable input', () => {
+    expect(parseDateOrNull(undefined)).toBeNull();
+    expect(parseDateOrNull('')).toBeNull();
+    expect(parseDateOrNull('not a date')).toBeNull();
   });
 });

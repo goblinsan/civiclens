@@ -137,7 +137,8 @@ alignment is strong and where it diverges.
 - **A tag says what a bill is about, not which way a vote pushes it.** Two
   bills tagged *healthcare* can move health coverage in opposite directions,
   and today a "yea" on either counts the same way. This is the main known
-  limitation of the current model.
+  limitation of the current model. The replacement, goal-based scoring with
+  per-bill effect coding, is being drafted in [policy-goals.md](./policy-goals.md).
 - **Tags are only as good as the official classification and the mapping.** A
   bill may carry a tag while representing a complex policy trade-off that a
   single tag cannot capture.

@@ -264,7 +264,15 @@ async function ingestBills(
         continue;
       }
 
-      const bill = normalizeBill(raw);
+      // Store the *list* item's updateDate, not the detail's: the next run's
+      // skip check compares against the list, so like must be compared with
+      // like. (The detail carries its own updateDate; slice 3 of the backfill
+      // re-fetched every bill because the two did not agree.)
+      const normalized = normalizeBill(raw);
+      const bill = {
+        ...normalized,
+        sourceUpdatedAt: parseDateOrNull(rawSummary.updateDate) ?? normalized.sourceUpdatedAt,
+      };
 
       if (!bill.sponsorBioguideId) {
         logger.warn('bill has no sponsor, skipping', {
