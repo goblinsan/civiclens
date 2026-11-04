@@ -1,0 +1,23 @@
+# CivReveal API on the home server.
+#
+#   sudo mkdir -p /opt/civreveal && sudo cp deploy/api.env.example /opt/civreveal/api.env
+#   (fill in DATABASE_URL etc.)
+#   docker compose -f deploy/docker-compose.yml up -d
+#
+# The API listens on 127.0.0.1:3001 only; the existing Cloudflare Tunnel routes
+# api.civreveal.org to it. Nothing is exposed to the LAN or the internet directly.
+# The deploy workflow (.github/workflows/api-image.yml) runs this same file on
+# the self-hosted runner after every image publish.
+
+services:
+  api:
+    image: ghcr.io/goblinsan/civreveal-api:latest
+    container_name: civreveal-api
+    restart: unless-stopped
+    env_file:
+      - ${CIVREVEAL_ENV_FILE:-/opt/civreveal/api.env}
+    ports:
+      - "127.0.0.1:3001:3001"
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }

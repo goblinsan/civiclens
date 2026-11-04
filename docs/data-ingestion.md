@@ -75,15 +75,13 @@ re-running with earlier values and clearing `SYNC_SINCE`.
   the date (`SESSION` overrides it), and a full backfill (`MAX_VOTES=0`) covers
   every session of the congress.
 - Up to `MAX_VOTES` most-recent vote details per chamber per run (default `50`).
-- **Senate votes run elsewhere (for now).** senate.gov answers HTTP 403 to
-  requests from cloud-provider IP ranges (GitHub-hosted runners, Cloudflare
-  Workers) regardless of User-Agent; Congress.gov has no Senate vote endpoint;
-  and GovTrack's mirror of the same data sits behind a bot challenge. None of
-  that is circumvented. The Senate step runs on its own workflow
-  (`ingest-senate.yml`, `INGEST_STEPS=senate`) on a self-hosted runner on a
-  residential network — see the launch runbook. The hosted workflow skips the
-  Senate step by default; if run with it enabled it records a `fetch_failure`
-  event rather than reporting success.
+- **Why the job runs from home.** senate.gov answers HTTP 403 to requests
+  from cloud-provider IP ranges (GitHub-hosted runners, Cloudflare Workers)
+  regardless of User-Agent; Congress.gov has no Senate vote endpoint; and
+  GovTrack's mirror of the same data sits behind a bot challenge. None of that
+  is circumvented: the whole job runs on a self-hosted runner on a residential
+  network, which senate.gov serves normally. A failed Senate fetch records a
+  `fetch_failure` event rather than reporting success.
 - **Bot identity and signing.** Every request carries
   `User-Agent: CivRevealBot/1.0 (+https://civreveal.org/bot)`. When the
   `BOT_SIGNING_KEY` secret is set, senate.gov requests also carry Web Bot Auth
@@ -138,11 +136,14 @@ pattern matching (see `normalize.ts → normalizeBillStatus`):
 | Senate votes | Every 6 hours during session | Senate may vote on multiple days per week |
 | House votes | Every 6 hours during session | House may have 50–300 roll-calls per day during intensive periods |
 
-In production the job runs on GitHub Actions
-(`.github/workflows/ingest.yml`): every 6 hours as an incremental sync of bills
-updated in the last 7 days, and on demand via **Actions → Ingest Congress data
-→ Run workflow** with caps and a `SYNC_SINCE` cutoff as inputs. It applies
-pending migrations first and writes a tagging-coverage summary to the run page.
+In production the job runs on GitHub Actions (`.github/workflows/ingest.yml`)
+on the **self-hosted runner on the home server** (see
+[home-server-setup.md](./home-server-setup.md)): every 6 hours as an
+incremental sync of bills updated in the last 7 days, and on demand via
+**Actions → Ingest Congress data → Run workflow** with caps, a `SYNC_SINCE`
+cutoff and the step list as inputs. Running from a residential network is what
+lets the Senate step work (senate.gov refuses cloud-provider IP ranges). It
+applies pending migrations first and writes a coverage summary to the run page.
 It needs the `DATABASE_URL` and `CONGRESS_API_KEY` repository secrets.
 
 ---
