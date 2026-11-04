@@ -233,6 +233,20 @@ MAX_BILLS=100 MAX_VOTES=10 pnpm --filter @civreveal/ingest-congress dev
 
 Then widen (`SYNC_SINCE=<date>` for incremental runs, `MAX_BILLS=0` for no cap).
 
+### Backfilling a whole congress
+
+A congress has ~15k bills at three requests each, which no single run can
+finish (the Congress.gov hourly quota and the workflow's own time limit).
+Backfill in slices instead: run **Ingest Congress data** with `max_bills` =
+`1500` and leave `sync_since` blank, then run it again. Each run skips bills
+whose Congress.gov `updateDate` is already stored and fetches the next 1500
+most recently updated ones; the run summary shows how many were `deferred`.
+When `deferred` reaches 0 the congress is complete. Five or six runs, about
+35 minutes each, spread over a day is a comfortable pace for the API.
+
+Votes link to bills only when the bill is in the database, so a House/Senate
+backfill is only fully useful once the bills backfill is complete.
+
 The job logs structured JSON to stdout/stderr.  All log lines include a `jobId`
 field (the UUID of the `run_start` audit event) for full run correlation.
 

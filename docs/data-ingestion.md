@@ -32,7 +32,13 @@ re-running with earlier values and clearing `SYNC_SINCE`.
 
 ### Members / politicians
 
-- All currently-serving Senate and House members.
+- All currently-serving Senate and House members. After each roster fetch,
+  members already stored but absent from the (complete) roster are marked
+  `is_current = false`; a bill whose sponsor is not in the roster triggers a
+  one-off fetch of that member, stored as a former member. The politician
+  directory and match rankings show sitting members by default
+  (`?include_former=true` lists everyone); former members keep their page and
+  voting record.
 - Fields: `bioguide_id`, full name, party, state, chamber, district, official
   website, and bioguide portrait URL.
 - **Not covered at MVP**: committees, social-media handles, committee assignments,
@@ -40,7 +46,12 @@ re-running with earlier values and clearing `SYNC_SINCE`.
 
 ### Bills
 
-- All bills updated since `SYNC_SINCE` (defaults to fetching recent updates).
+- All bills updated since `SYNC_SINCE` (defaults to the whole congress).
+- The list is read in full (most recently updated first); detail, summaries
+  and subjects are fetched only for bills whose Congress.gov `updateDate`
+  differs from the stored `source_updated_at`. `MAX_BILLS` caps how many
+  bills are *fetched* per run; the rest are reported as `deferred` and picked
+  up by the next run, so repeated capped runs walk through a whole congress.
 - Bill types: HR, S, HJRES, SJRES, HCONRES, SCONRES, HRES, SRES.
 - Fields: congress, type, number, title, status (normalised to 8-value canonical
   enum), sponsor bioguide ID, introduced date, latest plain-text summary, and
@@ -189,6 +200,6 @@ chamber per run (default `50`).
 | `BOT_SIGNING_KEY` | — | (unsigned) | Ed25519 private key, PKCS#8 PEM. Enables Web Bot Auth signatures on senate.gov requests |
 | `BOT_SIGNATURE_AGENT` | — | `https://civreveal.org` | Origin serving the bot's public key directory |
 | `SYNC_SINCE` | — | (none) | ISO-8601 datetime; bills updated after this are fetched |
-| `MAX_BILLS` | — | `0` (no limit) | Cap on bills fetched per run |
+| `MAX_BILLS` | — | `0` (no limit) | Cap on bills *fetched* (detail + summaries + subjects) per run; unchanged bills are skipped first and do not count |
 | `MAX_VOTES` | — | `50` | Max votes per chamber per run |
 | `LOG_LEVEL` | — | `info` | `trace` / `debug` / `info` / `warn` / `error` / `fatal` |

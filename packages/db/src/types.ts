@@ -32,6 +32,8 @@ export interface PoliticianRow {
   image_url: string | null;
   website: string | null;
   office_id: string | null;
+  /** False once the member has left Congress (missing from a fresh roster, or fetched on demand as a former member). */
+  is_current: boolean;
   created_at: Date;
   updated_at: Date;
 }
@@ -50,6 +52,8 @@ export interface BillRow {
   policy_area: string | null;
   /** Official CRS legislative subject terms from Congress.gov. */
   subjects: string[];
+  /** Congress.gov updateDate for the bill; NULL for rows not written by the ingest job. */
+  source_updated_at: Date | null;
   created_at: Date;
   updated_at: Date;
 }

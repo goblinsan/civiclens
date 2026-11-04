@@ -7,6 +7,8 @@ export interface ListPoliticiansOptions {
   party?: string;
   state?: string;
   q?: string;
+  /** Include members who have left Congress (default: sitting members only). */
+  includeFormer?: boolean;
 }
 
 export interface PaginatedResult<T> {
@@ -21,13 +23,16 @@ export function createPoliticiansRepository(pool: DbPool) {
   async function listPoliticians(
     options: ListPoliticiansOptions = {},
   ): Promise<PaginatedResult<PoliticianRow>> {
-    const { page = 1, limit = 20, chamber, party, state, q } = options;
+    const { page = 1, limit = 20, chamber, party, state, q, includeFormer = false } = options;
     const offset = (page - 1) * limit;
 
     const conditions: string[] = [];
     const params: unknown[] = [];
     let idx = 1;
 
+    if (!includeFormer) {
+      conditions.push('is_current = true');
+    }
     if (chamber) {
       conditions.push(`chamber = $${idx++}`);
       params.push(chamber);

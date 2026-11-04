@@ -106,8 +106,9 @@ export async function upsertPolitician(
 ): Promise<string> {
   const result = await pool.query<{ id: string }>(
     `INSERT INTO politicians
-       (bioguide_id, first_name, last_name, party, state, chamber, district, image_url, website, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+       (bioguide_id, first_name, last_name, party, state, chamber, district, image_url, website,
+        is_current, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
      ON CONFLICT (bioguide_id) DO UPDATE SET
        first_name  = EXCLUDED.first_name,
        last_name   = EXCLUDED.last_name,
@@ -117,6 +118,7 @@ export async function upsertPolitician(
        district    = EXCLUDED.district,
        image_url   = EXCLUDED.image_url,
        website     = EXCLUDED.website,
+       is_current  = EXCLUDED.is_current,
        updated_at  = NOW()
      RETURNING id`,
     [
@@ -129,12 +131,30 @@ export async function upsertPolitician(
       politician.district,
       politician.imageUrl,
       politician.website,
+      politician.isCurrent,
     ],
   );
 
   const id = result.rows[0]?.id;
   if (!id) throw new Error(`upsertPolitician: no id returned for ${politician.bioguideId}`);
   return id;
+}
+
+/**
+ * Mark every politician not in the freshly fetched roster as a former member.
+ * Returns the number of rows that changed. Callers should only invoke this
+ * with a complete roster (the caller guards against a partial fetch).
+ */
+export async function markFormerMembers(
+  pool: DbPool,
+  currentBioguideIds: readonly string[],
+): Promise<number> {
+  const result = await pool.query(
+    `UPDATE politicians SET is_current = false, updated_at = NOW()
+     WHERE is_current = true AND bioguide_id <> ALL($1::text[])`,
+    [currentBioguideIds],
+  );
+  return result.rowCount ?? 0;
 }
 
 /**
@@ -169,17 +189,18 @@ export async function upsertBill(
   const result = await pool.query<{ id: string }>(
     `INSERT INTO bills
        (congress, bill_type, bill_number, title, summary, status, sponsor_id, introduced_at,
-        policy_area, subjects, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::text[], NOW())
+        policy_area, subjects, source_updated_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::text[], $11, NOW())
      ON CONFLICT (congress, bill_type, bill_number) DO UPDATE SET
-       title         = EXCLUDED.title,
-       summary       = EXCLUDED.summary,
-       status        = EXCLUDED.status,
-       sponsor_id    = EXCLUDED.sponsor_id,
-       introduced_at = EXCLUDED.introduced_at,
-       policy_area   = EXCLUDED.policy_area,
-       subjects      = EXCLUDED.subjects,
-       updated_at    = NOW()
+       title             = EXCLUDED.title,
+       summary           = EXCLUDED.summary,
+       status            = EXCLUDED.status,
+       sponsor_id        = EXCLUDED.sponsor_id,
+       introduced_at     = EXCLUDED.introduced_at,
+       policy_area       = EXCLUDED.policy_area,
+       subjects          = EXCLUDED.subjects,
+       source_updated_at = EXCLUDED.source_updated_at,
+       updated_at        = NOW()
      RETURNING id`,
     [
       bill.congress,
@@ -192,6 +213,7 @@ export async function upsertBill(
       bill.introducedAt.toISOString(),
       bill.policyArea,
       bill.subjects,
+      bill.sourceUpdatedAt?.toISOString() ?? null,
     ],
   );
 
@@ -202,6 +224,24 @@ export async function upsertBill(
     );
   }
   return id;
+}
+
+/**
+ * Load, for every stored bill of a congress, Congress.gov's updateDate (epoch
+ * ms, or null when unknown), keyed by `${TYPE}-${number}`. Lets the ingest job
+ * skip the three detail requests for bills that have not changed upstream.
+ */
+export async function loadBillSourceState(
+  pool: DbPool,
+  congress: number,
+): Promise<Map<string, number | null>> {
+  const result = await pool.query<{ bill_type: string; bill_number: string; source_updated_at: Date | null }>(
+    `SELECT bill_type, bill_number, source_updated_at FROM bills WHERE congress = $1`,
+    [congress],
+  );
+  return new Map(
+    result.rows.map((r) => [`${r.bill_type.toUpperCase()}-${r.bill_number}`, r.source_updated_at?.getTime() ?? null]),
+  );
 }
 
 /**

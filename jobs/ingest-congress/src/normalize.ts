@@ -35,6 +35,8 @@ export interface CongressMemberSummary {
   state?: string | undefined;
   terms?: { item?: CongressMemberTerm[] | undefined } | undefined;
   updateDate?: string | undefined;
+  /** Present on member detail responses; absent on roster lists filtered to current members. */
+  currentMember?: boolean | undefined;
 }
 
 export interface CongressBillSponsor {
@@ -141,6 +143,7 @@ export interface NormalizedPolitician {
   district: number | null;
   imageUrl: string | null;
   website: string | null;
+  isCurrent: boolean;
 }
 
 export interface NormalizedBill {
@@ -156,6 +159,8 @@ export interface NormalizedBill {
   policyArea: string | null;
   /** Official CRS legislative subject terms (trimmed, de-duplicated, order preserved). */
   subjects: string[];
+  /** Congress.gov updateDate, when present. */
+  sourceUpdatedAt: Date | null;
 }
 
 export interface NormalizedVote {
@@ -303,6 +308,7 @@ export function normalizeMember(raw: CongressMemberSummary): NormalizedPoliticia
     district: raw.district ?? null,
     imageUrl: raw.depiction?.imageUrl ?? null,
     website: raw.officialWebsiteUrl ?? null,
+    isCurrent: raw.currentMember ?? true,
   };
 }
 
@@ -339,7 +345,13 @@ export function normalizeBill(raw: CongressBillSummary): NormalizedBill {
     introducedAt,
     policyArea,
     subjects,
+    sourceUpdatedAt: parseDateOrNull(raw.updateDate),
   };
+}
+
+/** Key identifying a bill within a congress, matching the list and the stored row. */
+export function billKey(billType: string, billNumber: string): string {
+  return `${billType.toUpperCase()}-${billNumber}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
