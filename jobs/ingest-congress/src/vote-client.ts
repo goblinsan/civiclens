@@ -50,8 +50,13 @@ export async function describeRefusal(response: Response): Promise<string> {
   }
   const reference = /Reference(?:&#32;|&nbsp;|\s)*#\s*([0-9a-f.]+)/i.exec(body);
   if (reference) return ` (Akamai reference #${reference[1]})`;
-  const text = body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-  return text ? ` (${text.slice(0, 160)})` : '';
+  const text = body
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<(style|script)\b[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text ? ` (${text.slice(0, 240)})` : '';
 }
 
 async function fetchText(

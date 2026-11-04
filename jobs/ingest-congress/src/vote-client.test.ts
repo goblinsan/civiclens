@@ -16,6 +16,15 @@ describe('describeRefusal', () => {
     expect(r).toBe(' (Senate.gov - Unauthorized)');
   });
 
+  it('drops comments, styles and scripts from the excerpt', async () => {
+    const html =
+      '<!DOCTYPE html><!-- served by x --><html><head><title>Senate.gov - Unauthorized</title>' +
+      '<style>body {margin: 0; background-image: url("/apology_objects/senatelogo.jpg");}</style>' +
+      '<script>var a = 1;</script></head><body><p>Sorry, a potential security risk was detected in your request.</p></body></html>';
+    const r = await describeRefusal(new Response(html, { status: 403 }));
+    expect(r).toBe(' (Senate.gov - Unauthorized Sorry, a potential security risk was detected in your request.)');
+  });
+
   it('is empty for an empty body', async () => {
     expect(await describeRefusal(new Response('', { status: 403 }))).toBe('');
   });
