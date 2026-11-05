@@ -1,16 +1,21 @@
-# Policy goals — draft for review
+# Policy goals
 
-This is the first draft of the goal statements that will replace the ten
-topic questions in the questionnaire. Nothing here is wired up yet. The
-statements are the product: once they are settled, the schema, the bill-coding
-workflow and the new scoring follow (see [scoring-methodology.md](./scoring-methodology.md)
-§7 for why the current topic-based model cannot express agreement).
+The goal statements that replace the ten topic questions in the
+questionnaire (see [scoring-methodology.md](./scoring-methodology.md) §7 for
+why the topic-based model could not express agreement).
 
-**How to review this.** Mark anything that reads as unfair to one side,
-anything that is really two goals, anything missing, and any wording a
-reader on either side would not sign as a neutral description of a
-direction. Cut freely; a shorter list that is fair beats a longer one that
-is not.
+**Where this lives.** The canonical, machine-read list is
+[`data/policy-goals.json`](../data/policy-goals.json); the tables below mirror
+it and a test fails if they drift. `pnpm db:sync-goals` (run by the ingest
+workflow after migrations) upserts it into `policy_goals`. Bill → goal effect
+codings live in [`data/bill-goal-effects/`](../data/bill-goal-effects/), one
+file per congress, and are reviewed by the pull request that merges them.
+
+**How to change a goal.** Edit both the JSON and the table, in one pull
+request. Mark anything that reads as unfair to one side, anything that is
+really two goals, anything missing, and any wording a reader on either side
+would not sign as a neutral description of a direction. A shorter list that
+is fair beats a longer one that is not.
 
 ---
 
@@ -191,20 +196,15 @@ is not.
 
 ---
 
-## Open questions for review
+## Decisions taken at approval
 
-1. **Count.** This is 79 goals across 12 areas. Is that the right size, or should v1 be
-   the twenty or thirty with the most floor votes behind them? (We can rank
-   goals by how many coded bills they would have once coding starts.)
-2. **Paired goals.** Guns and voting each have two goals that are near
-   opposites (`rights-gun-restrictions` / `rights-gun-rights-expand`,
-   `rights-voting-access` / `rights-voter-id`). The rule says one goal is
-   enough since *oppose* is a legitimate answer. They are listed as pairs
-   because the bills themselves divide that way; collapse them if you prefer.
-3. **Energy as its own area.** The current tags fold Energy into
-   Environment. The goals split them. The tag mapping would follow.
-4. **What is missing.** Agriculture, technology and AI, congressional
-   process, and government operations have no goals. Add areas or leave for
-   later?
-5. **Importance scale.** Three levels (a little / some / a lot) or a plain
-   checkbox for "matters most to me"?
+1. **Count.** All 79 goals across 12 areas ship. Respondents pick the areas
+   they care about, so the list is a menu, not a form to complete.
+2. **Paired goals.** The near-opposite pairs on guns and voting stay, because
+   the bills themselves divide that way.
+3. **Energy** is its own area here even though the bill *tags* fold it into
+   Environment; tags describe topics, goals describe directions.
+4. **Not yet covered.** Agriculture, technology and AI, congressional process
+   and government operations. Add an area when there are floor votes to code
+   against it.
+5. **Importance** has three levels: a little / some / a lot.

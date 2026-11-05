@@ -6,11 +6,14 @@
   "scripts": {
     "migrate": "tsx migrate.ts",
     "db:reset": "tsx db-reset.ts",
-    "seed": "tsx ../db/seeds/seed.ts"
+    "seed": "tsx ../db/seeds/seed.ts",
+    "sync-goals": "tsx sync-goals.ts",
+    "export-candidates": "tsx export-coding-candidates.ts"
   },
   "dependencies": {
     "@civreveal/db": "workspace:*",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "@civreveal/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

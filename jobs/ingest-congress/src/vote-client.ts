@@ -48,7 +48,9 @@ export async function describeRefusal(response: Response): Promise<string> {
   } catch {
     return '';
   }
-  const reference = /Reference(?:&#32;|&nbsp;|\s)*#\s*([0-9a-f.]+)/i.exec(body);
+  // Akamai block pages say "Reference #18.xxxx"; senate.gov's own page says
+  // "Reference ID: 18.xxxx". Both identify the decision on their side.
+  const reference = /Reference(?:&#32;|&nbsp;|\s)*(?:ID)?(?:&#32;|&nbsp;|\s)*[#:]\s*([0-9a-f]+(?:\.[0-9a-f]+)+)/i.exec(body);
   if (reference) return ` (Akamai reference #${reference[1]})`;
   const text = body
     .replace(/<!--[\s\S]*?-->/g, ' ')

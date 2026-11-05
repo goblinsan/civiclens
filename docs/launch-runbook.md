@@ -288,19 +288,25 @@ curl "http://localhost:3001/politicians/<politician-id>"
 ### Questionnaire
 
 ```bash
-# Get questions
-curl "http://localhost:3001/questionnaire/questions"
-# Expect: array of {id, slug, label} objects
+# Get goals grouped by area
+curl "http://localhost:3001/questionnaire/goals"
+# Expect: {"areas":[{"slug","label","goals":[{"slug","statement","legislation_note"}]}]}
 
-# Submit questionnaire
+# Submit answers (support/oppose per goal, importance 1–3)
 curl -X POST "http://localhost:3001/questionnaire/submit" \
   -H "Content-Type: application/json" \
-  -d '{"sessionId":"smoke-test-session","responses":[{"tag":"healthcare","stance":"support"}]}'
-# Expect: {"sessionId":"smoke-test-session","profileId":"..."}
+  -d '{"sessionId":"smoke-test-session","answers":[{"goal":"energy-nuclear-expand","stance":"support","importance":3}]}'
+# Expect: {"sessionId":"smoke-test-session","profileId":"...","answered":1}
 
 # Get matches
 curl "http://localhost:3001/questionnaire/matches?sessionId=smoke-test-session"
-# Expect: array of match result objects
+# Expect: array of match result objects with breakdown.goals
+
+# The votes that counted for one member
+curl "http://localhost:3001/questionnaire/matches/<politician-id>/evidence?sessionId=smoke-test-session"
+
+# A bill's reviewed codings and brief
+curl "http://localhost:3001/bills/<bill-id>/analysis"
 ```
 
 ### Sentiment

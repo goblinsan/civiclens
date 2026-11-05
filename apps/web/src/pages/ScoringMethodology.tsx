@@ -1,137 +1,101 @@
+import { Link } from 'react-router-dom';
+
+const REPO = 'https://github.com/goblinsan/civiclens/blob/main';
+
+const h2 = { fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.5rem', marginTop: '1.5rem' } as const;
+const p = { marginBottom: '0.75rem', lineHeight: 1.7 } as const;
+const th = { textAlign: 'left', padding: '0.25rem 1rem 0.25rem 0', borderBottom: '1px solid var(--color-border)' } as const;
+const td = { padding: '0.25rem 1rem 0.25rem 0' } as const;
+
 export default function ScoringMethodology() {
   return (
     <div style={{ maxWidth: '720px' }}>
-      <h1 className="page-heading">Scoring Methodology</h1>
+      <h1 className="page-heading">How matching works</h1>
 
       <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
-        CivReveal computes an <strong>alignment score</strong> (0–100) for each
-        politician that reflects how closely their voting record matches your stated
-        policy preferences. This page explains exactly how those scores are calculated.
+        CivReveal gives every sitting member a <strong>match score</strong> from 0 to 100: how often
+        their recorded votes, on bills that advance or hinder the goals you answered, went the way
+        you would have wanted. This page is the whole method. Everything it describes can be checked
+        from a member's match card or a bill's page.
       </p>
 
-      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.5rem' }}>1. Policy Taxonomy</h2>
-      <p style={{ marginBottom: '0.75rem' }}>
-        Bills are categorised using a fixed set of <strong>policy tags</strong>:
-        Civil Rights, Defense, Economy, Education, Environment, Foreign Policy, Healthcare,
-        Housing, Immigration, and Infrastructure. Each bill can carry one or more tags.
+      <h2 style={h2}>1. Goals, not topics</h2>
+      <p style={p}>
+        The questionnaire asks about <strong>goals</strong>: concrete directions Congress could take,
+        such as “Expand nuclear power generation” or “Let the federal government negotiate or cap
+        prescription drug prices”. Goals are independent. Supporting one never implies a position
+        on another. You answer <em>support</em> or <em>oppose</em> and say how much it matters
+        (a little, some, a lot). Anything you skip is ignored.
       </p>
-      <p style={{ marginBottom: '0.75rem' }}>
-        Tags are <strong>derived automatically from the official classification</strong> that
-        the Congressional Research Service assigns to every bill on Congress.gov: one
-        <em> policy area</em> term (for example “Health” or “Armed Forces and National
-        Security”) plus a list of <em>legislative subject</em> terms (for example “Medicaid”
-        or “Voting rights”). A fixed, public mapping converts those official terms into
-        CivReveal tags. Official terms that are not in the mapping produce no tag, and a bill
-        with no tag does not affect any score.
-      </p>
-      <p style={{ marginBottom: '1rem' }}>
-        Every bill page shows its official classification and, for each tag, the exact
-        official term it was derived from. The full mapping is published in{' '}
-        <a href="https://github.com/goblinsan/civiclens/blob/main/docs/bill-tagging.md" target="_blank" rel="noopener noreferrer">
-          docs/bill-tagging.md ↗
-        </a>.
+      <p style={p}>
+        The full list, with the rules for writing a goal fairly, is public:{' '}
+        <a href={`${REPO}/docs/policy-goals.md`} target="_blank" rel="noopener noreferrer">docs/policy-goals.md ↗</a>.
       </p>
 
-      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.5rem' }}>2. Questionnaire Responses</h2>
-      <p style={{ marginBottom: '0.5rem' }}>For each policy tag you answer, you select one of five stances:</p>
+      <h2 style={h2}>2. Bills are coded for their effect on goals</h2>
+      <p style={p}>
+        A bill counts only once it has been coded as <strong>advancing</strong> or{' '}
+        <strong>hindering</strong> a goal, with a strength (partial, clear, or the bill's central
+        purpose), a written rationale, and the passage of the official Congressional Research Service
+        summary the rationale rests on. Every coding is shown on the bill's page.
+      </p>
+      <p style={p}>
+        Coding is editorial, and it is treated that way: codings live in a public file, every change
+        goes through review before it counts, and the history is kept.{' '}
+        <a href={`${REPO}/data/bill-goal-effects`} target="_blank" rel="noopener noreferrer">See the codings and their history ↗</a>.
+        A bill with no coding affects no score.
+      </p>
+
+      <h2 style={h2}>3. Which votes count</h2>
+      <p style={p}>
+        Only roll-calls that decide the bill itself: passage, suspension votes to pass or agree,
+        agreeing to a resolution or conference report, concurring in the other chamber's amendment,
+        and veto overrides. Procedural votes (motions to recommit, previous-question votes, rules,
+        tabling) and votes on amendments are excluded until they are coded in their own right.
+        Abstentions and absences are no signal either way.
+      </p>
+
+      <h2 style={h2}>4. The arithmetic</h2>
+      <p style={p}>For each of your answered goals and each coded bill with a decisive roll-call:</p>
       <table style={{ borderCollapse: 'collapse', marginBottom: '1rem', fontSize: '0.9375rem' }}>
         <thead>
-          <tr>
-            <th style={{ textAlign: 'left', padding: '0.25rem 1rem 0.25rem 0', borderBottom: '1px solid var(--color-border)' }}>Stance</th>
-            <th style={{ textAlign: 'right', padding: '0.25rem 0', borderBottom: '1px solid var(--color-border)' }}>Weight</th>
-          </tr>
+          <tr><th style={th}>Your answer</th><th style={th}>Bill coding</th><th style={th}>Member's vote</th><th style={th}>Agreement</th></tr>
         </thead>
         <tbody>
-          {[
-            ['Strongly Support', '+2'],
-            ['Support', '+1'],
-            ['Skip / No Opinion', '0 (excluded)'],
-            ['Oppose', '−1'],
-            ['Strongly Oppose', '−2'],
-          ].map(([s, w]) => (
-            <tr key={s}>
-              <td style={{ padding: '0.25rem 1rem 0.25rem 0' }}>{s}</td>
-              <td style={{ textAlign: 'right' }}>{w}</td>
-            </tr>
-          ))}
+          <tr><td style={td}>support</td><td style={td}>advances</td><td style={td}>yea</td><td style={td}>+1</td></tr>
+          <tr><td style={td}>support</td><td style={td}>advances</td><td style={td}>nay</td><td style={td}>−1</td></tr>
+          <tr><td style={td}>support</td><td style={td}>hinders</td><td style={td}>nay</td><td style={td}>+1</td></tr>
+          <tr><td style={td}>oppose</td><td style={td}>advances</td><td style={td}>yea</td><td style={td}>−1</td></tr>
         </tbody>
       </table>
-      <p style={{ marginBottom: '1rem' }}>
-        <strong>Skipped questions</strong> are completely excluded from the score calculation.
+      <p style={p}>
+        Each vote weighs <em>importance × strength</em> (1–3 each). The score is the weighted share of
+        agreement mapped onto 0–100: <code>((Σ agreement × weight) / (Σ weight) + 1) / 2 × 100</code>.
+        All votes agreeing gives 100, all disagreeing gives 0, an even split or no data gives 50.
+        The per-goal breakdown uses the same formula on one goal at a time.
       </p>
 
-      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.5rem' }}>3. Vote Mapping</h2>
-      <p style={{ marginBottom: '0.5rem' }}>Each politician's vote is converted to a direction value:</p>
-      <table style={{ borderCollapse: 'collapse', marginBottom: '1rem', fontSize: '0.9375rem' }}>
-        <thead>
-          <tr>
-            <th style={{ textAlign: 'left', padding: '0.25rem 1rem 0.25rem 0', borderBottom: '1px solid var(--color-border)' }}>Vote cast</th>
-            <th style={{ textAlign: 'right', padding: '0.25rem 0', borderBottom: '1px solid var(--color-border)' }}>Direction</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[
-            ['Yea', '+1'],
-            ['Nay', '−1'],
-            ['Abstain', '0 (excluded)'],
-            ['Not Voting', '0 (excluded)'],
-          ].map(([v, d]) => (
-            <tr key={v}>
-              <td style={{ padding: '0.25rem 1rem 0.25rem 0' }}>{v}</td>
-              <td style={{ textAlign: 'right' }}>{d}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.5rem' }}>4. Score Calculation</h2>
-      <p style={{ marginBottom: '0.5rem' }}>For each politician and each non-neutral stance you gave on a tag:</p>
-      <ol style={{ marginBottom: '1rem', paddingLeft: '1.5rem', lineHeight: '1.75' }}>
-        <li>Find every bill tagged with that policy area.</li>
-        <li>Find every <em>yea</em> or <em>nay</em> vote cast by the politician on those bills.</li>
-        <li>For each vote: <code>contribution = stance_weight × vote_direction</code></li>
-        <li>Sum contributions and maximum possible points across all answered tags.</li>
-        <li>
-          Normalise:{' '}
-          <code>score = ((total_raw / total_max) + 1) / 2 × 100</code>
-          {' '}→ maps −1 to 0%, +1 to 100%, and equal split to 50%.
-        </li>
-      </ol>
-      <p style={{ marginBottom: '1rem' }}>
-        When no relevant votes are found the score defaults to <strong>50%</strong> (no data).
+      <h2 style={h2}>5. Confidence</h2>
+      <p style={p}>
+        The confidence badge counts the decisive votes behind a score: none (no data), 1–2 (low),
+        3–7 (medium), 8 or more (high). A low-confidence score says little about the member and a
+        lot about how few coded bills have reached a vote so far.
       </p>
 
-      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.5rem' }}>5. Confidence</h2>
-      <p style={{ marginBottom: '0.5rem' }}>Confidence reflects how many relevant yea/nay votes were found:</p>
-      <table style={{ borderCollapse: 'collapse', marginBottom: '1rem', fontSize: '0.9375rem' }}>
-        <thead>
-          <tr>
-            <th style={{ textAlign: 'left', padding: '0.25rem 1rem 0.25rem 0', borderBottom: '1px solid var(--color-border)' }}>Votes found</th>
-            <th style={{ textAlign: 'left', padding: '0.25rem 0', borderBottom: '1px solid var(--color-border)' }}>Badge</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[['0', 'No data'], ['1–2', 'Low'], ['3–7', 'Medium'], ['8+', 'High']].map(([n, b]) => (
-            <tr key={n}>
-              <td style={{ padding: '0.25rem 1rem 0.25rem 0' }}>{n}</td>
-              <td>{b}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.5rem' }}>6. Limitations</h2>
-      <ul style={{ marginBottom: '1rem', paddingLeft: '1.5rem', lineHeight: '1.75' }}>
-        <li>CivReveal does <strong>not</strong> infer ideology or political affiliation from scores.</li>
-        <li>A high score does not mean a politician is "better" or that you should vote for them.</li>
-        <li>Scores can change as more bills are tagged and more votes are recorded.</li>
-        <li>A tag says what a bill is <em>about</em>, not which direction a "yea" vote pushes that topic. Two bills tagged Healthcare can move health coverage in opposite directions, and today both count the same way.</li>
-        <li>Tags are only as good as the official classification and the public mapping; a single tag may not capture a bill's full complexity.</li>
-        <li>Abstentions and non-participation are excluded — a politician who often skips votes on a topic will appear neutral.</li>
+      <h2 style={h2}>6. What these scores are not</h2>
+      <ul style={{ paddingLeft: '1.25rem', lineHeight: 1.8, marginBottom: '1rem' }}>
+        <li>Not an ideology or party measure. The goals are written to be answerable either way.</li>
+        <li>Not a verdict on anyone. A high score means the record agreed with <em>your</em> answers.</li>
+        <li>Not complete. Scores move as more bills are coded and more votes are recorded.</li>
+        <li>Not the official record. Codings and bill briefs are CivReveal's reading of it, labelled
+          “Analysis” wherever they appear; the official summary and vote tallies sit beside them.</li>
       </ul>
 
-      <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
-        Use scores as one data point alongside your own research.
+      <h2 style={h2}>7. Sources</h2>
+      <p style={p}>
+        Bills, summaries, classification and House roll-calls come from the Congress.gov API; Senate
+        roll-calls from senate.gov. See <Link to="/data-sources">Data sources</Link> and{' '}
+        <a href={`${REPO}/docs/scoring-methodology.md`} target="_blank" rel="noopener noreferrer">the written methodology ↗</a>.
       </p>
     </div>
   );

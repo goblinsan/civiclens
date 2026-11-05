@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getBill, getBillVotes, getVoteRecords } from '../api';
 import type { BillDetail as BillDetailData, BillTagDetail, Vote, VoteRecord } from '../api';
 import SentimentWidget from '../components/SentimentWidget';
+import BillAnalysis from '../components/BillAnalysis';
 import { track } from '../analytics';
 import { tagLabel } from '../tagLabels';
 
@@ -53,14 +54,13 @@ function ClassificationSection({ bill }: { bill: BillDetailData }) {
           <span className="source-label source-label-platform" style={{ fontSize: '0.7rem' }}>Platform</span>
         </div>
         <p style={muted}>
-          Derived from the official classification using a fixed, public rule set. Tags decide
-          which questionnaire topics this bill counts toward; they describe what the bill is
-          about, not which way a “yea” vote pushes it.{' '}
+          Derived from the official classification using a fixed, public rule set. Tags say what
+          the bill is about and drive browsing; match scores use the goal codings above instead.{' '}
           <a href={TAGGING_DOC_URL} target="_blank" rel="noopener noreferrer">See the rules ↗</a>
         </p>
         {tagDetails.length === 0 ? (
           <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
-            No policy tag applies to this bill, so it does not count toward any alignment score.
+            No policy tag applies to this bill.
           </p>
         ) : (
           <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.9 }}>
@@ -283,6 +283,9 @@ export default function BillDetail() {
           </p>
         </div>
       )}
+
+      {/* Reviewed analysis: brief and goal codings */}
+      <BillAnalysis billId={bill.id} />
 
       {/* Official classification + derived policy tags */}
       <ClassificationSection bill={bill} />

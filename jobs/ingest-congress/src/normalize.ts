@@ -67,6 +67,22 @@ export interface CongressBillSummary {
   subjects?: { count?: number | undefined; url?: string | undefined } | undefined;
   /** Official CRS legislative subject names, pre-fetched from /subjects. */
   legislativeSubjects?: readonly string[] | undefined;
+  /** CBO cost estimates linked from the bill detail. */
+  cboCostEstimates?: readonly CongressCboEstimate[] | undefined;
+}
+
+export interface CongressCboEstimate {
+  title?: string | undefined;
+  url?: string | undefined;
+  pubDate?: string | undefined;
+  description?: string | undefined;
+}
+
+export interface NormalizedCboEstimate {
+  title: string;
+  url: string;
+  pubDate: string | null;
+  description: string | null;
 }
 
 export interface CongressVoteMember {
@@ -161,6 +177,8 @@ export interface NormalizedBill {
   subjects: string[];
   /** Congress.gov updateDate, when present. */
   sourceUpdatedAt: Date | null;
+  /** Official CBO cost estimates (title, url, pubDate, description), url required. */
+  cboEstimates: NormalizedCboEstimate[];
 }
 
 export interface NormalizedVote {
@@ -176,6 +194,8 @@ export interface NormalizedVote {
   billType: string | null;
   billNumber: string | null;
   sourceUpdatedAt: Date | null;
+  /** The question put to the chamber, as published ("On Passage"…). */
+  question: string | null;
 }
 
 export interface NormalizedVoteRecord {
@@ -346,6 +366,14 @@ export function normalizeBill(raw: CongressBillSummary): NormalizedBill {
     policyArea,
     subjects,
     sourceUpdatedAt: parseDateOrNull(raw.updateDate),
+    cboEstimates: (raw.cboCostEstimates ?? [])
+      .filter((e): e is CongressCboEstimate & { url: string } => typeof e.url === 'string' && e.url.length > 0)
+      .map((e) => ({
+        title: e.title?.trim() || 'CBO cost estimate',
+        url: e.url,
+        pubDate: e.pubDate ?? null,
+        description: e.description?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() || null,
+      })),
   };
 }
 
@@ -376,6 +404,7 @@ export function normalizeVoteEvent(raw: CongressVoteEvent): {
     billType: raw.billIdentifier?.type ?? null,
     billNumber: raw.billIdentifier?.number ?? null,
     sourceUpdatedAt: parseDateOrNull(raw.sourceUpdatedAt),
+    question: raw.question?.trim() || null,
   };
 
   const records: NormalizedVoteRecord[] = raw.members
