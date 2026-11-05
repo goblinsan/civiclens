@@ -495,7 +495,9 @@ export function normalizeHouseVoteApi(
     session: item.sessionNumber,
     rollCallNumber: item.rollCallNumber,
     voteDate: item.startDate ?? '',
-    question: item.voteQuestion ?? item.voteType,
+    // voteType ("Yea-and-Nay", "Recorded Vote") is how the vote was taken, not
+    // what was voted on; never substitute it for the question.
+    question: item.voteQuestion,
     result: item.result ?? '',
     yeaCount: tally.yea,
     nayCount: tally.nay,

@@ -196,8 +196,18 @@ interface HouseVoteListResponse {
   pagination?: CongressPagination;
 }
 
+/**
+ * GET /house-vote/{congress}/{session}/{roll}/members. Besides the member
+ * positions it repeats the vote's own fields, and it is the only place the
+ * question put to the chamber ("On Passage", "On Motion to Recommit"…) is
+ * published; the list endpoint carries only voteType ("Yea-and-Nay",
+ * "Recorded Vote"), which is not a question.
+ */
 interface HouseVoteMembersResponse {
   houseRollCallVoteMemberVotes?: {
+    voteQuestion?: string;
+    voteType?: string;
+    result?: string;
     results?: HouseVoteApiMemberVote[];
   };
 }
@@ -436,7 +446,11 @@ export function createCongressClient(apiKey: string, logger: Logger) {
             apiKey,
           );
           const data = await fetchJson<HouseVoteMembersResponse>(membersUrl, logger);
-          events[index] = normalizeHouseVoteApi(item, data.houseRollCallVoteMemberVotes?.results ?? []);
+          const detail = data.houseRollCallVoteMemberVotes;
+          events[index] = normalizeHouseVoteApi(
+            { ...item, voteQuestion: detail?.voteQuestion ?? item.voteQuestion },
+            detail?.results ?? [],
+          );
         } catch (err) {
           logger.warn('house vote member positions unavailable, skipping', {
             congress,
