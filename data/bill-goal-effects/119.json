@@ -2,5 +2,1590 @@
   "version": 1,
   "congress": 119,
   "codedBy": "claude-draft",
-  "effects": []
+  "effects": [
+    {
+      "bill": "HCONRES-14",
+      "goal": "fiscal-debt-ceiling-raise",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "The FY2025 budget resolution instructs committees to produce reconciliation legislation that raises the statutory debt limit by a specified amount, setting up a debt-limit increase.",
+      "evidence": "provides reconciliation instructions for legislation that increases or decreases the deficit and increases the statutory debt limit by specified amounts"
+    },
+    {
+      "bill": "HCONRES-38",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "A War Powers Resolution directive: U.S. forces must stop hostilities against Iran unless Congress has declared war or passed an authorization, asserting the congressional-approval requirement.",
+      "evidence": "directs the President to terminate the use of U.S. Armed Forces from hostilities against Iran or any part of the Iranian government or military unless a declaration of war or authorization to use military force for such purpose has been enacted"
+    },
+    {
+      "bill": "HCONRES-38",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Ending U.S. hostilities against Iran would pull forces back from an overseas military engagement.",
+      "evidence": "directs the President to terminate the use of U.S. Armed Forces from hostilities against Iran"
+    },
+    {
+      "bill": "HCONRES-40",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Directs the removal of U.S. forces from hostilities with Iran absent a declaration of war or an authorization for the use of military force, enforcing congressional authorization.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities against Iran unless explicitly authorized by a declaration of war or a congressional authorization for use of military force against Iran"
+    },
+    {
+      "bill": "HCONRES-40",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Removing forces from hostilities with Iran reduces an active overseas military engagement.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities against Iran"
+    },
+    {
+      "bill": "HCONRES-61",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Requires that U.S. forces leave hostilities with designated terrorist organizations in the Western Hemisphere unless Congress authorizes them, asserting the congressional-approval requirement.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities with any presidentially designated terrorist organization in the Western Hemisphere unless a declaration of war or authorization to use military force for such purpose has been enacted"
+    },
+    {
+      "bill": "HCONRES-61",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Pulling forces out of hostilities in the Western Hemisphere reduces U.S. military engagement abroad.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities with any presidentially designated terrorist organization in the Western Hemisphere"
+    },
+    {
+      "bill": "HCONRES-64",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Directs the removal of U.S. forces from hostilities against Venezuela unless Congress has declared war or authorized force, enforcing congressional approval of military action.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities within or against Venezuela unless a declaration of war or authorization to use military force for such purpose has been enacted"
+    },
+    {
+      "bill": "HCONRES-64",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Removing forces from hostilities against Venezuela reduces an overseas military deployment.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities within or against Venezuela"
+    },
+    {
+      "bill": "HCONRES-68",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Directs the removal of U.S. forces from Venezuela unless Congress has declared war or authorized force, enforcing congressional approval of military action.",
+      "evidence": "directs the President to remove U.S. Armed Forces from Venezuela unless a declaration of war or authorization to use military force for such purpose has been enacted"
+    },
+    {
+      "bill": "HCONRES-68",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Removing U.S. forces from Venezuela is a direct reduction of an overseas deployment.",
+      "evidence": "directs the President to remove U.S. Armed Forces from Venezuela"
+    },
+    {
+      "bill": "HCONRES-75",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Sets a deadline for ending hostilities against Iran unless Congress declares war or authorizes force, enforcing the congressional-approval requirement.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities against Iran or any part of its government or military no later than March 30, 2026, unless a declaration of war or authorization to use military force for such purpose has been enacted"
+    },
+    {
+      "bill": "HCONRES-75",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Ending hostilities against Iran by a fixed date reduces U.S. military engagement abroad.",
+      "evidence": "remove U.S. Armed Forces from hostilities against Iran or any part of its government or military no later than March 30, 2026"
+    },
+    {
+      "bill": "HCONRES-84",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "A War Powers Resolution directive ordering forces out of Lebanon on a seven-day clock, asserting Congress's power over an unauthorized deployment.",
+      "evidence": "directs the President to remove U.S. Armed Forces from Lebanon within seven days of the resolution's adoption"
+    },
+    {
+      "bill": "HCONRES-84",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Withdrawing all U.S. forces from Lebanon is a direct reduction of an overseas deployment.",
+      "evidence": "remove U.S. Armed Forces from Lebanon within seven days"
+    },
+    {
+      "bill": "HCONRES-86",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Directs the removal of U.S. forces from hostilities with Iran absent a declaration of war or an authorization for the use of military force, enforcing congressional authorization.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities against Iran unless explicitly authorized by a declaration of war or a congressional authorization for use of military force against Iran"
+    },
+    {
+      "bill": "HCONRES-86",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Removing forces from hostilities with Iran reduces an active overseas military engagement.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities against Iran"
+    },
+    {
+      "bill": "HCONRES-89",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Directs the removal of U.S. forces from hostilities against Iran unless Congress declares war or authorizes force, enforcing the congressional-approval requirement.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities against Iran or any part of its government or military unless a declaration of war or authorization to use military force for such purpose has been enacted"
+    },
+    {
+      "bill": "HCONRES-89",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Removing forces from hostilities against Iran reduces U.S. military engagement abroad.",
+      "evidence": "remove U.S. Armed Forces from hostilities against Iran or any part of its government or military"
+    },
+    {
+      "bill": "HCONRES-93",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Directs the removal of U.S. forces from hostilities with Iran absent a declaration of war or an authorization for the use of military force, enforcing congressional authorization.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities against Iran unless explicitly authorized by a declaration of war or a congressional authorization for use of military force against Iran"
+    },
+    {
+      "bill": "HCONRES-93",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Removing forces from hostilities with Iran reduces an active overseas military engagement.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities against Iran"
+    },
+    {
+      "bill": "HCONRES-108",
+      "goal": "defense-war-powers",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "A War Powers Resolution directive ordering forces out of hostilities in Lebanon within seven days, asserting Congress's power over an unauthorized engagement.",
+      "evidence": "directs the President to remove U.S. Armed Forces from hostilities in Lebanon within seven days of the resolution's adoption"
+    },
+    {
+      "bill": "HCONRES-108",
+      "goal": "defense-overseas-reduce",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Withdrawing U.S. forces from hostilities in Lebanon reduces an overseas military engagement.",
+      "evidence": "remove U.S. Armed Forces from hostilities in Lebanon within seven days"
+    },
+    {
+      "bill": "HCONRES-113",
+      "goal": "fiscal-deficit-reduce",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "The FY2027 budget resolution's reconciliation instructions direct committees to write legislation that increases the deficit rather than limiting spending.",
+      "evidence": "provides reconciliation instructions for legislation that increases the deficit"
+    },
+    {
+      "bill": "HJRES-20",
+      "goal": "energy-efficiency-standards",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Nullifies a Department of Energy efficiency standard for gas-fired instantaneous water heaters; blocking an appliance standard is the opposite of setting stricter ones.",
+      "evidence": "nullifies the rule titled Energy Conservation Program: Energy Conservation Standards for Consumer Gas-fired Instantaneous Water Heaters"
+    },
+    {
+      "bill": "HJRES-24",
+      "goal": "energy-efficiency-standards",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Nullifies the Department of Energy's efficiency standards for walk-in coolers and freezers; blocking an appliance standard runs against stricter standards.",
+      "evidence": "nullifies the rule titled Energy Conservation Program: Energy Conservation Standards for Walk-In Coolers and Walk-In Freezers"
+    },
+    {
+      "bill": "HJRES-35",
+      "goal": "env-ghg-limits",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Nullifies the EPA rule implementing the methane waste emissions charge on oil and gas systems, blocking a federal greenhouse-gas rule.",
+      "evidence": "nullifies the Environmental Protection Agency (EPA) rule titled Waste Emissions Charge for Petroleum and Natural Gas Systems ... Under the program, the EPA collects an annual charge on emissions of methane and other greenhouse gases from the oil and gas sector"
+    },
+    {
+      "bill": "HJRES-42",
+      "goal": "energy-efficiency-standards",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Nullifies the certification, labeling and enforcement provisions that make appliance efficiency standards operative, weakening the standards regime without changing the levels themselves.",
+      "evidence": "nullifies the Energy Conservation Program for Appliance Standards: Certification Requirements, Labeling Requirements, and Enforcement Provisions for Certain Consumer Products and Commercial Equipment rule"
+    },
+    {
+      "bill": "HJRES-60",
+      "goal": "env-public-lands-protect",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Nullifies a National Park Service rule that limited off-road vehicle use in parts of the Glen Canyon National Recreation Area, loosening a conservation restriction on federal land.",
+      "evidence": "the rule limited the use of off-road vehicles, such as off-highway vehicles and all-terrain vehicles, in certain areas"
+    },
+    {
+      "bill": "HJRES-61",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Nullifies an EPA hazardous-air-pollutant standard for rubber tire manufacturing, rolling back a federal air pollution limit.",
+      "evidence": "nullifies the Environmental Protection Agency rule titled National Emission Standards for Hazardous Air Pollutants: Rubber Tire Manufacturing"
+    },
+    {
+      "bill": "HJRES-75",
+      "goal": "energy-efficiency-standards",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Nullifies new and amended Department of Energy efficiency standards for commercial refrigeration equipment; blocking a standard runs against stricter standards.",
+      "evidence": "nullifies the final rule ... titled Energy Conservation Program: Energy Conservation Standards for Commercial Refrigerators, Freezers, and Refrigerator-Freezers"
+    },
+    {
+      "bill": "HJRES-78",
+      "goal": "env-species-protect",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Removes Endangered Species Act protection from the Bay-Delta longfin smelt by nullifying its endangered listing, a statutory delisting.",
+      "evidence": "the joint resolution removes protection for the species under the Endangered Species Act of 1973"
+    },
+    {
+      "bill": "HJRES-87",
+      "goal": "env-ghg-limits",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Nullifies the EPA waiver that let California enforce its Advanced Clean Trucks and heavy-duty emission rules, blocking a federally authorized emissions standard.",
+      "evidence": "nullifies the Environmental Protection Agency notice ... Advanced Clean Trucks ... the notice grants the California Air Resources Board request for a waiver"
+    },
+    {
+      "bill": "HJRES-87",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Withdrawing the waiver for California's heavy-duty vehicle and engine emission rules rolls back stricter air pollution limits on trucks.",
+      "evidence": "Heavy-Duty Vehicle and Engine Emission Warranty Regulations and Maintenance Provisions ... Under the Clean Air Act, California may seek waivers of the preemption prohibiting states from enacting certain emission standards"
+    },
+    {
+      "bill": "HJRES-87",
+      "goal": "energy-ev-support",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Advanced Clean Trucks requires rising zero-emission truck sales; revoking the federal waiver removes that push toward electric trucks.",
+      "evidence": "Advanced Clean Trucks; Zero Emission Airport Shuttle; Zero-Emission Power Train Certification; Waiver of Preemption"
+    },
+    {
+      "bill": "HJRES-88",
+      "goal": "env-ghg-limits",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Nullifies the EPA waiver for California's Advanced Clean Cars II vehicle emissions program, blocking a federally authorized greenhouse-gas standard for cars.",
+      "evidence": "nullifies the Environmental Protection Agency notice titled California State Motor Vehicle and Engine Pollution Control Standards; Advanced Clean Cars II; Waiver of Preemption"
+    },
+    {
+      "bill": "HJRES-88",
+      "goal": "energy-ev-support",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Advanced Clean Cars II phases in zero-emission vehicle sales requirements; revoking the waiver removes a major driver of electric vehicle adoption.",
+      "evidence": "the notice grants the California Air Resources Board request for a waiver for its Advanced Clean Cars II (ACC II) regulations"
+    },
+    {
+      "bill": "HJRES-88",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "The waiver also covers California's vehicle pollution control standards; revoking it rolls back stricter limits on tailpipe pollutants.",
+      "evidence": "California State Motor Vehicle and Engine Pollution Control Standards; Advanced Clean Cars II"
+    },
+    {
+      "bill": "HJRES-89",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Nullifies the EPA waiver for California's Omnibus Low NOx heavy-duty engine rule, rolling back a stricter nitrogen-oxide pollution standard.",
+      "evidence": "the notice grants the California Air Resources Board request for a waiver for its Heavy-Duty Vehicle and Engine Omnibus Low NOX regulations"
+    },
+    {
+      "bill": "HJRES-104",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Nullifies a land-management plan amendment that had made no acres available for coal leasing, reopening the Miles City area to coal.",
+      "evidence": "This Miles City Field Office RMP Amendment made no acres available for coal leasing and 1,745,040 acres unavailable for further consideration for coal leasing"
+    },
+    {
+      "bill": "HJRES-104",
+      "goal": "env-public-lands-protect",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Reversing a plan that kept 1.7 million acres of federal land out of coal leasing opens that land to extraction.",
+      "evidence": "made no acres available for coal leasing and 1,745,040 acres unavailable for further consideration for coal leasing"
+    },
+    {
+      "bill": "HJRES-105",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Nullifies a land-management plan that limited oil and gas development and confined new coal leasing near existing mines, expanding where fossil fuels can be produced.",
+      "evidence": "limiting development of oil and gas in low-potential areas and new coal leasing to areas within four miles of existing mines"
+    },
+    {
+      "bill": "HJRES-105",
+      "goal": "env-public-lands-protect",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Undoing limits on oil, gas and coal development across BLM lands in North Dakota opens more federal land to extraction.",
+      "evidence": "The 2025 North Dakota RMP modified the 1988 RMP, including by limiting development of oil and gas in low-potential areas and new coal leasing"
+    },
+    {
+      "bill": "HJRES-106",
+      "goal": "env-public-lands-protect",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Nullifies a plan that designated 21 areas of critical environmental concern covering about 3.6 million acres in Alaska, removing those conservation designations.",
+      "evidence": "designating 21 areas of critical environmental concern or research natural areas, encompassing approximately 3,611,000 acres"
+    },
+    {
+      "bill": "HJRES-130",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Reverses the plan that closed the Buffalo Field Office to new federal coal leasing and requires BLM to make coal available for leasing again.",
+      "evidence": "requires the BLM to follow the 2015 RMP as it was before it was amended in 2024 and make coal available for leasing"
+    },
+    {
+      "bill": "HJRES-130",
+      "goal": "env-public-lands-protect",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Reopening federal coal in the Powder River Basin to leasing moves public land from a no-leasing status back to extraction.",
+      "evidence": "amended the 2015 resource management plan (RMP) for the Buffalo Field Office in Wyoming to make no federal coal available for future leasing"
+    },
+    {
+      "bill": "HJRES-131",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Opens the Arctic National Wildlife Refuge coastal plain to oil and gas leasing by nullifying the decision that had withheld about 1.2 million acres.",
+      "evidence": "This joint resolution opens public land for oil and gas leasing in the Arctic National Wildlife Refuge"
+    },
+    {
+      "bill": "HJRES-131",
+      "goal": "env-public-lands-protect",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Removes the conservation protection the 2024 decision gave to most of the refuge's coastal plain, returning it to leasing.",
+      "evidence": "The 2024 ROD made approximately 1.2 million acres unavailable for leasing or exploration in order to protect and conserve resources and certain uses in these areas"
+    },
+    {
+      "bill": "HJRES-139",
+      "goal": "fiscal-deficit-reduce",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "A constitutional balanced-budget amendment capping annual spending at average receipts is the strongest form of a spending limit to reduce deficits.",
+      "evidence": "proposes a constitutional amendment prohibiting total federal expenditures for a year from exceeding the average annual federal receipts collected in the three prior years"
+    },
+    {
+      "bill": "HJRES-140",
+      "goal": "env-public-lands-protect",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Nullifies the 20-year mineral withdrawal protecting the Boundary Waters watershed, allowing 225,504 acres of national forest to be leased for mining.",
+      "evidence": "The joint resolution removes such protections and allows such land to be leased for the exploration and development of minerals and geothermal energy"
+    },
+    {
+      "bill": "HJRES-210",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Revokes EPA's authorization of California's expanded at-berth emission limits for ocean-going vessels, rolling back a stricter air pollution standard.",
+      "evidence": "expanded auxiliary engine emissions reductions requirements to include additional categories of ocean-going vessels"
+    },
+    {
+      "bill": "HJRES-213",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Revokes EPA's authorization of California's commercial harbor craft emission standards, rolling back stricter pollution limits for those vessels.",
+      "evidence": "create new emission standards and compliance dates depending on vessel category and engine model year and expand the types of vessels covered by the regulation"
+    },
+    {
+      "bill": "HR-1",
+      "goal": "fiscal-debt-ceiling-raise",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "The reconciliation act raises the statutory debt limit by $4 trillion as part of the package.",
+      "evidence": "This section increases the statutory debt limit by $4 trillion."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "safety-net-expand",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Expands SNAP work requirements to more adults and ages 18 to 64, shifts benefit and administrative costs to states, and narrows eligibility, all of which cut federal food assistance.",
+      "evidence": "This section expands the applicability of work requirements for SNAP recipients who are able-bodied adults without dependents (ABAWDs). ... This section modifies the general work requirements of the SNAP program to cover individuals who are over the age of 17 and under the age of 65."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "health-public-coverage-expand",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Imposes work requirements, six-month redeterminations and cost-sharing on the Medicaid expansion population and limits state financing tools, reducing public coverage.",
+      "evidence": "This section requires, beginning in 2029, individuals who are eligible for Medicaid as part of the Medicaid expansion population to engage in community service, work, or other activities in order to qualify for Medicaid."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "energy-renewables-support",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Phases out the clean electricity production and investment tax credits and ends the residential clean energy credit, the main federal financial support for wind and solar.",
+      "evidence": "This section modifies and phases out the clean electricity production tax credit. ... This section modifies and phases out the clean electricity investment tax credit. ... This section terminates the residential clean energy tax credit."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "energy-ev-support",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Terminates the new, used and commercial clean vehicle tax credits, removing federal purchase support for electric vehicles.",
+      "evidence": "This section terminates the previously-owned clean vehicle tax credit. ... This section terminates the clean vehicle tax credit. ... This section terminates the qualified commercial clean vehicle tax credit."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "energy-nuclear-expand",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Phases out the zero-emission nuclear power production credit that supports existing reactors, a partial step away from federal support for nuclear generation.",
+      "evidence": "This section modifies and phases out the zero-emission nuclear power production tax credit."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Mandates resumed quarterly onshore oil and gas lease sales, at least four ANWR coastal plain lease sales, and lets some leaseholders drill without a permit for a fee.",
+      "evidence": "directing the Department of the Interior to immediately resume onshore quarterly lease sales. ... directs Interior to conduct at least four lease sales under the Coastal Plain Oil and Gas Leasing Program in the ANWR"
+    },
+    {
+      "bill": "HR-1",
+      "goal": "tax-broad-cuts",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Makes the enlarged standard deduction permanent, adds a further increase through 2028, and creates new deductions for tip and overtime income, cutting income taxes broadly.",
+      "evidence": "This section makes permanent the increased standard deduction and provides an additional increase in the standard deduction in the amount of $1,000 (or $2,000 for joint filers and $1,500 for head of household) through 2028."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "tax-high-income-raise",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Triples the estate, gift and generation-skipping tax exemption to $15 million, a tax cut for large estates.",
+      "evidence": "This section increases the base estate tax, gift tax, and generation-skipping transfer tax exemption amount to $15 million (from $5 million), adjusted for inflation."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "imm-border-enforcement",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Appropriates large sums for immigration enforcement, removal and detention facilities and for military support of border operations.",
+      "evidence": "This part provides funding for various immigration agencies and offices for purposes of immigration enforcement, removal, maintenance of facilities, and program operations. ... provides additional funding for FY2025 to support border operations, including deployment of military personnel."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "imm-interior-enforcement",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Funds immigration enforcement and removal operations beyond the border, expanding interior enforcement capacity.",
+      "evidence": "provides funding for various immigration agencies and offices for purposes of immigration enforcement, removal, maintenance of facilities, and program operations"
+    },
+    {
+      "bill": "HR-1",
+      "goal": "defense-spending-increase",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Adds FY2025 defense funding on top of regular appropriations for barracks, health, housing allowances, missile defense and nuclear forces.",
+      "evidence": "This section provides additional funding for FY2025 to the Department of Defense (DOD) for the Marine Corps Barracks 2030 initiative, the Defense Health Program, supplemental payments of Basic Allowance for Housing to military personnel"
+    },
+    {
+      "bill": "HR-1",
+      "goal": "defense-nuclear-modernise",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Provides additional funding for nuclear forces development and production and for space-based missile defense.",
+      "evidence": "This section provides additional funding for FY2025 for nuclear defense resources and nuclear forces development and production."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "health-abortion-access",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Bars federal Medicaid payments for ten years to nonprofit providers serving low-income patients that also provide abortions, cutting funding to those providers.",
+      "evidence": "This section prohibits federal Medicaid payment for 10 years to nonprofit health care providers that serve predominantly low-income, medically underserved individuals"
+    },
+    {
+      "bill": "HR-1",
+      "goal": "edu-student-debt-relief",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Terminates the existing income-driven and other repayment plans for new loans, narrowing the repayment relief available to borrowers.",
+      "evidence": "This section terminates all current student loan repayment plans for loans disbursed on or after July 1, 2026."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "edu-vocational-fund",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Creates Workforce Pell Grants for students in eligible short-term workforce programs, extending federal aid to vocational training.",
+      "evidence": "This section requires ED to award Workforce Pell Grants to students enrolled in eligible workforce programs."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "health-private-market-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Expands who may make tax-deductible health savings account contributions, a modest widening of private coverage options.",
+      "evidence": "This section expands eligibility to make tax-deductible HSA contributions to include individuals who are 65 years or older and are enrolled in Medicare Part A."
+    },
+    {
+      "bill": "HR-1",
+      "goal": "health-drug-price-negotiation",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Narrows the Medicare drug price negotiation program by changing how orphan drugs are treated, exempting more drugs from negotiation.",
+      "evidence": "This section modifies certain provisions under the Medicare Drug Price Negotiation Program with respect to orphan drugs."
+    },
+    {
+      "bill": "HR-4",
+      "goal": "foreign-aid-overall",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Rescinds $9.4 billion of previously appropriated foreign assistance, including development, global health, refugee and disaster accounts.",
+      "evidence": "rescinds $9.4 billion in unobligated funds that were provided to the Department of State, the U.S. Agency for International Development (USAID), various independent and related agencies"
+    },
+    {
+      "bill": "HR-4",
+      "goal": "env-international-climate",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Among the rescinded funds are U.S. contributions to the Clean Technology Fund, a channel of international climate finance.",
+      "evidence": "rescinds funds that were provided to the State Department or the President for ... Contributions to the Clean Technology Fund"
+    },
+    {
+      "bill": "HR-21",
+      "goal": "health-abortion-access",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Adds federal criminal penalties and reporting duties on practitioners tied to abortion procedures, a federal restriction on abortion practice rather than on access itself.",
+      "evidence": "A health care practitioner who fails to provide the required degree of care, or a health care practitioner or other employee who fails to report such failure, is subject to criminal penalties"
+    },
+    {
+      "bill": "HR-22",
+      "goal": "rights-voter-id",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Requires documentary proof of U.S. citizenship to register to vote in federal elections, the central mechanism of this goal.",
+      "evidence": "requires individuals to provide documentary proof of U.S. citizenship when registering to vote in federal elections"
+    },
+    {
+      "bill": "HR-22",
+      "goal": "rights-voting-access",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "A federal documentation mandate at registration adds a barrier to registering, the opposite of expanding access rules.",
+      "evidence": "prohibits states from accepting and processing an application to register to vote in a federal election unless the applicant presents documentary proof of U.S. citizenship"
+    },
+    {
+      "bill": "HR-26",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Bars any presidential moratorium on hydraulic fracturing without congressional authorization, protecting oil and gas production from executive limits.",
+      "evidence": "prohibits the President from declaring a moratorium on the use of hydraulic fracturing unless Congress authorizes the moratorium"
+    },
+    {
+      "bill": "HR-27",
+      "goal": "justice-sentencing-reduce",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Permanently schedules all fentanyl-related substances and ties them to fentanyl-analogue quantity thresholds, extending ten-year mandatory minimums to a whole class of substances.",
+      "evidence": "offenses involving fentanyl-related substances are triggered by the same quantity thresholds and subject to the same penalties as offenses involving fentanyl analogues (e.g., offenses involving 100 grams or more trigger a 10-year mandatory minimum prison term)"
+    },
+    {
+      "bill": "HR-28",
+      "goal": "rights-lgbt-protections",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Defines sex by biology at birth under Title IX and bars transgender girls and women from women's athletic programs, a rollback of gender-identity protection in federal education law.",
+      "evidence": "it is a violation of Title IX of the Education Amendments of 1972 for federally funded education programs or activities to operate, sponsor, or facilitate athletic programs or activities that allow individuals of the male sex to participate in programs or activities that are designated for women or girls"
+    },
+    {
+      "bill": "HR-29",
+      "goal": "imm-interior-enforcement",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Mandates detention of unlawfully present non-citizens arrested for theft offenses and lets states sue over federal enforcement decisions, expanding interior enforcement.",
+      "evidence": "requires the Department of Homeland Security (DHS) to detain certain non-U.S. nationals (aliens under federal law) who have been arrested for burglary, theft, larceny, or shoplifting"
+    },
+    {
+      "bill": "HR-30",
+      "goal": "imm-interior-enforcement",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Expands the crimes that make a non-citizen inadmissible or deportable, widening the grounds for removal.",
+      "evidence": "establishes certain criminal grounds for making non-U.S. nationals (aliens under federal law) inadmissible and expands the crimes for which a non-U.S. national is deportable"
+    },
+    {
+      "bill": "HR-35",
+      "goal": "imm-border-enforcement",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Creates a federal crime for fleeing Border Patrol within 100 miles of the border and makes offenders deportable, adding an enforcement tool at the border.",
+      "evidence": "establishes new federal criminal offenses for operating a motor vehicle within 100 miles of the U.S. border while fleeing from a U.S. Border Patrol agent"
+    },
+    {
+      "bill": "HR-35",
+      "goal": "justice-sentencing-reduce",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Adds a new mandatory minimum prison term, the kind of sentencing provision this goal would repeal.",
+      "evidence": "establishes criminal penalties for an offense, including a mandatory minimum prison term for an offense resulting in death or serious bodily injury"
+    },
+    {
+      "bill": "HR-36",
+      "goal": "foreign-sanctions-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Requires visa sanctions and authorizes property sanctions on foreign officials undermining Georgia's security, a new sanctions program aimed at a foreign government.",
+      "evidence": "requires the President to impose sanctions on certain foreign persons, including Georgian government officials, who are undermining Georgia's security or stability"
+    },
+    {
+      "bill": "HR-471",
+      "goal": "env-climate-adaptation",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Creates fireshed management areas and an interagency Fireshed Center to assess and reduce wildfire risk on federal land, a resilience program.",
+      "evidence": "designates certain firesheds at high risk for wildfires as fireshed management areas; (2) directs the U.S. Forest Service and U.S. Geological Survey to jointly establish an interagency Fireshed Center"
+    },
+    {
+      "bill": "HR-498",
+      "goal": "rights-lgbt-protections",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Bars federal Medicaid payment for gender transition care for minors, a federal rollback aimed at gender identity.",
+      "evidence": "prohibits federal Medicaid payment for specified gender transition procedures for individuals under the age of 18"
+    },
+    {
+      "bill": "HR-530",
+      "goal": "veterans-benefits-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Commissions a National Academies study of cancer among veteran aircrew, a first step toward recognizing a service-connected condition.",
+      "evidence": "requires the Department of Veterans Affairs to enter into an agreement with the National Academies of Sciences, Engineering, and Medicine to study and report on the prevalence and mortality of cancers among veterans who served on active duty as aircrew members"
+    },
+    {
+      "bill": "HR-556",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Bars federal land agencies from regulating lead ammunition and tackle on federal land and water, removing a tool for limiting lead contamination.",
+      "evidence": "bars the Fish and Wildlife Service (FWS), the Bureau of Land Management (BLM), and the Forest Service from prohibiting or regulating the use of lead ammunition or tackle on federal land or water"
+    },
+    {
+      "bill": "HR-586",
+      "goal": "veterans-benefits-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Orders a VA epidemiological study and registry tracking of bile duct cancer in Vietnam veterans, groundwork for recognizing the condition.",
+      "evidence": "requires the Department of Veterans Affairs (VA) to conduct an epidemiological study and report on the prevalence of cholangiocarcinoma (bile duct cancer) in veterans who served in the Vietnam theater of operations"
+    },
+    {
+      "bill": "HR-692",
+      "goal": "foreign-china-restrict",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Directs the U.S. to press the IMF for scrutiny of China's exchange-rate practices, a modest economic pressure measure.",
+      "evidence": "requires the U.S. Executive Director at the International Monetary Fund (IMF) to use the voice and vote of the United States to advocate for increased exchange rate transparency from China"
+    },
+    {
+      "bill": "HR-695",
+      "goal": "veterans-benefits-expand",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Raises the Medal of Honor special pension nearly sixfold and creates a pension for surviving spouses, a direct benefit increase.",
+      "evidence": "increases the monthly special pension for living Medal of Honor recipients from $1,406.73 to $8,333.33 and establishes a rate of $1,406.73 for the monthly special pension for surviving spouses"
+    },
+    {
+      "bill": "HR-747",
+      "goal": "foreign-sanctions-expand",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Widens the Fentanyl Sanctions Act to cover Chinese entities and senior officials who aid opioid trafficking, expanding mandatory sanctions.",
+      "evidence": "subjects certain Chinese entities and government officials to potential sanctions related to opioid trafficking"
+    },
+    {
+      "bill": "HR-747",
+      "goal": "foreign-china-restrict",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Targets Chinese producers of synthetic opioids and complicit officials with sanctions, restricting dealings with those parties.",
+      "evidence": "the term includes (1) Chinese entities involved in the production or sale of synthetic opioids or related pharmaceutical ingredients that fail to take steps to detect or prevent opioid trafficking; and (2) certain senior Chinese government officials that aid and abet opioid trafficking"
+    },
+    {
+      "bill": "HR-845",
+      "goal": "env-species-protect",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Directs the removal of Endangered Species Act protection for the gray wolf by statute and shields the delisting from judicial review.",
+      "evidence": "directs the Department of the Interior to remove protections for the gray wolf under the Endangered Species Act of 1973 (ESA)"
+    },
+    {
+      "bill": "HR-859",
+      "goal": "rights-privacy-surveillance",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Requires disclosure before sale that a connected device contains a camera or microphone, a small limit on hidden data collection.",
+      "evidence": "requires manufacturers of internet-connected devices (e.g., smart appliances) that are equipped with a camera or microphone to disclose to consumers prior to purchase that a camera or microphone is part of the device"
+    },
+    {
+      "bill": "HR-875",
+      "goal": "imm-interior-enforcement",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Makes a drunk-driving conviction a ground for deportation and inadmissibility, widening the basis for removal.",
+      "evidence": "makes driving while intoxicated or impaired a ground for (1) barring a non-U.S. national (alien under federal law) from admission into the United States, or (2) deporting the individual"
+    },
+    {
+      "bill": "HR-881",
+      "goal": "foreign-china-restrict",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Cuts off DHS funding to colleges that keep ties with Confucius Institutes, the Thousand Talents Program or Chinese entities of concern, restricting institutional dealings with China.",
+      "evidence": "restricts funding to an institution of higher education (IHE) that has a relationship with a Confucius Institute, Thousand Talents Program, or Chinese entity of concern"
+    },
+    {
+      "bill": "HR-884",
+      "goal": "rights-voter-id",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Imposes a federal citizenship requirement on District of Columbia elections by repealing the local law that let noncitizen residents vote.",
+      "evidence": "prohibits a non-U.S. citizen from voting in a District of Columbia (DC) election and repeals relevant provisions of DC law"
+    },
+    {
+      "bill": "HR-993",
+      "goal": "imm-border-enforcement",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Requires CBP to plan and deploy emerging technologies such as sensors and AI for border security, strengthening enforcement capacity.",
+      "evidence": "requires U.S. Customs and Border Protection (CBP) and the Science and Technology Directorate of the Department of Homeland Security to develop a plan to identify, integrate, and deploy emerging and innovative technologies to improve border security operations"
+    },
+    {
+      "bill": "HR-1005",
+      "goal": "foreign-china-restrict",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Conditions federal K-12 funds on schools refusing money or contracts from the Chinese government or Communist Party.",
+      "evidence": "prohibits public elementary and secondary schools, as a condition of receiving federal elementary and secondary education funds, from accepting funds from or entering into a contract with the Chinese government, the Chinese Communist Party (CCP)"
+    },
+    {
+      "bill": "HR-1011",
+      "goal": "env-climate-adaptation",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Expands eligibility and advance cost-share payments for farmers and forest owners recovering from natural disasters, including wildfire.",
+      "evidence": "revises the Emergency Conservation Program (ECP) and the Emergency Forest Restoration Program (EFRP) to expand eligibility for payments to agricultural producers and owners of forest land impacted by natural disasters"
+    },
+    {
+      "bill": "HR-1041",
+      "goal": "rights-gun-rights-expand",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Stops the VA from reporting veterans with benefit fiduciaries to the firearms background-check system absent a judicial finding, restoring their ability to buy guns.",
+      "evidence": "prohibits the VA from transmitting personally identifying information of a veteran or a beneficiary to the NICS solely on the basis that such veteran or beneficiary has an appointed fiduciary to manage their benefits"
+    },
+    {
+      "bill": "HR-1041",
+      "goal": "rights-gun-restrictions",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Removes a category of records from the background-check system, narrowing the reach of federal firearm screening.",
+      "evidence": "prohibits the Department of Veterans Affairs (VA) from transmitting certain information to the National Instant Criminal Background Check System (NICS)"
+    },
+    {
+      "bill": "HR-1047",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Directs FERC to prioritize grid interconnection for dispatchable generation such as fossil-fuel plants, speeding their path to market.",
+      "evidence": "revises the approval process for interconnection requests of generating units that produce electricity to prioritize dispatchable power projects (e.g., certain fossil fuel projects)"
+    },
+    {
+      "bill": "HR-1047",
+      "goal": "energy-renewables-support",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Prioritizing dispatchable projects in the interconnection queue pushes renewable projects further back, a disadvantage to wind and solar.",
+      "evidence": "Currently, FERC receives interconnection requests from those projects and other generating units, such as units that produce electricity from renewable energy"
+    },
+    {
+      "bill": "HR-1048",
+      "goal": "foreign-china-restrict",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Requires colleges to disclose any gift from a foreign country of concern such as China and bars certain contracts with them.",
+      "evidence": "requires an IHE to annually disclose to the Department of Education (ED) any year in which the IHE receives a gift from a foreign country of concern (e.g., China or Russia) or foreign entity of concern of any dollar amount"
+    },
+    {
+      "bill": "HR-1069",
+      "goal": "foreign-china-restrict",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Denies federal education funding to schools that receive support from the Chinese government, including Confucius Classrooms.",
+      "evidence": "prohibits federal education funding for any elementary or secondary school that directly or indirectly receives support from the Chinese government"
+    },
+    {
+      "bill": "HR-1181",
+      "goal": "rights-gun-rights-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Bars payment networks from using a merchant code that singles out firearms retailers, blocking a mechanism for tracking gun purchases.",
+      "evidence": "prohibits payment card networks from using merchant codes that distinguish firearms retailers from general-merchandise retailers or sporting-goods retailers"
+    },
+    {
+      "bill": "HR-1181",
+      "goal": "rights-gun-restrictions",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Removing the firearms merchant code takes away a tool for flagging suspicious gun purchases.",
+      "evidence": "prohibits payment card networks from using merchant codes that distinguish firearms retailers"
+    },
+    {
+      "bill": "HR-1263",
+      "goal": "foreign-alliances-maintain",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Directs the State Department to deepen cooperation with Japan, Australia and India through the Quad, a treaty-adjacent security partnership.",
+      "evidence": "directs the Department of State to seek to establish a working group with Japan, Australia, and India to facilitate closer cooperation on shared interests and values"
+    },
+    {
+      "bill": "HR-1346",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Extends the summer volatility waiver to E15 gasoline and wipes out existing state opt-outs that were based on air pollution concerns.",
+      "evidence": "The bill nullifies existing state exclusions, but states may submit documentation after enactment of the bill to be excluded going forward"
+    },
+    {
+      "bill": "HR-1366",
+      "goal": "env-public-lands-protect",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Lets mining operators use federal land for waste disposal and other ancillary activities without a valid mineral claim, opening more public land to mining use.",
+      "evidence": "allows mining operators to use federal lands for activities ancillary to mining, such as waste disposal, regardless of whether those lands contain mineral deposits valuable enough to be mined"
+    },
+    {
+      "bill": "HR-1501",
+      "goal": "energy-permitting-streamline",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Makes mining infrastructure projects permanently eligible for expedited federal environmental review under the FAST-41 process.",
+      "evidence": "provides statutory authority for federal agencies to expedite the environmental review of certain mining infrastructure projects"
+    },
+    {
+      "bill": "HR-1531",
+      "goal": "foreign-china-restrict",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Makes it U.S. policy to exclude China from six international financial bodies if the President finds China threatens Taiwan.",
+      "evidence": "requires certain federal entities to seek to exclude China from six international financial organizations if the President informs Congress that China's actions threaten Taiwan"
+    },
+    {
+      "bill": "HR-1689",
+      "goal": "imm-legalisation-path",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Grants Haitian nationals temporary protected status with work authorization and protection from removal for 18 months, a form of legal status.",
+      "evidence": "directs the Department of Homeland Security to designate Haiti for temporary protected status (TPS) for 18 months beginning August 3, 2025"
+    },
+    {
+      "bill": "HR-1919",
+      "goal": "rights-privacy-surveillance",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Bars the Federal Reserve from issuing a central bank digital currency or holding individual accounts, foreclosing a channel of federal visibility into personal transactions.",
+      "evidence": "prohibits a Federal Reserve bank from offering products or services directly to an individual, maintaining an account on behalf of an individual, or issuing a central bank digital currency (i.e., a digital dollar)"
+    },
+    {
+      "bill": "HR-1949",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Repeals Energy Department approval requirements for natural gas exports and directs FERC to deem exports in the public interest, speeding LNG export approvals.",
+      "evidence": "repeals certain restrictions on the import and export of natural gas under the Natural Gas Act, including requirements for Department of Energy (DOE) approval"
+    },
+    {
+      "bill": "HR-1958",
+      "goal": "imm-interior-enforcement",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Makes public-benefits fraud a ground for deportation and inadmissibility and bars relief from removal for those offenders.",
+      "evidence": "makes certain acts related to public benefits fraud grounds for (1) barring a non-U.S. national (alien under federal law) from admission into the United States, or (2) deporting the individual"
+    },
+    {
+      "bill": "HR-2056",
+      "goal": "imm-interior-enforcement",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Bars the District of Columbia from limiting cooperation with federal immigration enforcement, including honoring detainers and sharing status information.",
+      "evidence": "prohibits the District of Columbia (DC) from limiting its cooperation with federal immigration enforcement activities, except for certain instances involving witnesses and victims of crime"
+    },
+    {
+      "bill": "HR-2096",
+      "goal": "justice-police-accountability",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Rolls back DC police discipline reforms by reinstating a 90-day limit on disciplinary action, removing the chief's power to increase penalties and ending public posting of termination hearings.",
+      "evidence": "the bill reinstates a 90-day statute of limitations (i.e., time limit) for initiating a corrective or adverse action against any MPD officer or civilian employee"
+    },
+    {
+      "bill": "HR-2140",
+      "goal": "env-pollution-rules",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Reauthorizes EPA grants and loans to replace or retrofit diesel engines, reducing air pollution through federal funding rather than new limits.",
+      "evidence": "reauthorizes through FY2029 a diesel emissions reduction program under which the Environmental Protection Agency provides grants, rebates, or loans for replacing diesel engines or retrofitting the engines with pollution control technologies"
+    },
+    {
+      "bill": "HR-2189",
+      "goal": "rights-gun-restrictions",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Removes less-than-lethal projectile devices from Gun Control Act regulation, narrowing the scope of federal firearm rules.",
+      "evidence": "removes less-than-lethal projectile devices (e.g., certain TASERs) from regulation under the Gun Control Act"
+    },
+    {
+      "bill": "HR-2243",
+      "goal": "rights-gun-rights-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Widens where active and retired law enforcement officers may carry concealed firearms, including school zones, national parks and federal facilities open to the public.",
+      "evidence": "allows qualified active and retired law enforcement officers to carry concealed firearms and ammunition (including magazines) in school zones; in national parks; on state, local, or private property that is open to the public; and in certain federal facilities"
+    },
+    {
+      "bill": "HR-2243",
+      "goal": "rights-gun-restrictions",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Overrides state and local carry limits for a class of carriers in more places, loosening firearm regulation.",
+      "evidence": "broadens the authority for certain law enforcement officers to carry concealed firearms across state lines"
+    },
+    {
+      "bill": "HR-2483",
+      "goal": "health-mental-health-fund",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Reauthorizes through FY2030 the SUPPORT Act's grant programs for substance use disorder treatment, overdose prevention and mental health.",
+      "evidence": "reauthorizes and revises Department of Health and Human Services (HHS) programs that address substance use disorders, overdoses, and mental health"
+    },
+    {
+      "bill": "HR-2493",
+      "goal": "health-rural-fund",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Reauthorizes through FY2030 the HRSA grant programs that fund rural health providers and networks.",
+      "evidence": "reauthorizes through FY2030 grant programs administered by the Health Resources and Services Administration (HRSA) that provide funding to health care service providers and related entities in rural areas"
+    },
+    {
+      "bill": "HR-2550",
+      "goal": "work-union-strengthen",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Nullifies the executive order that stripped collective bargaining from many federal agencies and keeps existing agreements in force, restoring federal employees' union rights.",
+      "evidence": "nullifies the Executive Order titled Exclusions from Federal Labor-Management Relations Programs (issued on March 27, 2025), which excludes specified executive agencies and subdivisions from the Federal Service Labor-Management Relations Statute"
+    },
+    {
+      "bill": "HR-2616",
+      "goal": "rights-lgbt-protections",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Conditions federal school funds on parental consent before a school changes a student's gender markers, pronouns or sex-based accommodations, a federal limit aimed at gender identity.",
+      "evidence": "requires public elementary and middle schools, as a condition of receiving certain federal funds for elementary and secondary education, to obtain parental consent before changing a student's gender on school forms or changing a student's sex-based accommodations"
+    },
+    {
+      "bill": "HR-2683",
+      "goal": "foreign-china-restrict",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Extends export controls to remote access of controlled items through networks and cloud services, closing a channel used to reach restricted technology.",
+      "evidence": "broadens the scope of the U.S. export control system to include remote access of items"
+    },
+    {
+      "bill": "HR-2721",
+      "goal": "veterans-benefits-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Pilots furnishing headstones and burial markers for veterans who died before November 1990, who are currently ineligible.",
+      "evidence": "requires the Department of Veterans Affairs (VA) to establish and implement a two-year pilot program to furnish, when requested, an appropriate headstone or burial marker to commemorate covered veterans"
+    },
+    {
+      "bill": "HR-2860",
+      "goal": "env-species-protect",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Reauthorizes a regional initiative that protects and restores marine habitats and species in Puget Sound and the Strait of Juan de Fuca.",
+      "evidence": "The initiative and the commission work to protect and restore marine waters, habitats, and species of the Northwest Straits region"
+    },
+    {
+      "bill": "HR-2913",
+      "goal": "foreign-ukraine-aid",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Creates a Ukraine reconstruction fund, revives lend-lease authority and extends Defense Department security assistance and intelligence support to Ukraine.",
+      "evidence": "reviving the President's authority to lend or lease defense articles to Ukraine or Eastern European countries affected by the war through FY2028, extending through 2027 the Department of Defense's authority to provide security assistance and intelligence support to Ukrainian forces"
+    },
+    {
+      "bill": "HR-2913",
+      "goal": "foreign-sanctions-expand",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Establishes penalties on Russia and associated foreign persons tied to the war of aggression against Ukraine.",
+      "evidence": "establishing penalties for Russia and certain foreign persons (individuals and entities)"
+    },
+    {
+      "bill": "HR-2913",
+      "goal": "foreign-alliances-maintain",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Directs the State Department to build the military and border capacity of the Baltic NATO allies.",
+      "evidence": "requiring the Department of State to take certain actions to build the capacity of the militaries and border forces of Baltic countries"
+    },
+    {
+      "bill": "HR-2931",
+      "goal": "imm-interior-enforcement",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Forces SBA offices out of jurisdictions that limit cooperation with immigration enforcement, pressuring localities to comply with detainers.",
+      "evidence": "requires the relocation of a regional, district, or local office of the Small Business Administration (SBA) if the SBA makes a public determination that the office is located in a sanctuary jurisdiction"
+    },
+    {
+      "bill": "HR-3015",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Reestablishes the National Coal Council as a permanent advisory body to the Energy Department on coal and the coal industry.",
+      "evidence": "provides statutory authority for the National Coal Council and directs the Department of Energy to reestablish the council"
+    },
+    {
+      "bill": "HR-3062",
+      "goal": "energy-permitting-streamline",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Replaces the presidential-permit process for cross-border pipelines and transmission lines with a FERC or DOE certificate issued on a statutory deadline.",
+      "evidence": "establishes a new process for approving or revoking permits for the construction and operation of energy infrastructure across an international border of the United States ... FERC and DOE must meet a deadline for issuing a certificate as set forth by this bill"
+    },
+    {
+      "bill": "HR-3062",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "A faster, deadline-bound approval path for oil and gas pipelines crossing the Canadian and Mexican borders speeds fossil fuel infrastructure.",
+      "evidence": "requires a person to obtain a certificate of crossing before constructing, connecting, operating, or maintaining a border-crossing facility for the import or export of oil or natural gas"
+    },
+    {
+      "bill": "HR-3109",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Orders a National Petroleum Council report on expanding U.S. refinery capacity and on government actions that reduced it.",
+      "evidence": "analyses and projections with respect to opportunities for expanding the capacities of the refineries and the risks to such refineries"
+    },
+    {
+      "bill": "HR-3123",
+      "goal": "veterans-benefits-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Ensures a pension awarded before a veteran's death is paid to the survivors or estate rather than lost.",
+      "evidence": "establishes procedures for the Department of Veterans Affairs (VA) to issue a pension that was due but unpaid at the time of a veteran's death"
+    },
+    {
+      "bill": "HR-3276",
+      "goal": "env-species-protect",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Gives statutory footing to the Urban Bird Treaty Program and its conservation grants for birds in and migrating through cities.",
+      "evidence": "provides statutory authority for the Urban Bird Treaty Program, which is administered by the U.S. Fish and Wildlife Service"
+    },
+    {
+      "bill": "HR-3400",
+      "goal": "veterans-benefits-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Creates a traveling VA physician program with bonuses to deliver care to veterans in Puerto Rico, Guam and other territories.",
+      "evidence": "authorizes the Department of Veterans Affairs (VA) to assign a physician who has been appointed in the Veterans Health Administration to serve as a traveling physician"
+    },
+    {
+      "bill": "HR-3486",
+      "goal": "imm-border-enforcement",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Raises criminal penalties for illegal entry and reentry, including longer maximum sentences for those previously removed.",
+      "evidence": "establishes or increases criminal penalties for certain non-U.S. nationals (aliens under federal law) who illegally enter the United States and then commit a felony or illegally reenter the United States"
+    },
+    {
+      "bill": "HR-3486",
+      "goal": "justice-sentencing-reduce",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Creates a new five-year mandatory minimum and allows life sentences, the opposite of reducing mandatory minimums.",
+      "evidence": "establishes a mandatory minimum prison term of 5 years and allows a life sentence for an individual who (1) improperly enters, or attempts to improperly enter, the United States; and (2) is subsequently convicted of a felony"
+    },
+    {
+      "bill": "HR-3492",
+      "goal": "rights-lgbt-protections",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Makes providing gender-affirming medical care to minors a federal crime punishable by up to ten years, a direct federal restriction aimed at gender identity.",
+      "evidence": "establishes federal criminal offenses for providing gender-affirming care to minors"
+    },
+    {
+      "bill": "HR-3616",
+      "goal": "env-ghg-limits",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Lets FERC review and comment on EPA and other agency rules affecting power plants whenever generation is declared inadequate, adding a hurdle to emissions rules on generators.",
+      "evidence": "establishes a process for the Federal Energy Regulatory Commission (FERC) to review federal regulations before they are finalized if the electric reliability organization finds that the system is at risk of not having sufficient electric generation to maintain reliability"
+    },
+    {
+      "bill": "HR-3632",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Lets FERC order power plants slated for retirement to keep running for up to five years, which in practice keeps coal and gas plants online longer.",
+      "evidence": "The bill specifies that FERC may order a power plant to remain open for up to five years"
+    },
+    {
+      "bill": "HR-3668",
+      "goal": "energy-permitting-streamline",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Makes FERC the sole lead agency for NEPA review of gas pipelines and LNG terminals, sets participation deadlines and caps the time to authorize after review.",
+      "evidence": "expedites the environmental review of certain natural gas pipeline projects or liquefied natural gas (LNG) import or export terminals for authorizations under the Natural Gas Act"
+    },
+    {
+      "bill": "HR-3668",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Faster federal review of gas pipelines and LNG terminals speeds the infrastructure that moves and exports natural gas.",
+      "evidence": "makes the Federal Energy Regulatory Commission (FERC) the only lead agency for the purpose of coordinating the environmental review of such projects under the National Environmental Policy Act of 1969 (NEPA)"
+    },
+    {
+      "bill": "HR-3898",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Narrows the Clean Water Act by excluding ephemeral streams, groundwater and other features from navigable waters, shrinking federal water pollution jurisdiction.",
+      "evidence": "limits the scope of the Clean Water Act by redefining navigable waters to exclude (1) waste treatment systems, (2) ephemeral features that flow only in direct response to precipitation, (3) prior converted cropland, (4) groundwater"
+    },
+    {
+      "bill": "HR-4090",
+      "goal": "env-public-lands-protect",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Directs Interior to accelerate and expand hardrock mining on national forests and public lands, including immediately approving priority projects.",
+      "evidence": "directs the Department of the Interior to address mineral supply chain vulnerabilities, including by accelerating and expanding mineral production on federal land (i.e., National Forest System land, public lands, and any land that may be leased for the exploration, development, or production of hardrock minerals)"
+    },
+    {
+      "bill": "HR-4090",
+      "goal": "energy-permitting-streamline",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Orders expedited approval of priority mining projects on federal land, a permitting shortcut for mineral supply.",
+      "evidence": "Interior must (1) identify priority mining projects on federal lands that can be immediately approved, and (2) take all necessary and appropriate steps to expedite those projects"
+    },
+    {
+      "bill": "HR-4219",
+      "goal": "env-species-protect",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Gives statutory authority to the invasive species strike teams that protect habitat in the National Wildlife Refuge System.",
+      "evidence": "provides statutory authority for the Invasive Species Strike Team program carried out by the National Wildlife Refuge System within the U.S. Fish and Wildlife Service (FWS)"
+    },
+    {
+      "bill": "HR-4541",
+      "goal": "health-vaccine-public-health",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Reauthorizes through FY2030 the CDC's breast and cervical cancer early detection program and through FY2031 its young women's breast health programs.",
+      "evidence": "reauthorizes through FY2030 and makes changes to the CDC's National Breast and Cervical Cancer Early Detection Program"
+    },
+    {
+      "bill": "HR-4626",
+      "goal": "energy-efficiency-standards",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Removes deadlines for updating appliance efficiency standards and lets DOE revoke standards on cost and product-availability grounds, weakening the standards regime.",
+      "evidence": "allows DOE to grant a petition to revoke or amend energy conservation standards if the standards (1) result in additional costs to consumers, (2) do not result in significant conservation of energy or water, (3) are not technologically feasible, and (4) result in a product (e.g., gas stoves) not being commercially available"
+    },
+    {
+      "bill": "HR-4638",
+      "goal": "imm-interior-enforcement",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Adds harming a law enforcement animal to the grounds that make a non-citizen inadmissible and deportable.",
+      "evidence": "establishes that a non-U.S. national (alien under federal law) convicted of, or who admits to having committed, an offense related to harming animals used in law enforcement is inadmissible and deportable"
+    },
+    {
+      "bill": "HR-4690",
+      "goal": "energy-efficiency-standards",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Repeals the energy performance standards that phase fossil fuels out of new and renovated federal buildings by 2030.",
+      "evidence": "repeals the performance standards that phase out fossil fuel use in such buildings by FY2030"
+    },
+    {
+      "bill": "HR-4758",
+      "goal": "energy-efficiency-standards",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Repeals the home electrification rebates, contractor training grants and the assistance for states to adopt building energy codes, and rescinds their funding.",
+      "evidence": "repeals the Department of Energy's (1) high-efficiency electric home rebate program for certain electrification projects in low- or moderate-income households, (2) state-based home energy efficiency contractor training grants, and (3) assistance for states and local governments to adopt specified building energy codes"
+    },
+    {
+      "bill": "HR-4776",
+      "goal": "energy-permitting-streamline",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Narrows what counts as a major federal action under NEPA, exempts actions already reviewed under equivalent laws, and limits the effects agencies must consider, shortening review for energy and transmission projects among others.",
+      "evidence": "limits the scope of the National Environmental Policy Act of 1969 (NEPA) and modifies the environmental review of major federal actions under NEPA to generally limit the number of federal actions that trigger NEPA review and to expedite the review process"
+    },
+    {
+      "bill": "HR-4922",
+      "goal": "justice-sentencing-reduce",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Freezes DC's ability to change criminal sentences and repeals the court's power to sentence youth offenders below mandatory minimums.",
+      "evidence": "repeals a provision that allows a DC criminal court to issue a sentence to a youth offender that is less than the mandatory minimum term otherwise required by law"
+    },
+    {
+      "bill": "HR-5107",
+      "goal": "justice-police-accountability",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Repeals DC's 2022 policing reform law, reviving the rules it replaced on neck restraints, body cameras and access to disciplinary records.",
+      "evidence": "repeals the Comprehensive Policing and Justice Reform Amendment Act of 2022, enacted by the Council of the District of Columbia ... including measures prohibiting the use of certain neck restraints by law enforcement officers, requiring additional procedures related to body-worn cameras, and expanding access to police disciplinary records"
+    },
+    {
+      "bill": "HR-5140",
+      "goal": "justice-sentencing-reduce",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Lowers to 14 the age at which DC minors can be tried as adults, exposing younger defendants to adult sentences.",
+      "evidence": "lowers the age at which an individual may be tried as an adult for certain criminal offenses in the District of Columbia (DC) to 14 years of age"
+    },
+    {
+      "bill": "HR-5143",
+      "goal": "justice-police-accountability",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Repeals DC's limits on police vehicle pursuits and instead generally requires officers to pursue, removing a use-of-force restriction.",
+      "evidence": "repeals restrictions on the circumstances under which law enforcement officers in the District of Columbia (DC) may engage in vehicular pursuits (i.e., police chases) of suspects fleeing in motor vehicles, and instead generally requires such pursuits"
+    },
+    {
+      "bill": "HR-5184",
+      "goal": "energy-efficiency-standards",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Rescinds the Department of Energy's efficiency standards for manufactured housing and removes its authority to issue such standards.",
+      "evidence": "rescinds Department of Energy (DOE) energy efficiency regulations applicable to manufactured housing and eliminates DOE's authority to issue similar regulations"
+    },
+    {
+      "bill": "HR-5214",
+      "goal": "justice-sentencing-reduce",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Mandates pretrial detention for violent and dangerous charges and requires cash bail for public-order offenses in DC, increasing incarceration before trial.",
+      "evidence": "mandates, in the District of Columbia (DC), pretrial and post-conviction detention for crimes of violence and dangerous crimes and cash bail to obtain pretrial release for public safety or order crimes"
+    },
+    {
+      "bill": "HR-5408",
+      "goal": "work-union-strengthen",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Sets deadlines for first-contract bargaining and sends stalled negotiations to mediation and binding arbitration, a core PRO Act-style organizing protection.",
+      "evidence": "establishes mandatory deadlines for parties negotiating an initial collective bargaining agreement (CBA) and provides for mediation and arbitration to finalize CBAs"
+    },
+    {
+      "bill": "HR-5587",
+      "goal": "energy-permitting-streamline",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Exempts geothermal exploration and production on nonfederal surface land from federal drilling permits and NEPA review.",
+      "evidence": "exempts certain geothermal activities on state and private lands (except Indian lands) from drilling permit requirements as well as environmental and historic preservation review requirements"
+    },
+    {
+      "bill": "HR-6047",
+      "goal": "veterans-benefits-expand",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Creates a new monthly allowance for severely disabled veterans, raises survivors' dependency and indemnity compensation, and widens VA home loan eligibility.",
+      "evidence": "expands specified benefits programs for veterans and their survivors and establishes a supplemental monthly allowance for certain disabled veterans"
+    },
+    {
+      "bill": "HR-6260",
+      "goal": "justice-sentencing-reduce",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Treats charitable bail funds as insurers subject to federal fraud crimes and state licensing, restricting a route to pretrial release.",
+      "evidence": "entities and organizations that pay cash bond or bail for defendants (e.g., charitable bail funds) are engaged in the business of insurance under federal law and subject to federal criminal provisions related to insurance fraud"
+    },
+    {
+      "bill": "HR-6387",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Widens the exceptional-events exclusion so more high-pollution days, including those from heat, drought and stagnant air, are left out of Clean Air Act attainment decisions.",
+      "evidence": "the bill no longer excludes from consideration as an exceptional event (1) meteorological events involving high temperatures or a lack of precipitation, or (2) stagnation of air masses that does not ordinarily occur"
+    },
+    {
+      "bill": "HR-6398",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Removes EPA's Clean Air Act review and comment on federal projects and proposed regulations that already undergo NEPA review, cutting an air-quality check.",
+      "evidence": "removes the requirement under the Clean Air Act that the Environmental Protection Agency (EPA) review and comment on newly authorized federal construction projects and other major federal agency actions"
+    },
+    {
+      "bill": "HR-6409",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Exempts severe ozone and particulate nonattainment areas from Clean Air Act sanctions and fees, and blocks new nonattainment designations, when a state blames outside emissions.",
+      "evidence": "modifies standards under the Clean Air Act to exempt states from penalties for emissions outside of the state's control"
+    },
+    {
+      "bill": "HR-6422",
+      "goal": "infra-water-fund",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Reauthorizes through FY2031 the Great Lakes Restoration Initiative, National Estuary Program and other federal water restoration programs.",
+      "evidence": "reauthorizes through FY2031 the Great Lakes Restoration Initiative, the Long Island Sound Partnership program, the Columbia River Basin Restoration Program, the National Estuary Program, and the BEACH Act program"
+    },
+    {
+      "bill": "HR-6422",
+      "goal": "env-pollution-rules",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Extends EPA water quality protection programs and lets beach grants trace specific contamination sources.",
+      "evidence": "reauthorizes several water quality protection and restoration programs of the Environmental Protection Agency (EPA)"
+    },
+    {
+      "bill": "HR-6472",
+      "goal": "edu-college-cost-aid",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Caps tuition for students from Guam, American Samoa, the Northern Mariana Islands and the Virgin Islands at in-state rates at public colleges.",
+      "evidence": "requires public institutions of higher education that participate in federal student aid programs to charge no more than in-state tuition and fee rates to students who are residents of Guam, the Northern Mariana Islands, American Samoa, or the U.S. Virgin Islands"
+    },
+    {
+      "bill": "HR-6504",
+      "goal": "trade-tariffs-increase",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Extends duty-free treatment for Haitian apparel through 2028 and refunds duties already collected, a tariff preference rather than protection.",
+      "evidence": "extends through December 31, 2028, the special duty-free rules for various apparel products imported from Haiti"
+    },
+    {
+      "bill": "HR-6644",
+      "goal": "housing-federal-build",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Raises FHA multifamily loan limits, expands the HOME program's income eligibility and creates planning grants, expanding federal financing for affordable housing.",
+      "evidence": "revises federal housing programs, including by expanding available financing for affordable housing and providing grants for planning and community development activities"
+    },
+    {
+      "bill": "HR-6644",
+      "goal": "housing-zoning-incentives",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Funds regional, state and local strategies to support affordable housing, the kind of planning incentive that can loosen local constraints.",
+      "evidence": "establishes a grant program to assist regional, state, and local entities with strategies to support affordable housing"
+    },
+    {
+      "bill": "HR-6945",
+      "goal": "health-abortion-access",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Authorizes TANF funds for pregnancy centers whose mission is to steer women away from abortion, directing federal money to that side.",
+      "evidence": "provides statutory authority for states to use Temporary Assistance for Needy Families (TANF) funds for pregnancy centers that (1) support protecting the life of the mother and the unborn child"
+    },
+    {
+      "bill": "HR-7618",
+      "goal": "env-public-lands-protect",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Extends battlefield acquisition and preservation grants through FY2036 and studies more sites for protection.",
+      "evidence": "extends through FY2036 three National Park Service (NPS) grant programs that preserve U.S. battlefields and requires the NPS to study additional sites for potential preservation"
+    },
+    {
+      "bill": "HR-9238",
+      "goal": "rights-privacy-surveillance",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Extends FISA Section 702 surveillance authorities without adding warrant requirements or other new limits.",
+      "evidence": "extends the authorities of Title VII of the Foreign Intelligence Surveillance Act (FISA) until July 2, 2026"
+    },
+    {
+      "bill": "HR-9497",
+      "goal": "infra-water-fund",
+      "effect": "advances",
+      "strength": 2,
+      "rationale": "Authorizes and modifies Army Corps of Engineers water projects for ports, navigation, flood control, ecosystem restoration, dam rehabilitation and water supply.",
+      "evidence": "authorizes and modifies certain water resource infrastructure projects and programs of the U.S. Army Corps of Engineers"
+    },
+    {
+      "bill": "HR-9497",
+      "goal": "env-climate-adaptation",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Among the authorized Corps projects are flood and storm damage reduction and shoreline protection, which are resilience investments.",
+      "evidence": "studies or projects to maintain ports and harbors, make certain waterways more navigable, reduce flood and storm damage, restore aquatic ecosystems and protect fish and wildlife, protect shorelines"
+    },
+    {
+      "bill": "HRES-1490",
+      "goal": "rights-voter-id",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "A sense-of-the-House resolution calling for enactment of the SAVE America Act and declaring that elections are for citizens only, endorsing citizenship-proof requirements.",
+      "evidence": "reaffirms its support for free, fair, and secure elections and calls for enactment of the SAVE America Act; reiterates that American elections are for American citizens only"
+    },
+    {
+      "bill": "S-2",
+      "goal": "imm-border-enforcement",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "A reconciliation bill funding CBP personnel, border security technology and screening through FY2029.",
+      "evidence": "provides funding to the Department of Homeland Security (DHS), U.S. Customs and Border Protection (CBP), and U.S. Immigration and Customs Enforcement (ICE) through FY2029 for immigration enforcement, border security, and related activities"
+    },
+    {
+      "bill": "S-2",
+      "goal": "imm-interior-enforcement",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Funds ICE personnel, investigations, enforcement, transportation and facilities through FY2029, expanding interior enforcement capacity.",
+      "evidence": "The bill provides funding to ICE for personnel, Homeland Security Investigations, immigration enforcement activities, transportation, information technology, facility and fleet maintenance and sustainment"
+    },
+    {
+      "bill": "S-5",
+      "goal": "imm-interior-enforcement",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Mandates detention of unlawfully present non-citizens arrested for theft offenses and lets states sue over federal enforcement decisions, expanding interior enforcement.",
+      "evidence": "requires the Department of Homeland Security (DHS) to detain certain non-U.S. nationals (aliens under federal law) who have been arrested for burglary, theft, larceny, or shoplifting"
+    },
+    {
+      "bill": "S-356",
+      "goal": "edu-k12-federal-fund",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Extends Secure Rural Schools payments to counties with federal land, which fund rural schools and roads.",
+      "evidence": "extending payments made to states and counties containing federal land through FY2026, providing for payments for FY2024 and FY2025"
+    },
+    {
+      "bill": "S-629",
+      "goal": "env-climate-adaptation",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Expands eligibility and advance cost-share payments for farmers and forest owners recovering from natural disasters.",
+      "evidence": "revises the Emergency Conservation Program (ECP) and the Emergency Forest Restoration Program (EFRP) to expand eligibility for payments to agricultural producers and owners of forest land impacted by natural disasters"
+    },
+    {
+      "bill": "S-723",
+      "goal": "housing-homeownership-support",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Sets deadlines for the Bureau of Indian Affairs to process residential mortgages on tribal trust land, easing homeownership there.",
+      "evidence": "sets forth requirements for the processing of a proposed residential leasehold mortgage, business leasehold mortgage, land mortgage, or right-of-way document by the Bureau of Indian Affairs (BIA)"
+    },
+    {
+      "bill": "S-2393",
+      "goal": "veterans-benefits-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Authorizes a major VA medical facility project in St. Louis, including a new bed tower and clinical expansion.",
+      "evidence": "authorizes the Department of Veterans Affairs to carry out a major medical facility project in St. Louis, Missouri, during FY2026"
+    },
+    {
+      "bill": "S-3971",
+      "goal": "foreign-china-restrict",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Requires agencies running SBIR and STTR to screen applicants for security risks, aimed at ties to China and other adversaries.",
+      "evidence": "expands the requirements for federal agencies administering these programs to evaluate the security risks of the small businesses that apply for awards under the programs"
+    },
+    {
+      "bill": "S-4465",
+      "goal": "rights-privacy-surveillance",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Extends FISA Section 702 surveillance authorities without adding warrant requirements or other new limits.",
+      "evidence": "extends the authorities of Title VII of the Foreign Intelligence Surveillance Act (FISA) until June 12, 2026"
+    },
+    {
+      "bill": "SCONRES-33",
+      "goal": "imm-border-enforcement",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "The FY2026 budget resolution instructs the Homeland Security and Judiciary committees to write deficit-financed legislation, the vehicle for the immigration enforcement reconciliation bill.",
+      "evidence": "reconciliation instructions that direct the House Homeland Security Committee, the House Judiciary Committee, the Senate Homeland Security and Governmental Affairs Committee, and the Senate Judiciary Committee to submit recommendations for legislation that will increase the deficit over FY2026-FY2035 by not more than $70 billion"
+    },
+    {
+      "bill": "SCONRES-33",
+      "goal": "fiscal-deficit-reduce",
+      "effect": "hinders",
+      "strength": 1,
+      "rationale": "Its reconciliation instructions call for legislation that increases the deficit by up to $70 billion without offsets.",
+      "evidence": "provides reconciliation instructions for legislation that increases the deficit"
+    },
+    {
+      "bill": "SJRES-11",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 1,
+      "rationale": "Nullifies a rule requiring archaeological surveys for every offshore oil and gas approval, removing a step before Outer Continental Shelf development.",
+      "evidence": "The rule requires operators and lessees conducting oil and gas exploration or development on the Outer Continental Shelf and that are seeking BOEM approval for such activities to also provide BOEM with an archaeological report"
+    },
+    {
+      "bill": "SJRES-31",
+      "goal": "env-pollution-rules",
+      "effect": "hinders",
+      "strength": 2,
+      "rationale": "Nullifies the EPA rule that keeps sources of persistent, bioaccumulative hazardous air pollutants bound by major-source standards after reclassifying, loosening toxic air limits.",
+      "evidence": "the rule requires sources of persistent and bioaccumulative hazardous air pollutants to continue to comply with certain major source emission standards under the Clean Air Act even if the sources reclassify as area sources"
+    },
+    {
+      "bill": "SJRES-80",
+      "goal": "energy-fossil-expand",
+      "effect": "advances",
+      "strength": 3,
+      "rationale": "Reverts the National Petroleum Reserve in Alaska to the 2020 plan, reopening roughly half of the 23-million-acre reserve to oil and gas leasing.",
+      "evidence": "The 2022 plan replaced the 2020 plan and closed approximately 48% of the reserve to oil and gas leasing in order to protect certain surface resources and uses, such as protecting wildlife and providing subsistence for communities. Thus, the joint resolution removes the protections provided under the 2022 plan and reverts to the 2020 plan."
+    },
+    {
+      "bill": "SJRES-80",
+      "goal": "env-public-lands-protect",
+      "effect": "hinders",
+      "strength": 3,
+      "rationale": "Removes the 2022 plan's protections for wildlife and subsistence areas across about 48 percent of the reserve.",
+      "evidence": "the joint resolution removes the protections provided under the 2022 plan and reverts to the 2020 plan"
+    }
+  ]
 }
