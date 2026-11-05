@@ -394,8 +394,15 @@ describe('normalizeHouseVoteApi', () => {
     expect(event.rollCallNumber).toBe(74);
     expect(event.voteDate).toBe('2026-02-24T14:18:00-05:00');
     expect(event.result).toBe('Passed');
-    expect(event.question).toBe('Recorded Vote');
     expect(event.sourceUpdatedAt).toBe('2026-02-25T14:09:11-05:00');
+  });
+
+  it('takes the question from voteQuestion and never from voteType', () => {
+    expect(normalizeHouseVoteApi(item, memberVotes).question).toBeUndefined();
+    const withQuestion = normalizeHouseVoteApi({ ...item, voteQuestion: 'On Agreeing to the Resolution' }, memberVotes);
+    expect(withQuestion.question).toBe('On Agreeing to the Resolution');
+    expect(normalizeVoteEvent(withQuestion).vote.question).toBe('On Agreeing to the Resolution');
+    expect(normalizeVoteEvent(normalizeHouseVoteApi(item, memberVotes)).vote.question).toBeNull();
   });
 
   it('carries the upstream update date into the normalised vote', () => {

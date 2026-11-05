@@ -2,6 +2,8 @@
 
 A civic-engagement platform for tracking U.S. legislation and understanding how elected representatives vote — helping citizens discover which politicians best reflect their values.
 
+> **Current state and open work:** see [docs/handoff.md](./docs/handoff.md).
+
 ## Repo Structure
 
 ```
