@@ -25,13 +25,6 @@ export type {
 export { createGoalsRepository } from './goals.js';
 export type { GoalsRepository, GoalArea, BillGoalEffectDetail } from './goals.js';
 
-export { createSentimentsRepository } from './sentiments.js';
-export type {
-  SentimentsRepository,
-  SentimentCounts,
-  SubmitSentimentResult,
-} from './sentiments.js';
-
 export { createAuditLogRepository } from './auditLog.js';
 export type {
   AuditLogRepository,

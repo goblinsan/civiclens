@@ -59,8 +59,6 @@ pnpm dev
 |----------|-------------|----------|
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
 | `CONGRESS_API_KEY` | api.congress.gov API key | Yes |
-| `TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key | Yes |
-| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key | Yes |
 | `LOG_LEVEL` | Logging level (`info` default) | No |
 
 ### API (`apps/api/.env`)
@@ -71,7 +69,6 @@ pnpm dev
 | `HOST` | `0.0.0.0` | HTTP listen host |
 | `DATABASE_URL` | — | PostgreSQL connection string |
 | `LOG_LEVEL` | `info` | Pino log level |
-| `TURNSTILE_SECRET_KEY` | — | Cloudflare Turnstile secret |
 
 ## Dev Scripts
 

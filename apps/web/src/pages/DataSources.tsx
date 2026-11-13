@@ -242,15 +242,6 @@ export default function DataSources() {
                 details.
               </td>
             </tr>
-            <tr>
-              <th style={{ textAlign: 'left', padding: '0.375rem 1rem 0.375rem 0', fontWeight: 600 }}>
-                Public sentiment
-              </th>
-              <td style={{ padding: '0.375rem 0' }}>
-                Aggregated anonymous reactions (Support / Oppose / Neutral)
-                submitted voluntarily by site visitors. Not a scientific poll.
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>

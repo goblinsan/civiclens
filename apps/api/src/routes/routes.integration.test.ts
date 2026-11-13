@@ -4,7 +4,7 @@
  * These tests exercise the full Fastify request/response cycle using
  * app.inject() with a mocked database pool.  They cover the flows
  * specified in issue #51: list bills, bill detail, politician detail,
- * questionnaire submit, match calculate, and sentiment submit.
+ * questionnaire submit and match calculate.
  */
 import { describe, it, expect, vi } from 'vitest';
 import { buildApp } from '../app.js';
@@ -52,14 +52,6 @@ const fakeProfile = {
   created_at: new Date(),
 };
 
-
-const fakeSentiment = {
-  id: 'sentiment-uuid-1',
-  bill_id: 'bill-uuid-1',
-  session_id: 'test-session-abc',
-  sentiment: 'support',
-  submitted_at: new Date(),
-};
 
 // ─── Pool mock helpers ────────────────────────────────────────────────────────
 
@@ -307,74 +299,5 @@ describe('GET /bills/:id/analysis', () => {
     const res = await app.inject({ method: 'GET', url: '/bills/bill-uuid-1/analysis' });
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({ effects: [], brief: null });
-  });
-});
-
-// ─── POST /bills/:id/sentiments ───────────────────────────────────────────────
-
-describe('POST /bills/:id/sentiments', () => {
-  it('returns 201 on successful sentiment submission', async () => {
-    const pool = makePoolMock({
-      'WHERE b.id': [fakeBill],
-      'INSERT INTO sentiment_submissions': [fakeSentiment],
-    });
-    const app = await buildApp({ pool });
-    const res = await app.inject({
-      method: 'POST',
-      url: '/bills/bill-uuid-1/sentiments',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        sessionId: 'test-session-abc',
-        sentiment: 'support',
-      }),
-    });
-    expect(res.statusCode).toBe(201);
-    const body = res.json<{ sentiment: string }>();
-    expect(body.sentiment).toBe('support');
-  });
-
-  it('returns 400 when body is invalid', async () => {
-    const pool = makePoolMock();
-    const app = await buildApp({ pool });
-    const res = await app.inject({
-      method: 'POST',
-      url: '/bills/bill-uuid-1/sentiments',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ sessionId: '', sentiment: 'bad' }),
-    });
-    expect(res.statusCode).toBe(400);
-  });
-
-  it('returns 404 when bill does not exist', async () => {
-    const pool = makePoolMock(); // returns empty for getBillById
-    const app = await buildApp({ pool });
-    const res = await app.inject({
-      method: 'POST',
-      url: '/bills/nonexistent/sentiments',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ sessionId: 'test-session-abc', sentiment: 'support' }),
-    });
-    expect(res.statusCode).toBe(404);
-  });
-
-  it('returns 409 when sentiment already submitted for this session', async () => {
-    // Simulate a PostgreSQL unique-constraint violation for the sentiment INSERT.
-    const uniqueViolation = Object.assign(new Error('unique violation'), { code: '23505' });
-    const poolMock = {
-      query: vi.fn()
-        .mockResolvedValueOnce({ rows: [fakeBill], rowCount: 1 })      // getBillById
-        .mockRejectedValueOnce(uniqueViolation)                        // INSERT sentiment → 23505
-        .mockResolvedValueOnce({ rows: [fakeSentiment], rowCount: 1 }) // SELECT existing
-        .mockResolvedValue({ rows: [], rowCount: 0 }),                 // any further calls
-      connect: vi.fn(),
-    } as unknown as DbPool;
-    const app = await buildApp({ pool: poolMock });
-    const res = await app.inject({
-      method: 'POST',
-      url: '/bills/bill-uuid-1/sentiments',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ sessionId: 'test-session-abc', sentiment: 'support' }),
-    });
-    expect(res.statusCode).toBe(409);
   });
 });

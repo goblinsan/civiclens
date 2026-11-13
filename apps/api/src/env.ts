@@ -5,7 +5,6 @@ const envSchema = z.object({
   HOST: z.string().default('0.0.0.0'),
   DATABASE_URL: z.string().optional(),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
-  TURNSTILE_SECRET_KEY: z.string().optional(),
   /** Comma-separated browser origins allowed to call the API (e.g. https://civreveal.org). */
   CORS_ORIGINS: z.string().optional(),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),

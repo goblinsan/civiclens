@@ -15,12 +15,3 @@ export const QuestionnaireResponseSchema = z.object({
 });
 
 export type QuestionnaireResponse = z.infer<typeof QuestionnaireResponseSchema>;
-
-export const SentimentSubmissionSchema = z.object({
-  billId: z.string(),
-  sessionId: z.string(),
-  sentiment: z.enum(['support', 'oppose', 'neutral']),
-  turnstileToken: z.string().optional(),
-});
-
-export type SentimentSubmission = z.infer<typeof SentimentSubmissionSchema>;
