@@ -31,14 +31,12 @@ Verify the following environment variables are set before deploying.
 | `HOST`                | optional | Bind address (default: `0.0.0.0`)                        |
 | `LOG_LEVEL`           | optional | `trace`/`debug`/`info`/`warn`/`error`/`fatal` (default: `info`) |
 | `NODE_ENV`            | ✅        | Must be `production` in production                       |
-| `TURNSTILE_SECRET_KEY`| optional | Cloudflare Turnstile server-side secret. Omitting disables bot protection in dev; **required for production sentiment submissions** |
 
 ### Web (`apps/web`)
 
 | Variable                  | Required | Description                                  |
 |---------------------------|----------|----------------------------------------------|
 | `VITE_API_BASE_URL`       | optional | API base URL seen by the browser (default: `http://localhost:3001`) |
-| `VITE_TURNSTILE_SITE_KEY` | optional | Cloudflare Turnstile public site key         |
 
 ### Ingestion Job (`jobs/ingest-congress`)
 
@@ -309,19 +307,6 @@ curl "http://localhost:3001/questionnaire/matches/<politician-id>/evidence?sessi
 curl "http://localhost:3001/bills/<bill-id>/analysis"
 ```
 
-### Sentiment
-
-```bash
-# Get sentiment counts for a bill
-curl "http://localhost:3001/bills/<bill-id>/sentiments"
-
-# Submit sentiment (dev/test only — no Turnstile required)
-curl -X POST "http://localhost:3001/bills/<bill-id>/sentiments" \
-  -H "Content-Type: application/json" \
-  -d '{"sessionId":"smoke-test-session-2","sentiment":"support"}'
-# Expect: 201 {"id":"...","sentiment":"support"}
-```
-
 ### Audit log
 
 ```bash
@@ -356,7 +341,6 @@ line in a run, enabling full job-level correlation.
 | `run_complete`  | `ingest-congress`| Ingestion job completed successfully |
 | `run_failure`   | `ingest-congress`| Ingestion job encountered a fatal error |
 | `fetch_failure` | `ingest-congress`| A step (members/bills/votes) failed  |
-| `sentiment_block` | `api`          | Rate limit or bot-check blocked a submission |
 
 Query these via `GET /audit/events?event_type=<type>`.
 
@@ -408,7 +392,6 @@ pg_restore --clean --if-exists -d "$DATABASE_URL" backup-<timestamp>.dump
 
 | Issue | Severity | Notes |
 |-------|----------|-------|
-| Turnstile bypass in dev/test | Low | `TURNSTILE_SECRET_KEY` must be set in production to enable bot protection for sentiment submissions. |
 | No authentication on `/audit/events` | Medium | The audit log endpoint is unauthenticated. Restrict access via reverse-proxy or VPN in production. |
 | Analytics stored in `ingestion_events` table | Low | Product analytics and system audit events share the same table. Filter by `source = 'web-client'` for analytics. |
 | Ingestion job is single-threaded | Low | Large full syncs may take several minutes. Use `MAX_BILLS`/`MAX_VOTES` to cap runs. |

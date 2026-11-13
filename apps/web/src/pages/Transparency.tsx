@@ -43,9 +43,8 @@ export default function Transparency() {
             federal, state, or local government agency.
           </li>
           <li>
-            <strong>Not a polling or survey platform.</strong> The public
-            sentiment widget collects anonymous voluntary reactions and is not a
-            scientific poll.
+            <strong>Not a polling or survey platform.</strong> CivReveal does
+            not collect or display public reactions to bills.
           </li>
           <li>
             <strong>Not a legal or political advisory service.</strong> Nothing
@@ -80,7 +79,7 @@ export default function Transparency() {
             </span>
             <span>
               Generated or computed by CivReveal. Includes policy tags applied
-              to bills, alignment scores, and aggregated public sentiment counts.
+              to bills and alignment scores.
               These are not official government records and represent editorial
               or algorithmic judgments.
             </span>

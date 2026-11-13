@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getBill, getBillVotes, getVoteRecords } from '../api';
 import type { BillDetail as BillDetailData, BillTagDetail, Vote, VoteRecord } from '../api';
-import SentimentWidget from '../components/SentimentWidget';
 import BillAnalysis from '../components/BillAnalysis';
 import { track } from '../analytics';
 import { tagLabel } from '../tagLabels';
@@ -289,9 +288,6 @@ export default function BillDetail() {
 
       {/* Official classification + derived policy tags */}
       <ClassificationSection bill={bill} />
-
-      {/* Sentiment widget */}
-      <SentimentWidget billId={bill.id} />
 
       {/* Vote events */}
       <div className="detail-section">
