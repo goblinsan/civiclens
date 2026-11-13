@@ -138,3 +138,20 @@ Browser ──► Vite (port 3000)
 2. Make changes; ensure `pnpm lint`, `pnpm typecheck`, and `pnpm test` all pass
 3. Commit with [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `chore:`, etc.
 4. Open a pull request describing your changes
+
+## License
+
+Copyright (C) 2026 CivReveal contributors.
+
+CivReveal is free software: you can redistribute it and/or modify it under the
+terms of the GNU Affero General Public License, version 3, as published by the
+Free Software Foundation. See [LICENSE](./LICENSE).
+
+In plain terms: anyone may use, study, change and share this code. Anyone who
+runs a changed version as a public service must publish their changes under the
+same license, so a copy of CivReveal can never quietly differ from its
+published source.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
