@@ -36,6 +36,13 @@ on:
         description: 'Steps to run (comma list of members,bills,senate,house)'
         default: 'members,bills,senate,house'
         type: string
+      runner:
+        description: 'Where to run: home (self-hosted runner) or hosted (GitHub runner)'
+        default: 'home'
+        type: choice
+        options:
+          - home
+          - hosted
   schedule:
     # Every 6 hours (see docs/data-ingestion.md → refresh cadence). Scheduled
     # runs are incremental: bills updated in the last 7 days, no bill cap.
@@ -48,7 +55,8 @@ concurrency:
 jobs:
   ingest:
     name: Migrate + ingest
-    runs-on: [self-hosted, linux, civreveal-home]
+    # Scheduled runs have no inputs and stay on the home runner.
+    runs-on: ${{ inputs.runner == 'hosted' && 'ubuntu-latest' || 'civreveal-home' }}
     timeout-minutes: 350
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
