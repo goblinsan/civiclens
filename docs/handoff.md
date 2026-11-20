@@ -8,7 +8,7 @@ below is either in this repository or reachable from the GitHub Actions tab.
 
 | Area | State |
 | --- | --- |
-| Hosting | Web on Cloudflare Pages (`apps/web`, root directory blank, output `apps/web/dist`); API in Docker on the home server behind the Cloudflare Tunnel, bound to the LAN address from `CIVREVEAL_BIND_ADDR` in `~/actions-runner/.env`; Neon Postgres. See [home-server-setup.md](./home-server-setup.md). |
+| Hosting | Web on Cloudflare Pages (`apps/web`, root directory blank, output `apps/web/dist`); API in Docker on the home server behind the Cloudflare Tunnel, bound to the LAN address from `CIVREVEAL_BIND_ADDR` in `~/actions-runner/.env`; PostgreSQL on the home server (moved off Neon on 2026-11-20, reached over the LAN, never exposed to the internet). See [home-server-setup.md](./home-server-setup.md). |
 | Deploys | Push to `main` → CI → `API image` builds, publishes to GHCR and redeploys on the home runner; Pages builds the web on the same push. |
 | Members | 539 sitting members plus former members fetched on demand (`is_current = false`). |
 | Bills | All 19,832 bills of the 119th Congress with CRS summary, policy area, subjects and policy tags. Scheduled ingest (every 6 h) keeps the last 7 days fresh in ~2 min. |

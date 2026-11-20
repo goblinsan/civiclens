@@ -11,7 +11,7 @@ What runs where, once this is done:
 | Web app (civreveal.org) | Cloudflare Pages | Pages builds `apps/web` on every push to `main` |
 | API (api.civreveal.org) | Home server, Docker, port 3001 (loopback, or the LAN address when `cloudflared` is on another box), via the tunnel | `api-image.yml` builds → publishes to GHCR → deploys on the self-hosted runner |
 | Ingest job (all four steps incl. Senate) | Home server, self-hosted runner | `ingest.yml`, every 6 h and on demand |
-| Database | Neon (unchanged) | — |
+| Database | PostgreSQL on the home server, in its own database and role | Migrations run at the start of every ingest |
 | CI (lint/typecheck/test/build) | GitHub-hosted runners | on every PR |
 
 ## 0. Before registering anything: lock the repo
@@ -46,6 +46,26 @@ sudo curl -fsSL https://raw.githubusercontent.com/goblinsan/civiclens/main/deplo
 sudo chown ghrunner:ghrunner /opt/civreveal/api.env && sudo chmod 600 /opt/civreveal/api.env
 sudo -u ghrunner editor /opt/civreveal/api.env   # set DATABASE_URL (the same value as the GitHub secret)
 ```
+
+### The database
+
+The database lives on the home server too (it was on Neon's free tier until its
+monthly compute allowance ran out in November 2026). It is an ordinary
+PostgreSQL database with its own login role, on the server's shared Postgres.
+
+- `DATABASE_URL` points at the server's **LAN address**, not `localhost`: the
+  API runs in a container, where `localhost` is the container itself. The same
+  value works for the ingest job, which runs on the host.
+- Leave `?sslmode=require` off unless that Postgres has TLS switched on; a
+  plain local server refuses the connection otherwise. Nothing leaves the LAN.
+- The `DATABASE_URL` repository secret must hold the same value. Because the
+  database is only reachable from the home network, every workflow that needs
+  it has to run on the self-hosted runner. GitHub-hosted runners cannot reach it.
+- It needs a backup like any other database on the box. Add it to whatever
+  nightly dump job covers the others.
+- Moving it again is a dump and a restore. Use `pg_dump` at least as new as the
+  source server, `--no-owner --no-acl`, and compare row counts before switching
+  `api.env` and the secret.
 
 ## 3. Start the API once by hand (so the tunnel has something to route to)
 
