@@ -61,8 +61,16 @@ PostgreSQL database with its own login role, on the server's shared Postgres.
 - The `DATABASE_URL` repository secret must hold the same value. Because the
   database is only reachable from the home network, every workflow that needs
   it has to run on the self-hosted runner. GitHub-hosted runners cannot reach it.
-- It needs a backup like any other database on the box. Add it to whatever
-  nightly dump job covers the others.
+- It is backed up nightly as a **small partial dump**: the whole schema, plus
+  data only for what cannot be rebuilt (visitor answers and match results,
+  ingest and audit logs, migration state, and the goals, tags and members those
+  rows point at). Everything derived from Congress is left out, because the
+  ingest job can fetch it again.
+- Restoring from that dump: `pg_restore` it into an empty database, point
+  `api.env` and the `DATABASE_URL` secret at it, then run **Ingest Congress
+  data**. The run applies migrations, re-syncs the goal codings from the repo
+  and refills members, bills and votes. A full bills backfill takes several
+  capped runs (see the launch runbook).
 - Moving it again is a dump and a restore. Use `pg_dump` at least as new as the
   source server, `--no-owner --no-acl`, and compare row counts before switching
   `api.env` and the secret.
